@@ -18,7 +18,7 @@ jobs:
         with:
           version: latest
 
-  test:
+  build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -30,3 +30,9 @@ jobs:
 
     - name: Compile and Test
       run: make compile test
+
+    - name: Run coverage
+      run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
+    
+    - name: Upload coverage to Codecov
+      run: bash <(curl -s https://codecov.io/bash)
