@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    k8tz.io/injected: "true"
+    k8tz.io/timezone: Europe/Luxembourg
+  name: nginx1
+spec:
+  containers:
+  - env:
+    - name: TZ
+      value: Europe/Luxembourg
+    image: nginx
+    name: nginx
+    volumeMounts:
+    - mountPath: /etc/localtime
+      name: k8tz
+      readOnly: true
+      subPath: Europe/Luxembourg
+    - mountPath: /usr/share/zoneinfo
+      name: k8tz
+      readOnly: true
+  initContainers:
+  - args:
+    - bootstrap
+    image: testimage:0.0.0
+    name: k8tz
+    resources: {}
+    volumeMounts:
+    - mountPath: /mnt/zoneinfo
+      name: k8tz
+  volumes:
+  - emptyDir: {}
+    name: k8tz
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    k8tz.io/injected: "true"
+    k8tz.io/timezone: Europe/Luxembourg
+  name: nginx2
+spec:
+  containers:
+  - env:
+    - name: TZ
+      value: Europe/Luxembourg
+    image: nginx
+    name: nginx
+    volumeMounts:
+    - mountPath: /etc/localtime
+      name: k8tz
+      readOnly: true
+      subPath: Europe/Luxembourg
+    - mountPath: /usr/share/zoneinfo
+      name: k8tz
+      readOnly: true
+  initContainers:
+  - args:
+    - bootstrap
+    image: testimage:0.0.0
+    name: k8tz
+    resources: {}
+    volumeMounts:
+    - mountPath: /mnt/zoneinfo
+      name: k8tz
+  volumes:
+  - emptyDir: {}
+    name: k8tz

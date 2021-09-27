@@ -1,0 +1,46 @@
+{
+    "kind": "AdmissionReview",
+    "apiVersion": "admission.k8s.io/v1",
+    "request": {
+        "uid": "0c0829ff-c2f5-4634-a1c3-098147304d03",
+        "kind": {
+            "group": "",
+            "version": "v1",
+            "kind": "Namespace"
+        },
+        "resource": {
+            "group": "",
+            "version": "v1",
+            "resource": "namespaces"
+        },
+        "requestKind": {
+            "group": "",
+            "version": "v1",
+            "kind": "Namespace"
+        },
+        "requestResource": {
+            "group": "",
+            "version": "v1",
+            "resource": "namespaces"
+        },
+        "name": "k8tz",
+        "namespace": "default",
+        "operation": "CREATE",
+        "object": {
+            "apiVersion": "v1",
+            "kind": "Namespace",
+            "metadata": {
+                "name": "k8tz",
+                "creationTimestamp": null
+            },
+            "spec": {},
+            "status": {}
+        },
+        "oldObject": null,
+        "dryRun": false,
+        "options": {
+            "kind": "CreateOptions",
+            "apiVersion": "meta.k8s.io/v1"
+        }
+    }
+}

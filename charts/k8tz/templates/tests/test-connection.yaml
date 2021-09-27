@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "k8tz.fullname" . }}-health-test"
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "k8tz.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: curl
+      image: curlimages/curl:7.78.0
+      args: ['--insecure', 'https://{{ include "k8tz.serviceName" . }}:{{ .Values.service.port }}/health']
+  restartPolicy: Never

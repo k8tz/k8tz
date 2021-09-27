@@ -1,0 +1,11 @@
+/vendor/
+build/
+*.tgz
+tls/
+/k8tz
+ignore
+.vscode
+*.pdf
+*.mp4
+tzdata/zoneinfo/
+tzdata/*.tar.gz

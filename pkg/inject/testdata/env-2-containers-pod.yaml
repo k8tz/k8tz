@@ -1,0 +1,28 @@
+[
+  {
+    "op": "add",
+    "path": "/spec/containers/0/env",
+    "value": []
+  },
+  {
+    "op": "add",
+    "path": "/spec/containers/0/env/-",
+    "value": {
+      "name": "TZ",
+      "value": "Asia/Chita"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/spec/containers/1/env",
+    "value": []
+  },
+  {
+    "op": "add",
+    "path": "/spec/containers/1/env/-",
+    "value": {
+      "name": "TZ",
+      "value": "Asia/Chita"
+    }
+  }
+]

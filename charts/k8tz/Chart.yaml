@@ -1,0 +1,6 @@
+apiVersion: v2
+name: k8tz
+description: Kubernetes admission controller to inject timezones into Pods
+type: application
+version: 0.1.6
+appVersion: "0.2.9-beta1"

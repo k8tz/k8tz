@@ -1,0 +1,153 @@
+[
+  {
+    "op": "add",
+    "path": "/items/0/spec/template/spec/volumes/-",
+    "value": {
+      "name": "k8tz",
+      "emptyDir": {}
+    }
+  },
+  {
+    "op": "add",
+    "path": "/items/0/spec/template/spec/containers/0/volumeMounts/-",
+    "value": {
+      "name": "k8tz",
+      "readOnly": true,
+      "mountPath": "/etc/localtime",
+      "subPath": "UTC"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/items/0/spec/template/spec/initContainers",
+    "value": []
+  },
+  {
+    "op": "add",
+    "path": "/items/0/spec/template/spec/initContainers/-",
+    "value": {
+      "name": "k8tz",
+      "args": [
+        "bootstrap"
+      ],
+      "resources": {},
+      "volumeMounts": [
+        {
+          "name": "k8tz",
+          "mountPath": "/mnt/zoneinfo"
+        }
+      ]
+    }
+  },
+  {
+    "op": "add",
+    "path": "/items/0/spec/template/spec/containers/0/env",
+    "value": []
+  },
+  {
+    "op": "add",
+    "path": "/items/0/spec/template/spec/containers/0/env/-",
+    "value": {
+      "name": "TZ",
+      "value": "UTC"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/items/0/metadata/annotations/k8tz.io~1injected",
+    "value": "true"
+  },
+  {
+    "op": "add",
+    "path": "/items/0/metadata/annotations/k8tz.io~1timezone",
+    "value": "UTC"
+  },
+  {
+    "op": "add",
+    "path": "/items/0/spec/template/metadata/annotations",
+    "value": {}
+  },
+  {
+    "op": "add",
+    "path": "/items/0/spec/template/metadata/annotations/k8tz.io~1injected",
+    "value": "true"
+  },
+  {
+    "op": "add",
+    "path": "/items/0/spec/template/metadata/annotations/k8tz.io~1timezone",
+    "value": "UTC"
+  },
+  {
+    "op": "add",
+    "path": "/items/1/spec/template/spec/volumes/-",
+    "value": {
+      "name": "k8tz",
+      "emptyDir": {}
+    }
+  },
+  {
+    "op": "add",
+    "path": "/items/1/spec/template/spec/containers/0/volumeMounts/-",
+    "value": {
+      "name": "k8tz",
+      "readOnly": true,
+      "mountPath": "/etc/localtime",
+      "subPath": "UTC"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/items/1/spec/template/spec/initContainers",
+    "value": []
+  },
+  {
+    "op": "add",
+    "path": "/items/1/spec/template/spec/initContainers/-",
+    "value": {
+      "name": "k8tz",
+      "args": [
+        "bootstrap"
+      ],
+      "resources": {},
+      "volumeMounts": [
+        {
+          "name": "k8tz",
+          "mountPath": "/mnt/zoneinfo"
+        }
+      ]
+    }
+  },
+  {
+    "op": "add",
+    "path": "/items/1/spec/template/spec/containers/0/env/-",
+    "value": {
+      "name": "TZ",
+      "value": "UTC"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/items/1/metadata/annotations/k8tz.io~1injected",
+    "value": "true"
+  },
+  {
+    "op": "add",
+    "path": "/items/1/metadata/annotations/k8tz.io~1timezone",
+    "value": "UTC"
+  },
+  {
+    "op": "add",
+    "path": "/items/1/spec/template/metadata/annotations",
+    "value": {}
+  },
+  {
+    "op": "add",
+    "path": "/items/1/spec/template/metadata/annotations/k8tz.io~1injected",
+    "value": "true"
+  },
+  {
+    "op": "add",
+    "path": "/items/1/spec/template/metadata/annotations/k8tz.io~1timezone",
+    "value": "UTC"
+  }
+]

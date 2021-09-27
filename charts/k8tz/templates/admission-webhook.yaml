@@ -1,0 +1,42 @@
+{{- $fqdn := printf "%s.%s.svc" (include "k8tz.serviceName" .) .Values.namespace }}
+{{- $ca := genSelfSignedCert $fqdn (list) (list $fqdn) 5114 }}
+apiVersion: v1
+data:
+  tls.crt: {{ ternary (b64enc (trim $ca.Cert)) (b64enc (trim .Values.webhook.crtPEM)) (empty .Values.webhook.crtPEM) }}
+  tls.key: {{ ternary (b64enc (trim $ca.Key)) (b64enc (trim .Values.webhook.keyPEM)) (empty .Values.webhook.keyPEM) }}
+kind: Secret
+metadata:
+  namespace: {{ .Values.namespace }}
+  creationTimestamp: null
+  name: {{ include "k8tz.fullname" . }}-tls
+  labels:
+    {{- include "k8tz.labels" . | nindent 4 }}
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: {{ include "k8tz.fullname" . }}
+  labels:
+    {{- include "k8tz.labels" . | nindent 4 }}
+webhooks:
+  - name: admission-controller.k8tz.io
+    namespaceSelector:
+      matchExpressions:
+      - key: k8tz.io/controller-namespace
+        operator: NotIn
+        values: ["true"]
+    sideEffects: None
+    failurePolicy: {{ .Values.webhook.failurePolicy }}
+    admissionReviewVersions: ["v1", "v1beta1"]
+    clientConfig:
+      service:
+        name: {{ include "k8tz.serviceName" . }}
+        namespace: {{ .Values.namespace }}
+        path: "/"
+        port: {{ .Values.service.port }}
+      caBundle: {{ ternary (b64enc (trim $ca.Cert)) (b64enc (trim .Values.webhook.caBundle)) (empty .Values.webhook.caBundle) }}
+    rules:
+      - operations: [ "CREATE" ]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]

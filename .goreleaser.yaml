@@ -1,0 +1,234 @@
+dist: build
+before:
+  hooks:
+    - make tzdata
+    - go mod tidy
+    - go test -v ./...
+builds:
+  - id: k8tz
+    binary: k8tz
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - -v
+    ldflags:
+      - -s
+      - -w
+      - -X github.com/k8tz/k8tz/pkg/version.GitCommit={{ .FullCommit }}
+      - -X github.com/k8tz/k8tz/pkg/version.AppVersion={{ .RawVersion }}
+      - -X github.com/k8tz/k8tz/pkg/version.VersionSuffix={{ if .Prerelease }}-{{ .Prerelease }}{{ else }}{{ if .IsSnapshot }}-{{ .Branch }}{{ end }}{{ end }}
+      - -X github.com/k8tz/k8tz/pkg/version.ImageRepository={{ if index .Env "IMAGE_REPOSITORY"  }}{{ .Env.IMAGE_REPOSITORY }}{{ else }}quay.io/k8tz/k8tz{{ end }}
+    goos:
+      - linux
+      - windows
+      - darwin
+      - openbsd
+      - netbsd
+      - solaris
+    goarch:
+      - amd64
+      - arm
+      - arm64
+      - s390x
+      - 386
+      - ppc64le
+      - riscv64
+    goarm:
+      - 6
+      - 7
+archives:
+  - replacements:
+      386: i386
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-snapshot"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+release:
+  github:
+    owner: yonatankahana
+    name: k8tz
+  draft: true
+  prerelease: auto
+  header: |
+    # Release k8tz {{ .Version }}
+
+    We are happy to announce a new version of k8tz, these are the changes in this version:
+
+  footer: |
+    ## Install with Go
+
+    ```console
+    go install github.com/k8tz/k8tz@{{ .Tag }}
+    ```
+
+dockers:
+  - id: k8tz-linux-amd64
+    goos: linux
+    goarch: amd64
+    use: buildx
+    ids:
+    - k8tz
+    image_templates:
+    - "quay.io/k8tz/k8tz:{{ .Version }}-amd64"
+    - "quay.io/k8tz/k8tz:{{ .Major }}.{{ .Minor }}-amd64"
+    - "quay.io/k8tz/k8tz:latest-amd64"
+    skip_push: auto
+    dockerfile: Dockerfile
+    build_flag_templates:
+    - "--pull"
+    - "--label=org.opencontainers.image.created={{.Date}}"
+    - "--label=org.opencontainers.image.title={{.ProjectName}}"
+    - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+    - "--label=org.opencontainers.image.version={{.Version}}"
+    - "--platform=linux/amd64"
+    extra_files:
+      - tzdata
+  - id: k8tz-linux-arm64
+    goos: linux
+    goarch: arm64
+    use: buildx
+    ids:
+    - k8tz
+    image_templates:
+    - "quay.io/k8tz/k8tz:latest-arm64"
+    - "quay.io/k8tz/k8tz:{{ .Version }}-arm64"
+    - "quay.io/k8tz/k8tz:{{ .Major }}.{{ .Minor }}-arm64"
+    skip_push: auto
+    dockerfile: Dockerfile
+    build_flag_templates:
+    - "--label=org.opencontainers.image.created={{.Date}}"
+    - "--label=org.opencontainers.image.title={{.ProjectName}}"
+    - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+    - "--label=org.opencontainers.image.version={{.Version}}"
+    - "--platform=linux/arm64"
+    extra_files:
+      - tzdata
+  - id: k8tz-linux-i386
+    goos: linux
+    goarch: 386
+    use: buildx
+    ids:
+    - k8tz
+    image_templates:
+    - "quay.io/k8tz/k8tz:latest-i386"
+    - "quay.io/k8tz/k8tz:{{ .Version }}-i386"
+    - "quay.io/k8tz/k8tz:{{ .Major }}.{{ .Minor }}-i386"
+    skip_push: auto
+    dockerfile: Dockerfile
+    build_flag_templates:
+    - "--label=org.opencontainers.image.created={{.Date}}"
+    - "--label=org.opencontainers.image.title={{.ProjectName}}"
+    - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+    - "--label=org.opencontainers.image.version={{.Version}}"
+    - "--platform=linux/386"
+    extra_files:
+      - tzdata
+  - id: k8tz-linux-ppc64le
+    goos: linux
+    goarch: ppc64le
+    use: buildx
+    ids:
+    - k8tz
+    image_templates:
+    - "quay.io/k8tz/k8tz:latest-ppc64le"
+    - "quay.io/k8tz/k8tz:{{ .Version }}-ppc64le"
+    - "quay.io/k8tz/k8tz:{{ .Major }}.{{ .Minor }}-ppc64le"
+    skip_push: auto
+    dockerfile: Dockerfile
+    build_flag_templates:
+    - "--label=org.opencontainers.image.created={{.Date}}"
+    - "--label=org.opencontainers.image.title={{.ProjectName}}"
+    - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+    - "--label=org.opencontainers.image.version={{.Version}}"
+    - "--platform=linux/ppc64le"
+    extra_files:
+      - tzdata
+  - id: k8tz-linux-armv6
+    goos: linux
+    goarch: arm
+    goarm: 6
+    use: buildx
+    ids:
+    - k8tz
+    image_templates:
+    - "quay.io/k8tz/k8tz:latest-armv6"
+    - "quay.io/k8tz/k8tz:{{ .Version }}-armv6"
+    - "quay.io/k8tz/k8tz:{{ .Major }}.{{ .Minor }}-armv6"
+    skip_push: auto
+    dockerfile: Dockerfile
+    build_flag_templates:
+    - "--label=org.opencontainers.image.created={{.Date}}"
+    - "--label=org.opencontainers.image.title={{.ProjectName}}"
+    - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+    - "--label=org.opencontainers.image.version={{.Version}}"
+    - "--platform=linux/arm/v6"
+    extra_files:
+      - tzdata
+  - id: k8tz-linux-armv7
+    goos: linux
+    goarch: arm
+    goarm: 7
+    use: buildx
+    ids:
+    - k8tz
+    image_templates:
+    - "quay.io/k8tz/k8tz:latest-armv7"
+    - "quay.io/k8tz/k8tz:{{ .Version }}-armv7"
+    - "quay.io/k8tz/k8tz:{{ .Major }}.{{ .Minor }}-armv7"
+    skip_push: auto
+    dockerfile: Dockerfile
+    build_flag_templates:
+    - "--label=org.opencontainers.image.created={{.Date}}"
+    - "--label=org.opencontainers.image.title={{.ProjectName}}"
+    - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+    - "--label=org.opencontainers.image.version={{.Version}}"
+    - "--platform=linux/arm/v7"
+    extra_files:
+      - tzdata
+
+docker_manifests:
+- id: multiplatform-latest
+
+  name_template: quay.io/k8tz/k8tz:latest
+
+  image_templates:
+  - quay.io/k8tz/k8tz:{{ .Version }}-amd64
+  - quay.io/k8tz/k8tz:{{ .Version }}-arm64
+  - quay.io/k8tz/k8tz:{{ .Version }}-i386
+  - quay.io/k8tz/k8tz:{{ .Version }}-ppc64le
+  - quay.io/k8tz/k8tz:{{ .Version }}-armv6
+  - quay.io/k8tz/k8tz:{{ .Version }}-armv7
+
+  skip_push: auto
+- id: multiplatform-tag
+
+  name_template: quay.io/k8tz/k8tz:{{ .Version }}
+
+  image_templates:
+  - quay.io/k8tz/k8tz:{{ .Version }}-amd64
+  - quay.io/k8tz/k8tz:{{ .Version }}-arm64
+  - quay.io/k8tz/k8tz:{{ .Version }}-i386
+  - quay.io/k8tz/k8tz:{{ .Version }}-ppc64le
+  - quay.io/k8tz/k8tz:{{ .Version }}-armv6
+  - quay.io/k8tz/k8tz:{{ .Version }}-armv7
+
+  skip_push: auto
+- id: multiplatform-majorminor
+
+  name_template: quay.io/k8tz/k8tz:{{ .Major }}.{{ .Minor }}
+
+  image_templates:
+  - quay.io/k8tz/k8tz:{{ .Version }}-amd64
+  - quay.io/k8tz/k8tz:{{ .Version }}-arm64
+  - quay.io/k8tz/k8tz:{{ .Version }}-i386
+  - quay.io/k8tz/k8tz:{{ .Version }}-ppc64le
+  - quay.io/k8tz/k8tz:{{ .Version }}-armv6
+  - quay.io/k8tz/k8tz:{{ .Version }}-armv7
+
+  skip_push: auto

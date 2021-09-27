@@ -1,0 +1,65 @@
+[
+  {
+    "op": "add",
+    "path": "/spec/containers/0/volumeMounts",
+    "value": []
+  },
+  {
+    "op": "add",
+    "path": "/spec/containers/0/volumeMounts/-",
+    "value": {
+      "name": "k8tz",
+      "readOnly": true,
+      "mountPath": "/etc/localtime",
+      "subPath": "Europe/Vatican"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/spec/containers/0/volumeMounts/-",
+    "value": {
+      "name": "k8tz",
+      "readOnly": true,
+      "mountPath": "/usr/share/zoneinfo"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/spec/containers/1/volumeMounts",
+    "value": []
+  },
+  {
+    "op": "add",
+    "path": "/spec/containers/1/volumeMounts/-",
+    "value": {
+      "name": "k8tz",
+      "readOnly": true,
+      "mountPath": "/etc/localtime",
+      "subPath": "Europe/Vatican"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/spec/containers/1/volumeMounts/-",
+    "value": {
+      "name": "k8tz",
+      "readOnly": true,
+      "mountPath": "/usr/share/zoneinfo"
+    }
+  },
+  {
+    "op": "add",
+    "path": "/spec/volumes",
+    "value": []
+  },
+  {
+    "op": "add",
+    "path": "/spec/volumes/-",
+    "value": {
+      "name": "k8tz",
+      "hostPath": {
+        "path": "/usr/share/zoneinfo"
+      }
+    }
+  }
+]

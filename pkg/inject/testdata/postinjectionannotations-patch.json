@@ -1,0 +1,17 @@
+[
+  {
+    "op": "add",
+    "path": "/spec/annotations",
+    "value": {}
+  },
+  {
+    "op": "add",
+    "path": "/spec/annotations/k8tz.io~1injected",
+    "value": "true"
+  },
+  {
+    "op": "add",
+    "path": "/spec/annotations/k8tz.io~1timezone",
+    "value": "America/Anguilla"
+  }
+]

@@ -1,0 +1,1 @@
+{"kind":"AdmissionReview","apiVersion":"admission.k8s.io/v1","response":{"uid":"0c0829ff-c2f5-4634-a1c3-098147304d03","allowed":true,"patch":"bnVsbA==","patchType":"JSONPatch"}}
