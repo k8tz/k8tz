@@ -51,7 +51,7 @@ changelog:
       - '^test:'
 release:
   github:
-    owner: yonatankahana
+    owner: k8tz
     name: k8tz
   draft: true
   prerelease: auto
