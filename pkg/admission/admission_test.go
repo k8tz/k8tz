@@ -435,7 +435,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := &AdmissionRequestsHandler{
+			h := &RequestsHandler{
 				DefaultTimezone:          tt.fields.DefaultTimezone,
 				BootstrapImage:           tt.fields.BootstrapImage,
 				DefaultInjectionStrategy: tt.fields.DefaultInjectionStrategy,
@@ -469,7 +469,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 			}
 
 			if tt.fields.GoldenFile != "" {
-				if err := compareReviews(t, rr.Body, tt.fields.GoldenFile); err != nil {
+				if err := compareReviews(rr.Body, tt.fields.GoldenFile); err != nil {
 					t.Errorf("TestAdmissionRequestsHandler_handleFunc: %v", err)
 				}
 			}
@@ -477,7 +477,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 	}
 }
 
-func compareReviews(t *testing.T, got *bytes.Buffer, goldenFile string) error {
+func compareReviews(got *bytes.Buffer, goldenFile string) error {
 	golden, exists, err := readGolden(goldenFile)
 	if err != nil {
 		return fmt.Errorf("golden file: %s, exists: %t, err: %v", goldenFile, exists, err)
@@ -508,12 +508,12 @@ func compareReviews(t *testing.T, got *bytes.Buffer, goldenFile string) error {
 
 func readGolden(file string) (*string, bool, error) {
 	if _, err := os.Stat(file); err == nil {
-		bytes, err := ioutil.ReadFile(file)
+		data, err := ioutil.ReadFile(file)
 		if err != nil {
 			return nil, true, err
 		}
 
-		content := string(bytes)
+		content := string(data)
 		return &content, true, nil
 	} else if os.IsNotExist(err) {
 		return nil, false, nil
