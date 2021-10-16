@@ -41,29 +41,29 @@ var (
 	errorLogger   *log.Logger
 )
 
-type AdmissionServer struct {
+type Server struct {
 	TLSCertFile string
 	TLSKeyFile  string
 	Address     string
-	Handler     AdmissionRequestsHandler
+	Handler     RequestsHandler
 	Verbose     bool
 }
 
-func NewAdmissionServer() *AdmissionServer {
-	return &AdmissionServer{
+func NewAdmissionServer() *Server {
+	return &Server{
 		TLSCertFile: "/run/secrets/tls/tls.crt",
 		TLSKeyFile:  "/run/secrets/tls/tls.key",
 		Address:     ":8443",
-		Handler:     NewAdmissionRequestsHandler(),
+		Handler:     NewRequestsHandler(),
 		Verbose:     false,
 	}
 }
 
-func (h *AdmissionServer) health(w http.ResponseWriter, r *http.Request) {
+func (h *Server) health(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (h *AdmissionServer) Start(kubeconfigFlag string) error {
+func (h *Server) Start(kubeconfigFlag string) error {
 	infoLogger.Println(version.DisplayVersion())
 
 	if h.Verbose {

@@ -36,7 +36,7 @@ import (
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
-type AdmissionRequestsHandler struct {
+type RequestsHandler struct {
 	DefaultTimezone          string
 	BootstrapImage           string
 	DefaultInjectionStrategy inject.InjectionStrategy
@@ -46,8 +46,8 @@ type AdmissionRequestsHandler struct {
 	clientset                kubernetes.Interface
 }
 
-func NewAdmissionRequestsHandler() AdmissionRequestsHandler {
-	return AdmissionRequestsHandler{
+func NewRequestsHandler() RequestsHandler {
+	return RequestsHandler{
 		DefaultTimezone:          k8tz.DefaultTimezone,
 		BootstrapImage:           version.Image(),
 		DefaultInjectionStrategy: inject.DefaultInjectionStrategy,
@@ -72,7 +72,7 @@ func getKubeconfig(kubeconfPath string) (*restclient.Config, error) {
 		&clientcmd.ConfigOverrides{ClusterInfo: clientcmdapi.Cluster{Server: ""}}).ClientConfig()
 }
 
-func (h *AdmissionRequestsHandler) InitializeClientset(kubeconfPath string) error {
+func (h *RequestsHandler) InitializeClientset(kubeconfPath string) error {
 	config, err := getKubeconfig(kubeconfPath)
 	if err != nil {
 		return fmt.Errorf("failed to get in-cluster config: %v", err)
@@ -87,7 +87,7 @@ func (h *AdmissionRequestsHandler) InitializeClientset(kubeconfPath string) erro
 	return nil
 }
 
-func (h *AdmissionRequestsHandler) handleFunc(w http.ResponseWriter, r *http.Request) {
+func (h *RequestsHandler) handleFunc(w http.ResponseWriter, r *http.Request) {
 	review, header, err := h.readAdmissionReview(r)
 	if err != nil {
 		warningLogger.Printf("failed to parse review: %v\n", err)
@@ -138,7 +138,7 @@ func (h *AdmissionRequestsHandler) handleFunc(w http.ResponseWriter, r *http.Req
 	}
 }
 
-func (h *AdmissionRequestsHandler) handleAdmissionReview(review *admission.AdmissionReview) (k8tz.Patches, error) {
+func (h *RequestsHandler) handleAdmissionReview(review *admission.AdmissionReview) (k8tz.Patches, error) {
 	if review.Request.Resource != podResource || review.Request.Operation != "CREATE" {
 		return nil, nil
 	}
@@ -155,7 +155,7 @@ func (h *AdmissionRequestsHandler) handleAdmissionReview(review *admission.Admis
 	return patches, nil
 }
 
-func (h *AdmissionRequestsHandler) readAdmissionReview(r *http.Request) (*admission.AdmissionReview, int, error) {
+func (h *RequestsHandler) readAdmissionReview(r *http.Request) (*admission.AdmissionReview, int, error) {
 	if r.Method != http.MethodPost {
 		return nil, http.StatusMethodNotAllowed, fmt.Errorf("invalid method %s, only POST requests are allowed", r.Method)
 	}
@@ -176,17 +176,10 @@ func (h *AdmissionRequestsHandler) readAdmissionReview(r *http.Request) (*admiss
 		return nil, http.StatusBadRequest, errors.New("review parsed but request is null")
 	}
 
-	// infoLogger.Printf("-----------\n")
-
-	// s, _ := json.MarshalIndent(review, "", "  ")
-	// infoLogger.Println(string(body))
-
-	// infoLogger.Printf("-----------\n")
-
 	return review, http.StatusOK, nil
 }
 
-func (h *AdmissionRequestsHandler) lookupGenerator(namespace string, pod *corev1.Pod) (*inject.PatchGenerator, error) {
+func (h *RequestsHandler) lookupGenerator(namespace string, pod *corev1.Pod) (*inject.PatchGenerator, error) {
 	namespaceObj, err := h.clientset.CoreV1().Namespaces().Get(context.TODO(), namespace, metav1.GetOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("failed to lookup pod's namespace (%s/%s): %v", namespace, pod.Name, err)
@@ -208,7 +201,7 @@ func (h *AdmissionRequestsHandler) lookupGenerator(namespace string, pod *corev1
 			return nil, nil
 		}
 	} else if !h.InjectByDefault {
-		infoLogger.Printf("skipping pod (%s/%s) because no other insturction and injection disabled by default", namespace, pod.Name)
+		infoLogger.Printf("skipping pod (%s/%s) because no other instruction and injection disabled by default", namespace, pod.Name)
 		return nil, nil
 	}
 
@@ -231,7 +224,7 @@ func (h *AdmissionRequestsHandler) lookupGenerator(namespace string, pod *corev1
 	}
 
 	return &inject.PatchGenerator{
-		Strategy:           inject.InjectionStrategy(strategy),
+		Strategy:           strategy,
 		Timezone:           timezone,
 		InitContainerImage: h.BootstrapImage,
 		HostPathPrefix:     h.HostPathPrefix,
@@ -239,7 +232,7 @@ func (h *AdmissionRequestsHandler) lookupGenerator(namespace string, pod *corev1
 	}, nil
 }
 
-func (h *AdmissionRequestsHandler) handleAdmissionRequest(req *admission.AdmissionRequest) (k8tz.Patches, error) {
+func (h *RequestsHandler) handleAdmissionRequest(req *admission.AdmissionRequest) (k8tz.Patches, error) {
 	raw := req.Object.Raw
 	pod := corev1.Pod{}
 	if _, _, err := k8sdecode.Decode(raw, nil, &pod); err != nil {

@@ -37,11 +37,11 @@ func copyDirectory(src, dst string, overwrite bool) error {
 		default:
 			exists, err := exists(destPath)
 			if err != nil {
-				return fmt.Errorf("failed to check existance of file: %s, error: %w", destPath, err)
+				return fmt.Errorf("failed to check existence of file: %s, error: %w", destPath, err)
 			}
 
 			if !exists || overwrite {
-				if err := copy(sourcePath, destPath); err != nil {
+				if err := copyFile(sourcePath, destPath); err != nil {
 					return fmt.Errorf("failed to copy file from '%s' to '%s', error: %w", sourcePath, destPath, err)
 				}
 			} else {
@@ -60,7 +60,7 @@ func copyDirectory(src, dst string, overwrite bool) error {
 	return nil
 }
 
-func copy(src, dst string) error {
+func copyFile(src, dst string) error {
 	fmt.Fprintf(os.Stderr, "Copying '%s' to '%s'\n", src, dst)
 	out, err := os.Create(dst)
 	if err != nil {
@@ -98,7 +98,7 @@ func exists(filePath string) (bool, error) {
 func createIfNotExists(dir string, perm os.FileMode) error {
 	exists, err := exists(dir)
 	if err != nil {
-		return fmt.Errorf("failed to check for directory existance: %s error: %w", dir, err)
+		return fmt.Errorf("failed to check for directory existence: %s error: %w", dir, err)
 	}
 
 	if exists {
@@ -117,7 +117,7 @@ func createIfNotExists(dir string, perm os.FileMode) error {
 func copySymLinkIfNotExists(source, dest string, force bool) error {
 	exists, err := exists(dest)
 	if err != nil {
-		return fmt.Errorf("failed to check for symlink existance: %s error: %w", dest, err)
+		return fmt.Errorf("failed to check for symlink existence: %s error: %w", dest, err)
 	}
 
 	if exists {

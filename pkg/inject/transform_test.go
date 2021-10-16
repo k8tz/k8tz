@@ -193,7 +193,7 @@ func TestTransformer_Transform(t *testing.T) {
 			if tt.golden != "" {
 				got := buffer.String()
 
-				if err := compareGolden(t, got, tt.golden); err != nil {
+				if err := compareGolden(got, tt.golden); err != nil {
 					t.Errorf("Transformer.Transform(): %v", err)
 				}
 			}
@@ -246,13 +246,13 @@ func Test_parseTypeMetaSkeleton(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			json, err := json.Marshal(tt.args.object)
+			jb, err := json.Marshal(tt.args.object)
 			if err != nil {
 				t.Errorf("failed to marshal test argument to json: %v", tt.args.object)
 				return
 			}
 
-			got, err := parseTypeMetaSkeleton(json)
+			got, err := parseTypeMetaSkeleton(jb)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("parseTypeMetaSkeleton() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -317,7 +317,7 @@ func TestArgumentsToInputs(t *testing.T) {
 	}
 }
 
-func compareGolden(t *testing.T, hyp string, goldenFile string) error {
+func compareGolden(hyp string, goldenFile string) error {
 	golden, exists, err := readGolden(goldenFile)
 	if err != nil {
 		return fmt.Errorf("golden file: %s, exists: %t, err: %v", goldenFile, exists, err)
@@ -336,10 +336,9 @@ func compareGolden(t *testing.T, hyp string, goldenFile string) error {
 			return fmt.Errorf("failed to write golden file: %s, error: %v", goldenFile, err)
 		}
 	} else {
-		hyps := string(hyp)
 		refs := *golden
-		if refs != hyps {
-			return fmt.Errorf("actual: %v, want: %v", hyps, refs)
+		if refs != hyp {
+			return fmt.Errorf("actual: %v, want: %v", hyp, refs)
 		}
 	}
 

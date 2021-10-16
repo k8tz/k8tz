@@ -26,7 +26,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	yaml "k8s.io/apimachinery/pkg/util/yaml"
+	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
 // InjectionStrategy is a method of timezone injection, since there is more
@@ -38,14 +38,14 @@ const (
 	DefaultLocalTimePath  string = "/etc/localtime"
 
 	// DefaultInjectionStrategy is the default injection strategy of k8tz
-	DefaultInjectionStrategy InjectionStrategy = InitContainerInjectionStrategy
+	DefaultInjectionStrategy = InitContainerInjectionStrategy
 	// InitContainerInjectionStrategy is an injection strategy where we inject
 	// k8tz bootstrap initContainer into a pod with a shared emptyDir volume;
 	// the bootstrap container then copies TZif files to the emptyDir so the
 	// actual container can consume them later
 	InitContainerInjectionStrategy InjectionStrategy = "initContainer"
 	// HostPathInjectionStrategy is an injection strategy where we assume that
-	// TZif files exists on the node machines and we can just mount them
+	// TZif files exists on the node machines, and we can just mount them
 	// with hostPath volumes
 	HostPathInjectionStrategy InjectionStrategy = "hostPath"
 )
@@ -85,22 +85,14 @@ func isObjectInjected(obj *metav1.ObjectMeta) bool {
 func (g *PatchGenerator) Generate(object interface{}, pathprefix string) (patches k8tz.Patches, err error) {
 	switch o := object.(type) {
 	case *appsv1.Deployment:
-		return g.generate(
-			&o.Spec.Template.ObjectMeta,
-			&o.Spec.Template.Spec,
-			fmt.Sprintf("%s/spec/template/spec", pathprefix),
-			map[string]*metav1.ObjectMeta{
-				fmt.Sprintf("%s/metadata", pathprefix):               &o.ObjectMeta,
-				fmt.Sprintf("%s/spec/template/metadata", pathprefix): &o.Spec.Template.ObjectMeta,
-			})
+		return g.generate(&o.Spec.Template.Spec, fmt.Sprintf("%s/spec/template/spec", pathprefix), map[string]*metav1.ObjectMeta{
+			fmt.Sprintf("%s/metadata", pathprefix):               &o.ObjectMeta,
+			fmt.Sprintf("%s/spec/template/metadata", pathprefix): &o.Spec.Template.ObjectMeta,
+		})
 	case *corev1.Pod:
-		return g.generate(
-			&o.ObjectMeta,
-			&o.Spec,
-			fmt.Sprintf("%s/spec", pathprefix),
-			map[string]*metav1.ObjectMeta{
-				fmt.Sprintf("%s/metadata", pathprefix): &o.ObjectMeta,
-			})
+		return g.generate(&o.Spec, fmt.Sprintf("%s/spec", pathprefix), map[string]*metav1.ObjectMeta{
+			fmt.Sprintf("%s/metadata", pathprefix): &o.ObjectMeta,
+		})
 	case *corev1.List:
 		return g.handleList(o, pathprefix)
 	}
@@ -140,17 +132,16 @@ func (g *PatchGenerator) handleList(list *corev1.List, pathprefix string) (patch
 	return patches, nil
 }
 
-func (g *PatchGenerator) generate(meta *metav1.ObjectMeta, spec *corev1.PodSpec, pathprefix string,
-	postInjectionAnnotations map[string]*metav1.ObjectMeta) (patches k8tz.Patches, err error) {
+func (g *PatchGenerator) generate(spec *corev1.PodSpec, pathprefix string, postInjectionAnnotations map[string]*metav1.ObjectMeta) (patches k8tz.Patches, err error) {
 	if g.Strategy == HostPathInjectionStrategy {
-		patches = append(patches, g.createHostPathPatches(meta, spec, pathprefix)...)
+		patches = append(patches, g.createHostPathPatches(spec, pathprefix)...)
 	} else if g.Strategy == InitContainerInjectionStrategy {
-		patches = append(patches, g.createInitContainerPatches(meta, spec, pathprefix)...)
+		patches = append(patches, g.createInitContainerPatches(spec, pathprefix)...)
 	} else {
 		return nil, fmt.Errorf("unknown injection strategy specified: %s", g.Strategy)
 	}
 
-	patches = append(patches, g.createEnvironmentVariablePatches(meta, spec, pathprefix)...)
+	patches = append(patches, g.createEnvironmentVariablePatches(spec, pathprefix)...)
 
 	for k, v := range postInjectionAnnotations {
 		patches = append(patches, g.createPostInjectionAnnotations(v, k)...)
@@ -159,7 +150,7 @@ func (g *PatchGenerator) generate(meta *metav1.ObjectMeta, spec *corev1.PodSpec,
 	return patches, nil
 }
 
-func (g *PatchGenerator) createEnvironmentVariablePatches(meta *metav1.ObjectMeta, spec *corev1.PodSpec, pathprefix string) k8tz.Patches {
+func (g *PatchGenerator) createEnvironmentVariablePatches(spec *corev1.PodSpec, pathprefix string) k8tz.Patches {
 	var patches = k8tz.Patches{}
 
 	for containerId := 0; containerId < len(spec.Containers); containerId++ {
@@ -184,7 +175,7 @@ func (g *PatchGenerator) createEnvironmentVariablePatches(meta *metav1.ObjectMet
 	return patches
 }
 
-func (g *PatchGenerator) createInitContainerPatches(metadata *metav1.ObjectMeta, spec *corev1.PodSpec, pathprefix string) k8tz.Patches {
+func (g *PatchGenerator) createInitContainerPatches(spec *corev1.PodSpec, pathprefix string) k8tz.Patches {
 	var patches = k8tz.Patches{}
 
 	containers := len(spec.Containers)
@@ -270,7 +261,7 @@ func (g *PatchGenerator) createInitContainerPatches(metadata *metav1.ObjectMeta,
 	return patches
 }
 
-func (g *PatchGenerator) createHostPathPatches(metadata *metav1.ObjectMeta, spec *corev1.PodSpec, pathprefix string) k8tz.Patches {
+func (g *PatchGenerator) createHostPathPatches(spec *corev1.PodSpec, pathprefix string) k8tz.Patches {
 	var patches = k8tz.Patches{}
 	containers := len(spec.Containers)
 	if containers == 0 {

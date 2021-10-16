@@ -73,6 +73,6 @@ func init() {
 	injectCmd.Flags().StringVarP(&patchGenerator.Timezone, "timezone", "t", patchGenerator.Timezone, "Default timezone if not specified explicitly")
 	injectCmd.Flags().StringVarP(&patchGenerator.InitContainerImage, "image", "i", patchGenerator.InitContainerImage, "initContainer bootstrap image")
 	injectCmd.Flags().StringVarP((*string)(&patchGenerator.Strategy), "strategy", "s", string(patchGenerator.Strategy), "Default injection strategy if not specified explicitly (hostPath/initContainer)")
-	injectCmd.Flags().StringVar((*string)(&patchGenerator.HostPathPrefix), "hostpath", string(patchGenerator.HostPathPrefix), "Location of TZif files on host machines")
-	injectCmd.Flags().StringVarP((*string)(&patchGenerator.LocalTimePath), "mountpath", "m", string(patchGenerator.LocalTimePath), "Mount path for TZif file on containers")
+	injectCmd.Flags().StringVar(&patchGenerator.HostPathPrefix, "hostpath", patchGenerator.HostPathPrefix, "Location of TZif files on host machines")
+	injectCmd.Flags().StringVarP(&patchGenerator.LocalTimePath, "mountpath", "m", patchGenerator.LocalTimePath, "Mount path for TZif file on containers")
 }

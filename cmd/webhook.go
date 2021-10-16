@@ -17,7 +17,7 @@ limitations under the License.
 package cmd
 
 import (
-	admission "github.com/k8tz/k8tz/pkg/admission"
+	"github.com/k8tz/k8tz/pkg/admission"
 	"github.com/spf13/cobra"
 )
 

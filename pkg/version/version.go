@@ -22,10 +22,10 @@ import (
 )
 
 var (
-	AppVersion      string = "0.3.1"
-	VersionSuffix   string = "-beta1"
-	GitCommit       string = ""
-	ImageRepository string = "quay.io/k8tz/k8tz"
+	AppVersion      = "0.3.1"
+	VersionSuffix   = "-beta1"
+	GitCommit       = ""
+	ImageRepository = "quay.io/k8tz/k8tz"
 )
 
 func Version() string {

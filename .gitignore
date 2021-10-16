@@ -9,3 +9,4 @@ ignore
 *.mp4
 tzdata/zoneinfo/
 tzdata/*.tar.gz
+.idea/

@@ -71,7 +71,7 @@ func Test_isObjectInjected(t *testing.T) {
 			want: false,
 		},
 		{
-			name: "annotation value is emtpy",
+			name: "annotation value is empty",
 			args: args{
 				obj: &metav1.ObjectMeta{
 					Annotations: map[string]string{
@@ -257,7 +257,7 @@ func TestPatchGenerator_Generate(t *testing.T) {
 			}
 
 			if tt.golden != "" {
-				if err := comparePatches(t, &got, tt.golden); err != nil {
+				if err := comparePatches(&got, tt.golden); err != nil {
 					t.Errorf("PatchGenerator.Generate(): %v", err)
 				}
 			}
@@ -420,8 +420,8 @@ func TestPatchGenerator_createEnvironmentVariablePatches(t *testing.T) {
 				HostPathPrefix:     "/usr/share/zoneinfo",
 			}
 
-			got := g.createEnvironmentVariablePatches(tt.args.meta, tt.args.spec, tt.args.pathprefix)
-			if err := comparePatches(t, &got, tt.golden); err != nil {
+			got := g.createEnvironmentVariablePatches(tt.args.spec, tt.args.pathprefix)
+			if err := comparePatches(&got, tt.golden); err != nil {
 				t.Errorf("PatchGenerator.createEnvironmentVariablePatches(): %v", err)
 			}
 		})
@@ -496,8 +496,8 @@ func TestPatchGenerator_createInitContainerPatches(t *testing.T) {
 				LocalTimePath:      "/etc/localtime",
 			}
 
-			got := g.createInitContainerPatches(tt.args.metadata, tt.args.spec, tt.args.pathprefix)
-			if err := comparePatches(t, &got, tt.golden); err != nil {
+			got := g.createInitContainerPatches(tt.args.spec, tt.args.pathprefix)
+			if err := comparePatches(&got, tt.golden); err != nil {
 				t.Errorf("PatchGenerator.createInitContainerPatches(): %v", err)
 			}
 		})
@@ -568,8 +568,8 @@ func TestPatchGenerator_createHostPathPatches(t *testing.T) {
 				HostPathPrefix: tt.fields.HostPathPrefix,
 				LocalTimePath:  "/etc/localtime",
 			}
-			got := g.createHostPathPatches(tt.args.metadata, tt.args.spec, tt.args.pathprefix)
-			if err := comparePatches(t, &got, tt.golden); err != nil {
+			got := g.createHostPathPatches(tt.args.spec, tt.args.pathprefix)
+			if err := comparePatches(&got, tt.golden); err != nil {
 				t.Errorf("PatchGenerator.createHostPathPatches(): %v", err)
 			}
 		})
@@ -617,17 +617,17 @@ func TestPatchGenerator_createPostInjectionAnnotations(t *testing.T) {
 			}
 
 			got := g.createPostInjectionAnnotations(tt.args.meta, tt.args.pathprefix)
-			if err := comparePatches(t, &got, tt.golden); err != nil {
+			if err := comparePatches(&got, tt.golden); err != nil {
 				t.Errorf("TestPatchGenerator_createPostInjectionAnnotations: %v", err)
 			}
 		})
 	}
 }
 
-func comparePatches(t *testing.T, got *k8tz.Patches, goldenFile string) error {
+func comparePatches(got *k8tz.Patches, goldenFile string) error {
 	hyp, err := json.MarshalIndent(got, "", "  ")
 	if err != nil {
-		return fmt.Errorf("failed to convert refrence to json, refrence: %v, err: %v", got, err)
+		return fmt.Errorf("failed to convert reference to json, reference: %v, err: %v", got, err)
 	}
 
 	golden, exists, err := readGolden(goldenFile)
