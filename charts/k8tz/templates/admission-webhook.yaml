@@ -6,7 +6,7 @@ data:
   tls.key: {{ ternary (b64enc (trim $ca.Key)) (b64enc (trim .Values.webhook.keyPEM)) (empty .Values.webhook.keyPEM) }}
 kind: Secret
 metadata:
-  namespace: {{ .Values.namespace }}
+  namespace: {{ .Release.Namespace | quote }}
   creationTimestamp: null
   name: {{ include "k8tz.fullname" . }}-tls
   labels:

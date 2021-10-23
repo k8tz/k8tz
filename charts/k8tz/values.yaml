@@ -2,7 +2,6 @@
 
 replicaCount: 1
 
-namespace: k8tz
 injectionStrategy: initContainer
 timezone: UTC
 injectAll: true
