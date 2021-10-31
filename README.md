@@ -25,8 +25,8 @@ helm install k8tz k8tz/k8tz --set timezone=Europe/London
 ![Short Demo](assets/k8tz-helm-demo.gif)
 
 ### Prerequisites
-- Helm 3
-- Kubernetes >=1.16
+- Helm 2 or later
+- Kubernetes 1.16 or later
 - Permissions to use `emptyDir` or `hostPath`
 
 ### Installation
