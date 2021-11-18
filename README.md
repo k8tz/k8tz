@@ -26,7 +26,7 @@ helm install k8tz k8tz/k8tz --set timezone=Europe/London
 
 ### Prerequisites
 - Helm 2 or later
-- Kubernetes 1.16 or later
+- Kubernetes 1.16+ or OpenShift 4.X
 - Permissions to use `emptyDir` or `hostPath`
 
 ### Installation
@@ -200,7 +200,7 @@ The behaviour of the controller can be changed using annotations on both `Pod` a
 
 - [ ] Support `StatefulSet` injection
 - [ ] Lookup for annotations in pods owner when possible
-- [ ] Test and document installation on OpenShift
+- [X] Test and document installation on OpenShift
 - [X] Implement `make install` for easier installation from source
 - [ ] Add VERBOSE flag to helm
 - [ ] Write verbose logs for webhook
