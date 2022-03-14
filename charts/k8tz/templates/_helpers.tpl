@@ -56,7 +56,7 @@ helm.sh/chart: {{ include "k8tz.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- if .Values.commonLabels}}
+{{- if .Values.commonLabels }}
 {{ toYaml .Values.commonLabels }}
 {{- end }}
 {{- end }}
