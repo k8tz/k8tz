@@ -64,6 +64,7 @@ helm test k8tz
 | replicaCount | Amount of admission controller webhooks to spin up. For production use it is recommended to have at least 3 replicas | 1 |
 | namespace | The namespace where to install the admission controller | k8tz |
 | timezone | The default timezone to inject | UTC |
+| commonLabels | Labels added to all resources created by the chart | {} |
 | injectionStrategy | The default injection strategy to use | initContainer |
 | injectAll | If true, timezone will be injected to the pod even when there is no annotation with explicit injection request. When false, the `k8tz.io/inject: true` annotation is required. | true |
 | image.repository | The image repository for the admission controller and bootstrap image | quay.io/k8tz/k8tz |
