@@ -7,6 +7,9 @@ injectionStrategy: initContainer
 timezone: UTC
 injectAll: true
 
+# Labels to apply to all resources
+commonLabels: {} 
+
 webhook:
   failurePolicy: Fail
 
