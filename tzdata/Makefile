@@ -15,7 +15,7 @@
 .DEFAULT_GOAL := build
 
 IMAGE_REPOSITORY ?= quay.io/k8tz/tzdata
-TZDATA_VERSION ?= 2021b
+TZDATA_VERSION ?= 2022a
 IMAGE = $(IMAGE_REPOSITORY):$(TZDATA_VERSION)
 
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))

@@ -14,7 +14,7 @@
 
 FROM alpine:3.13 AS src
 
-ARG tzdbversion=2021b
+ARG tzdbversion=2022a
 
 RUN \
     apk add build-base lzip && \
