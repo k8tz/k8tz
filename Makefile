@@ -38,7 +38,7 @@ IMAGE_EXTRA_TAGS ?=
 IMAGE_LABELS ?= \
 	--label gitCommit=$(GIT_COMMIT) \
 	--label version=$(VERSION)$(VERSION_SUFFIX)
-IMAGE_TZDATA_VERSION ?= 2021b
+IMAGE_TZDATA_VERSION ?= 2022a
 
 tzdata:
 		(cd tzdata && make TZDATA_VERSION=$(IMAGE_TZDATA_VERSION) clean import)
