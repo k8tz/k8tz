@@ -198,7 +198,7 @@ The behaviour of the controller can be changed using annotations on both `Pod` a
 
 ## Roadmap
 
-- [ ] Support `StatefulSet` injection
+- [X] Support `StatefulSet` injection
 - [ ] Lookup for annotations in pods owner when possible
 - [X] Test and document installation on OpenShift
 - [X] Implement `make install` for easier installation from source

@@ -110,7 +110,7 @@ func (t *Transformer) transformInput(input Input) error {
 			}
 
 			first = false
-			fmt.Fprintf(os.Stderr, "unknown TypeMeta in input: %s(%d), writing to output as-is\n", input.Identifier, input.ArgNumber)
+			fmt.Fprintf(os.Stderr, "unknown TypeMeta in input: (%d)%s, writing to output as-is\n", input.ArgNumber, input.Identifier)
 			continue
 		}
 
@@ -175,6 +175,8 @@ func parseTypeMetaSkeleton(data []byte) (interface{}, error) {
 	}
 
 	switch metainfo.Kind {
+	case "StatefulSet":
+		return &appsv1.StatefulSet{}, nil
 	case "Deployment":
 		return &appsv1.Deployment{}, nil
 	case "Pod":

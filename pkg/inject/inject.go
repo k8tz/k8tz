@@ -84,6 +84,11 @@ func isObjectInjected(obj *metav1.ObjectMeta) bool {
 
 func (g *PatchGenerator) Generate(object interface{}, pathprefix string) (patches k8tz.Patches, err error) {
 	switch o := object.(type) {
+	case *appsv1.StatefulSet:
+		return g.generate(&o.Spec.Template.Spec, fmt.Sprintf("%s/spec/template/spec", pathprefix), map[string]*metav1.ObjectMeta{
+			fmt.Sprintf("%s/metadata", pathprefix):               &o.ObjectMeta,
+			fmt.Sprintf("%s/spec/template/metadata", pathprefix): &o.Spec.Template.ObjectMeta,
+		})
 	case *appsv1.Deployment:
 		return g.generate(&o.Spec.Template.Spec, fmt.Sprintf("%s/spec/template/spec", pathprefix), map[string]*metav1.ObjectMeta{
 			fmt.Sprintf("%s/metadata", pathprefix):               &o.ObjectMeta,
