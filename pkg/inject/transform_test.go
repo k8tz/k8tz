@@ -96,6 +96,36 @@ func TestTransformer_Transform(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "transform a simple StatefulSet",
+			fields: fields{
+				PatchGenerator: PatchGenerator{
+					Strategy:           InitContainerInjectionStrategy,
+					Timezone:           "UTC",
+					InitContainerImage: "testimage:0.0.0",
+					HostPathPrefix:     "/usr/share/zoneinfo",
+					LocalTimePath:      "/etc/localtime",
+				},
+				Inputs: []string{"testdata/statefulset-simple.yaml"},
+			},
+			golden:  "testdata/statefulset-simple-injected.yaml",
+			wantErr: false,
+		},
+		{
+			name: "transform list of StatefulSets",
+			fields: fields{
+				PatchGenerator: PatchGenerator{
+					Strategy:           InitContainerInjectionStrategy,
+					Timezone:           "UTC",
+					InitContainerImage: "testimage:0.0.0",
+					HostPathPrefix:     "/usr/share/zoneinfo",
+					LocalTimePath:      "/etc/localtime",
+				},
+				Inputs: []string{"testdata/statefulset-list.yaml"},
+			},
+			golden:  "testdata/statefulset-list-injected.yaml",
+			wantErr: false,
+		},
+		{
 			name: "mix single input with multiple pods and another pod from a different input",
 			fields: fields{
 				PatchGenerator: PatchGenerator{
@@ -233,6 +263,14 @@ func Test_parseTypeMetaSkeleton(t *testing.T) {
 				object: metav1.TypeMeta{Kind: "Deployment"},
 			},
 			want:    &appsv1.Deployment{},
+			wantErr: false,
+		},
+		{
+			name: "test valid StatefulSet type",
+			args: args{
+				object: metav1.TypeMeta{Kind: "StatefulSet"},
+			},
+			want:    &appsv1.StatefulSet{},
 			wantErr: false,
 		},
 		{
