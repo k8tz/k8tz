@@ -1,4 +1,4 @@
-# v0.X.Y
+# v0.4.0
 
 - Add StatefulSet transformation support
 - Update tzdata package to 2022a

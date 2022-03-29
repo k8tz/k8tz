@@ -13,6 +13,8 @@
 
 Containers do not inherit timezones from host machines and have only accessed to the clock from the kernel. The default timezone for most images is UTC, yet it is not guaranteed and may be different from container to container. With `k8tz` it is easy to standardize selected timezone across pods and namespaces automatically with minimal effort.
 
+Read article: [Timezone in Kubernetes With k8tz](https://medium.com/@yonatankahana/timezone-in-kubernetes-with-k8tz-fdefca785238)
+
 ## Admission Controller with Helm
 
 tl;dr:
@@ -125,7 +127,7 @@ NOTE: The injection process is idempotent; you can do it multiple times and/or u
 You can install k8tz binary file by downloading precompiled binary and use it
 
 ```console
-wget -c https://github.com/k8tz/k8tz/releases/download/v0.3.0/k8tz_0.3.0_linux_amd64.tar.gz -O - | tar xz
+wget -c https://github.com/k8tz/k8tz/releases/download/v0.4.0/k8tz_0.4.0_linux_amd64.tar.gz -O - | tar xz
 chmod +x k8tz
 ./k8tz version
 ```
