@@ -40,3 +40,7 @@ webhooks:
         apiGroups: [""]
         apiVersions: ["v1"]
         resources: ["pods"]
+      - operations: [ "CREATE" ]
+        apiGroups: ["batch"]
+        apiVersions: ["v1"]
+        resources: ["cronjobs"]

@@ -9,6 +9,7 @@ import (
 
 	jsonpatch "github.com/evanphx/json-patch"
 	appsv1 "k8s.io/api/apps/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/yaml"
@@ -175,6 +176,8 @@ func parseTypeMetaSkeleton(data []byte) (interface{}, error) {
 	}
 
 	switch metainfo.Kind {
+	case "CronJob":
+		return &batchv1.CronJob{}, nil
 	case "StatefulSet":
 		return &appsv1.StatefulSet{}, nil
 	case "Deployment":

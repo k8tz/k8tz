@@ -6,6 +6,7 @@ namespace: k8tz
 injectionStrategy: initContainer
 timezone: UTC
 injectAll: true
+cronJobTimeZone: false
 
 webhook:
   failurePolicy: Fail

@@ -43,6 +43,13 @@ spec:
           - {{ .Values.injectAll | quote }}
           - "--bootstrap-image"
           - "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          {{- if .Values.cronJobTimeZone }}
+          {{- if and (ge .Capabilities.KubeVersion.Major "1") (ge .Capabilities.KubeVersion.Minor "24") }}
+          - "--cronJobTimeZone"
+          {{- else }}
+          {{- fail "CronJob injection requires kubernetes >=1.24.0-beta.0 with 'CronJobTimeZone' feature gate enabled" }}
+          {{- end }}
+          {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
