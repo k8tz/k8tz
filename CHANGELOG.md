@@ -1,3 +1,7 @@
+# 0.5.0
+
+- Add CronJob support (for kubernetes >=1.24.0-beta.0)
+
 # v0.4.0
 
 - Add StatefulSet transformation support

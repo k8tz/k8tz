@@ -67,7 +67,8 @@ helm test k8tz
 | namespace | The namespace where to install the admission controller | k8tz |
 | timezone | The default timezone to inject | UTC |
 | injectionStrategy | The default injection strategy to use | initContainer |
-| injectAll | If true, timezone will be injected to the pod even when there is no annotation with explicit injection request. When false, the `k8tz.io/inject: true` annotation is required. | true |
+| injectAll | If true, timezone will be injected to the pod even when there is no annotation with explicit injection request. When false, the `k8tz.io/inject: true` annotation is required | true |
+| cronJobTimeZone | Enable injection of `timeZone` field to `CronJob`s (alpha). Requires kubernetes >=1.24.0-beta.0 with [`CronJobTimeZone`](https://github.com/kubernetes/enhancements/blob/aad71056d33eccf3845b73670106f06a9e74fec6/keps/sig-apps/3140-TimeZone-support-in-CronJob/README.md) feature gate enabled | false |
 | image.repository | The image repository for the admission controller and bootstrap image | quay.io/k8tz/k8tz |
 | image.pullPolicy | Admission controller image pull policy | IfNotPresent |
 | image.tag | The image tag for the admission controller and bootstrap image. The default is the chart appVersion | - |
@@ -86,9 +87,9 @@ helm test k8tz
 | tolerations | Tolerations for the admission controller deployment | {} |
 | affinity | Affinities and anti-affinities for the admission controller deployment | {} |
 | webhook.failurePolicy | Failure policy for the admission webhook. May be `Fail` or `Ignore` | `Fail` |
-| webhook.crtPEM | Certificate in PEM format for the admission controller webhook. Will be generated if not specified (Recommended). | - |
-| webhook.keyPEM | Private key for in PEM format for the admission controller webhook certificate. Will be generated if not specified (Recommended). | - |
-| webhook.caBundle | Certificate Authority Bundle for the admission controller webhook. Will be generated if not specified (Recommended). | - |
+| webhook.crtPEM | Certificate in PEM format for the admission controller webhook. Will be generated if not specified (Recommended) | - |
+| webhook.keyPEM | Private key for in PEM format for the admission controller webhook certificate. Will be generated if not specified (Recommended) | - |
+| webhook.caBundle | Certificate Authority Bundle for the admission controller webhook. Will be generated if not specified (Recommended) | - |
 
 ### Uninstall
 

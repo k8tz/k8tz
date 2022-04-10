@@ -33,12 +33,13 @@ const (
 )
 
 var (
-	k8sdecode     = serializer.NewCodecFactory(runtime.NewScheme()).UniversalDeserializer()
-	podResource   = metav1.GroupVersionResource{Version: "v1", Resource: "pods"}
-	verboseLogger *log.Logger
-	warningLogger *log.Logger
-	infoLogger    *log.Logger
-	errorLogger   *log.Logger
+	k8sdecode       = serializer.NewCodecFactory(runtime.NewScheme()).UniversalDeserializer()
+	podResource     = metav1.GroupVersionResource{Version: "v1", Resource: "pods"}
+	cronJobResource = metav1.GroupVersionResource{Version: "v1", Resource: "cronjobs", Group: "batch"}
+	verboseLogger   *log.Logger
+	warningLogger   *log.Logger
+	infoLogger      *log.Logger
+	errorLogger     *log.Logger
 )
 
 type Server struct {

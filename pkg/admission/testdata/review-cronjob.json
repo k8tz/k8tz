@@ -1,0 +1,67 @@
+{
+    "kind": "AdmissionReview",
+    "apiVersion": "admission.k8s.io/v1",
+    "request": {
+        "uid": "0c0829ff-c2f5-4634-a1c3-098147304d03",
+        "kind": {
+            "group": "batch",
+            "version": "v1",
+            "kind": "CronJob"
+        },
+        "resource": {
+            "group": "batch",
+            "version": "v1",
+            "resource": "cronjobs"
+        },
+        "requestKind": {
+            "group": "batch",
+            "version": "v1",
+            "kind": "CronJob"
+        },
+        "requestResource": {
+            "group": "batch",
+            "version": "v1",
+            "resource": "cronjobs"
+        },
+        "name": "k8tz",
+        "namespace": "default",
+        "operation": "CREATE",
+        "object": {
+            "apiVersion": "batch/v1",
+            "kind": "CronJob",
+            "metadata": {
+                "name": "hello"
+            },
+            "spec": {
+                "schedule": "* * * * *",
+                "jobTemplate": {
+                "spec": {
+                    "template": {
+                        "spec": {
+                            "containers": [
+                                    {
+                                        "name": "hello",
+                                        "image": "busybox:1.28",
+                                        "imagePullPolicy": "IfNotPresent",
+                                        "command": [
+                                            "/bin/sh",
+                                            "-c",
+                                            "date; echo Hello from the Kubernetes cluster"
+                                        ],
+                                        "restartPolicy": "OnFailure"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "oldObject": null,
+        "dryRun": false,
+        "options": {
+            "kind": "CreateOptions",
+            "apiVersion": "meta.k8s.io/v1"
+        }
+    }
+}

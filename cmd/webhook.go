@@ -58,5 +58,6 @@ func init() {
 	webhookCmd.Flags().StringVar(&webhook.Handler.LocalTimePath, "localTimePath", webhook.Handler.LocalTimePath, "Mount path for TZif file on containers")
 	webhookCmd.Flags().StringVarP((*string)(&webhook.Handler.DefaultInjectionStrategy), "injection-strategy", "s", string(webhook.Handler.DefaultInjectionStrategy), "Default injection strategy if not specified explicitly (hostPath/initContainer)")
 	webhookCmd.Flags().BoolVar(&webhook.Handler.InjectByDefault, "inject", webhook.Handler.InjectByDefault, "Whether injection is enabled by default or should be requested by annotation")
+	webhookCmd.Flags().BoolVar(&webhook.Handler.CronJobTimeZone, "cronJobTimeZone", webhook.Handler.CronJobTimeZone, "Enable CronJob injection. Requires kubernetes >=1.24.0-beta.0 and the 'CronJobTimeZone' feature gate enabled (alpha)")
 	webhookCmd.Flags().BoolVar(&webhook.Verbose, "verbose", webhook.Verbose, "Print more verbose logs for debugging")
 }

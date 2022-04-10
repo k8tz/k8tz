@@ -24,6 +24,7 @@ import (
 	k8tz "github.com/k8tz/k8tz/pkg"
 	"github.com/k8tz/k8tz/pkg/version"
 	appsv1 "k8s.io/api/apps/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/yaml"
@@ -60,6 +61,7 @@ type PatchGenerator struct {
 	InitContainerImage string
 	HostPathPrefix     string
 	LocalTimePath      string
+	CronJobTimeZone    bool
 }
 
 func NewPatchGenerator() PatchGenerator {
@@ -69,6 +71,7 @@ func NewPatchGenerator() PatchGenerator {
 		InitContainerImage: version.Image(),
 		HostPathPrefix:     DefaultHostPathPrefix,
 		LocalTimePath:      DefaultLocalTimePath,
+		CronJobTimeZone:    false,
 	}
 }
 
@@ -84,18 +87,22 @@ func isObjectInjected(obj *metav1.ObjectMeta) bool {
 
 func (g *PatchGenerator) Generate(object interface{}, pathprefix string) (patches k8tz.Patches, err error) {
 	switch o := object.(type) {
+	case *batchv1.CronJob:
+		return g.forCronJobSpec(&o.Spec, fmt.Sprintf("%s/spec", pathprefix), map[string]*metav1.ObjectMeta{
+			fmt.Sprintf("%s/metadata", pathprefix): &o.ObjectMeta,
+		})
 	case *appsv1.StatefulSet:
-		return g.generate(&o.Spec.Template.Spec, fmt.Sprintf("%s/spec/template/spec", pathprefix), map[string]*metav1.ObjectMeta{
+		return g.forPodSpec(&o.Spec.Template.Spec, fmt.Sprintf("%s/spec/template/spec", pathprefix), map[string]*metav1.ObjectMeta{
 			fmt.Sprintf("%s/metadata", pathprefix):               &o.ObjectMeta,
 			fmt.Sprintf("%s/spec/template/metadata", pathprefix): &o.Spec.Template.ObjectMeta,
 		})
 	case *appsv1.Deployment:
-		return g.generate(&o.Spec.Template.Spec, fmt.Sprintf("%s/spec/template/spec", pathprefix), map[string]*metav1.ObjectMeta{
+		return g.forPodSpec(&o.Spec.Template.Spec, fmt.Sprintf("%s/spec/template/spec", pathprefix), map[string]*metav1.ObjectMeta{
 			fmt.Sprintf("%s/metadata", pathprefix):               &o.ObjectMeta,
 			fmt.Sprintf("%s/spec/template/metadata", pathprefix): &o.Spec.Template.ObjectMeta,
 		})
 	case *corev1.Pod:
-		return g.generate(&o.Spec, fmt.Sprintf("%s/spec", pathprefix), map[string]*metav1.ObjectMeta{
+		return g.forPodSpec(&o.Spec, fmt.Sprintf("%s/spec", pathprefix), map[string]*metav1.ObjectMeta{
 			fmt.Sprintf("%s/metadata", pathprefix): &o.ObjectMeta,
 		})
 	case *corev1.List:
@@ -137,7 +144,7 @@ func (g *PatchGenerator) handleList(list *corev1.List, pathprefix string) (patch
 	return patches, nil
 }
 
-func (g *PatchGenerator) generate(spec *corev1.PodSpec, pathprefix string, postInjectionAnnotations map[string]*metav1.ObjectMeta) (patches k8tz.Patches, err error) {
+func (g *PatchGenerator) forPodSpec(spec *corev1.PodSpec, pathprefix string, postInjectionAnnotations map[string]*metav1.ObjectMeta) (patches k8tz.Patches, err error) {
 	if g.Strategy == HostPathInjectionStrategy {
 		patches = append(patches, g.createHostPathPatches(spec, pathprefix)...)
 	} else if g.Strategy == InitContainerInjectionStrategy {
@@ -153,6 +160,30 @@ func (g *PatchGenerator) generate(spec *corev1.PodSpec, pathprefix string, postI
 	}
 
 	return patches, nil
+}
+
+func (g *PatchGenerator) forCronJobSpec(spec *batchv1.CronJobSpec, pathprefix string, postInjectionAnnotations map[string]*metav1.ObjectMeta) (patches k8tz.Patches, err error) {
+	if g.CronJobTimeZone {
+		patches = append(patches, g.createCronJobPatches(spec, pathprefix)...)
+
+		for k, v := range postInjectionAnnotations {
+			patches = append(patches, g.createPostInjectionAnnotations(v, k)...)
+		}
+	}
+
+	return patches, nil
+}
+
+func (g *PatchGenerator) createCronJobPatches(spec *batchv1.CronJobSpec, pathprefix string) k8tz.Patches {
+	var patches = k8tz.Patches{}
+
+	patches = append(patches, k8tz.Patch{
+		Op:    "add",
+		Path:  fmt.Sprintf("%s/timeZone", pathprefix),
+		Value: g.Timezone,
+	})
+
+	return patches
 }
 
 func (g *PatchGenerator) createEnvironmentVariablePatches(spec *corev1.PodSpec, pathprefix string) k8tz.Patches {

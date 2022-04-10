@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	appsv1 "k8s.io/api/apps/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -186,6 +187,22 @@ func TestTransformer_Transform(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "simple cronjob injection",
+			fields: fields{
+				PatchGenerator: PatchGenerator{
+					Strategy:           InitContainerInjectionStrategy,
+					Timezone:           "Europe/Dublin",
+					InitContainerImage: "testimage:0.0.0",
+					HostPathPrefix:     "/usr/share/zoneinfo",
+					LocalTimePath:      "/etc/localtime",
+					CronJobTimeZone:    true,
+				},
+				Inputs: []string{"testdata/simple-cronjob.yaml"},
+			},
+			golden:  "testdata/simple-cronjob-dublin.yaml",
+			wantErr: false,
+		},
+		{
 			name: "list of uninjected deployments",
 			fields: fields{
 				PatchGenerator: PatchGenerator{
@@ -271,6 +288,14 @@ func Test_parseTypeMetaSkeleton(t *testing.T) {
 				object: metav1.TypeMeta{Kind: "StatefulSet"},
 			},
 			want:    &appsv1.StatefulSet{},
+			wantErr: false,
+		},
+		{
+			name: "test valid CronJob type",
+			args: args{
+				object: metav1.TypeMeta{Kind: "CronJob"},
+			},
+			want:    &batchv1.CronJob{},
 			wantErr: false,
 		},
 		{
