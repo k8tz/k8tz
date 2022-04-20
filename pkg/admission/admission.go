@@ -59,7 +59,7 @@ func NewRequestsHandler() RequestsHandler {
 
 func getKubeconfig(kubeconfPath string) (*restclient.Config, error) {
 	if kubeconfPath == "" {
-		warningLogger.Println("--kubeconfig not specified. Using the inClusterConfig. This might not work.")
+		verboseLogger.Println("--kubeconfig not specified. Using the inClusterConfig. This might not work.")
 		kubeconfig, err := restclient.InClusterConfig()
 		if err == nil {
 			return kubeconfig, nil
