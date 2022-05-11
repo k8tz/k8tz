@@ -76,7 +76,7 @@ func (h *Server) Start(kubeconfigFlag string) error {
 		return fmt.Errorf("failed to setup connection with kubernetes api: %w", err)
 	}
 
-	infoLogger.Println(fmt.Sprintf("Listening on %s", h.Address))
+	infoLogger.Printf("Listening on %s\n", h.Address)
 
 	mux := http.NewServeMux()
 
