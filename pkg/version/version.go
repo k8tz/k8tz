@@ -22,7 +22,7 @@ import (
 )
 
 var (
-	AppVersion      = "0.4.1"
+	AppVersion      = "0.5.0"
 	VersionSuffix   = "-beta0"
 	GitCommit       = ""
 	ImageRepository = "quay.io/k8tz/k8tz"

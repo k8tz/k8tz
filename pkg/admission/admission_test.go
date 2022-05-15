@@ -49,6 +49,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 		GoldenFile               string
 		FakeObjects              []runtime.Object
 		WantCode                 int
+		CronJobTimeZone          bool
 	}
 	tests := []struct {
 		name   string
@@ -117,6 +118,30 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 				ReviewFile:               "testdata/review-namespace.json",
 				GoldenFile:               "testdata/review-namespace-ignored.json",
 				WantCode:                 http.StatusOK,
+			},
+		},
+		{
+			name: "cronjob request should be handled when feature enabled",
+			fields: fields{
+				DefaultTimezone:          pkg.UTCTimezone,
+				BootstrapImage:           "test:0.0.0",
+				DefaultInjectionStrategy: inject.InitContainerInjectionStrategy,
+				InjectByDefault:          true,
+				HostPathPrefix:           "/usr/share/zoneinfo",
+				LocalTimePath:            "/etc/localtime",
+				ContentType:              "application/json",
+				Method:                   "POST",
+				ReviewFile:               "testdata/review-cronjob.json",
+				GoldenFile:               "testdata/review-cronjob-enabled.json",
+				WantCode:                 http.StatusOK,
+				CronJobTimeZone:          true,
+				FakeObjects: []runtime.Object{
+					&corev1.Namespace{
+						ObjectMeta: v1.ObjectMeta{
+							Name: "default",
+						},
+					},
+				},
 			},
 		},
 		{
@@ -442,6 +467,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 				InjectByDefault:          tt.fields.InjectByDefault,
 				HostPathPrefix:           tt.fields.HostPathPrefix,
 				LocalTimePath:            tt.fields.LocalTimePath,
+				CronJobTimeZone:          tt.fields.CronJobTimeZone,
 				clientset:                fake.NewSimpleClientset(tt.fields.FakeObjects...),
 			}
 

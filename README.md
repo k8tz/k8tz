@@ -9,7 +9,7 @@
 
 ![k8tz Logo](assets/k8tz-logo-blue-transparent-medium.png)
 
-`k8tz` is a kubernetes admission controller and a CLI tool to inject timezones into Pods.
+`k8tz` is a kubernetes admission controller and a CLI tool to inject timezones into Pods and CronJobs[^1].
 
 Containers do not inherit timezones from host machines and have only accessed to the clock from the kernel. The default timezone for most images is UTC, yet it is not guaranteed and may be different from container to container. With `k8tz` it is easy to standardize selected timezone across pods and namespaces automatically with minimal effort.
 
@@ -67,7 +67,8 @@ helm test k8tz
 | namespace | The namespace where to install the admission controller | k8tz |
 | timezone | The default timezone to inject | UTC |
 | injectionStrategy | The default injection strategy to use | initContainer |
-| injectAll | If true, timezone will be injected to the pod even when there is no annotation with explicit injection request. When false, the `k8tz.io/inject: true` annotation is required. | true |
+| injectAll | If true, timezone will be injected to the pod even when there is no annotation with explicit injection request. When false, the `k8tz.io/inject: true` annotation is required | true |
+| cronJobTimeZone | Enable injection of `timeZone` field to `CronJob`s[^1] | false |
 | image.repository | The image repository for the admission controller and bootstrap image | quay.io/k8tz/k8tz |
 | image.pullPolicy | Admission controller image pull policy | IfNotPresent |
 | image.tag | The image tag for the admission controller and bootstrap image. The default is the chart appVersion | - |
@@ -86,9 +87,9 @@ helm test k8tz
 | tolerations | Tolerations for the admission controller deployment | {} |
 | affinity | Affinities and anti-affinities for the admission controller deployment | {} |
 | webhook.failurePolicy | Failure policy for the admission webhook. May be `Fail` or `Ignore` | `Fail` |
-| webhook.crtPEM | Certificate in PEM format for the admission controller webhook. Will be generated if not specified (Recommended). | - |
-| webhook.keyPEM | Private key for in PEM format for the admission controller webhook certificate. Will be generated if not specified (Recommended). | - |
-| webhook.caBundle | Certificate Authority Bundle for the admission controller webhook. Will be generated if not specified (Recommended). | - |
+| webhook.crtPEM | Certificate in PEM format for the admission controller webhook. Will be generated if not specified (Recommended) | - |
+| webhook.keyPEM | Private key for in PEM format for the admission controller webhook certificate. Will be generated if not specified (Recommended) | - |
+| webhook.caBundle | Certificate Authority Bundle for the admission controller webhook. Will be generated if not specified (Recommended) | - |
 
 ### Uninstall
 
@@ -213,3 +214,5 @@ The behaviour of the controller can be changed using annotations on both `Pod` a
 `k8tz` has been tested widely with many popular base images and worked perfectly with `alpine`, `amazonlinux`, `busybox` (glibc, musl), `centos`, `clearlinux`, `debian`, `fedora`, `photon`, `ros`, `ubuntu` and many more.
 
 The only limitation found so far is that `uclibc` not respecting TZif files in `/etc/localtime`. Images as `busybox` built with `uclibc` will not be affected by `k8tz`.
+
+[^1]: Timezones for CronJobs are available only from kubernetes >=1.24.0-beta.0 with [`CronJobTimeZone`](https://github.com/kubernetes/enhancements/blob/aad71056d33eccf3845b73670106f06a9e74fec6/keps/sig-apps/3140-TimeZone-support-in-CronJob/README.md) feature gate enabled.

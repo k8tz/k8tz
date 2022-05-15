@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  annotations:
+    k8tz.io/injected: "true"
+    k8tz.io/timezone: Europe/Dublin
+  name: hello
+spec:
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - command:
+            - /bin/sh
+            - -c
+            - date; echo Hello from the Kubernetes cluster
+            image: busybox:1.28
+            imagePullPolicy: IfNotPresent
+            name: hello
+          restartPolicy: OnFailure
+  schedule: '* * * * *'
+  timeZone: Europe/Dublin
