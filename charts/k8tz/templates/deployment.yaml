@@ -39,8 +39,7 @@ spec:
           - {{ .Values.timezone | quote }}
           - "--injection-strategy"
           - {{ .Values.injectionStrategy | quote }}
-          - "--inject"
-          - {{ .Values.injectAll | quote }}
+          - "--inject={{ .Values.injectAll }}"
           - "--bootstrap-image"
           - "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           {{- if .Values.cronJobTimeZone }}
