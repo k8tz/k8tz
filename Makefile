@@ -18,7 +18,7 @@
 BINARY_NAME ?= k8tz
 OUT_DIR ?= build/
 VERSION ?= 0.5.0
-VERSION_SUFFIX ?= -beta0
+VERSION_SUFFIX ?= 
 TARGET=/usr/local/bin
 INSTALLCMD=install -v $(OUT_DIR)$(BINARY_NAME) $(TARGET)
 BUILD_FLAGS ?= \

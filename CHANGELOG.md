@@ -1,4 +1,4 @@
-# 0.X.Y
+# 0.5.0
 
 - Add CronJob support (for kubernetes >=1.24.0-beta.0)
 - Hide confusing log message about `--kubeconfig` not specified
