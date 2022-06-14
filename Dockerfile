@@ -18,4 +18,5 @@ ARG BINARY_LOCATION=k8tz
 COPY tzdata/zoneinfo /usr/share/zoneinfo
 COPY $BINARY_LOCATION /
 
+USER 1000
 ENTRYPOINT ["/k8tz"]
