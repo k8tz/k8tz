@@ -1,3 +1,7 @@
+# 0.5.1
+
+- Run container as non-root user
+
 # 0.5.0
 
 - Add CronJob support (for kubernetes >=1.24.0-beta.0)
