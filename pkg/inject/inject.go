@@ -211,7 +211,7 @@ func (g *PatchGenerator) createEnvironmentVariablePatches(spec *corev1.PodSpec, 
 	return patches
 }
 
-func (g *PatchGenerator) removeContainerVolum(volumeMounts []corev1.VolumeMount, pathprefix string, containerId int) k8tz.Patches {
+func (g *PatchGenerator) removeContainerVolume(volumeMounts []corev1.VolumeMount, pathprefix string, containerId int) k8tz.Patches {
 	patches := k8tz.Patches{}
 	for index := len(volumeMounts) - 1; index >= 0; index-- {
 		if volumeMounts[index].MountPath == g.LocalTimePath {
@@ -220,7 +220,7 @@ func (g *PatchGenerator) removeContainerVolum(volumeMounts []corev1.VolumeMount,
 				Path:  fmt.Sprintf("%s/containers/%d/volumeMounts/%d", pathprefix, containerId, index),
 				Value: "",
 			})
-		} else if volumeMounts[index].MountPath == "/usr/share/zoneinfo" {
+		} else if volumeMounts[index].MountPath == g.HostPathPrefix {
 			patches = append(patches, k8tz.Patch{
 				Op:    "remove",
 				Path:  fmt.Sprintf("%s/containers/%d/volumeMounts/%d", pathprefix, containerId, index),
@@ -266,7 +266,7 @@ func (g *PatchGenerator) createInitContainerPatches(spec *corev1.PodSpec, pathpr
 				Value: []corev1.VolumeMount{},
 			})
 		}
-		patches = append(patches, g.removeContainerVolum(spec.Containers[containerId].VolumeMounts, pathprefix, containerId)...)
+		patches = append(patches, g.removeContainerVolume(spec.Containers[containerId].VolumeMounts, pathprefix, containerId)...)
 		patches = append(patches, k8tz.Patch{
 			Op:   "add",
 			Path: fmt.Sprintf("%s/containers/%d/volumeMounts/-", pathprefix, containerId),
@@ -333,7 +333,7 @@ func (g *PatchGenerator) createHostPathPatches(spec *corev1.PodSpec, pathprefix 
 			})
 		}
 
-		patches = append(patches, g.removeContainerVolum(spec.Containers[containerId].VolumeMounts, pathprefix, containerId)...)
+		patches = append(patches, g.removeContainerVolume(spec.Containers[containerId].VolumeMounts, pathprefix, containerId)...)
 		patches = append(patches, k8tz.Patch{
 			Op:   "add",
 			Path: fmt.Sprintf("%s/containers/%d/volumeMounts/-", pathprefix, containerId),

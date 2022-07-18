@@ -713,3 +713,167 @@ func Test_escapeJsonPointer(t *testing.T) {
 		})
 	}
 }
+
+func Test_removeContainerVolume(t *testing.T) {
+	type fields struct {
+		Strategy           InjectionStrategy
+		Timezone           string
+		InitContainerImage string
+		HostPathPrefix     string
+	}
+	type args struct {
+		containerId int
+		VolumeMount []corev1.VolumeMount
+		pathprefix  string
+		result      k8tz.Patches
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		args   args
+		golden string
+	}{
+		{
+			name: "test /usr/share/zoneinfo",
+			fields: fields{
+				Strategy:       HostPathInjectionStrategy,
+				Timezone:       "Asia/Shanghai",
+				HostPathPrefix: "/usr/share/zoneinfo",
+			},
+			args: args{
+				containerId: 0,
+				VolumeMount: []corev1.VolumeMount{
+					{
+						Name:      "k8tz",
+						MountPath: "/usr/share/zoneinfo",
+					},
+				},
+				pathprefix: "/spec",
+				result: k8tz.Patches{
+					{
+						Op:    "remove",
+						Path:  "/spec/containers/0/volumeMounts/0",
+						Value: "",
+					},
+				},
+			},
+		},
+		{
+			name: "test /etc/localtime",
+			fields: fields{
+				Strategy:       HostPathInjectionStrategy,
+				Timezone:       "Asia/Shanghai",
+				HostPathPrefix: "/usr/share/zoneinfo",
+			},
+			args: args{
+				containerId: 1,
+				VolumeMount: []corev1.VolumeMount{
+					{
+						Name:      "k8tz",
+						MountPath: "/etc/localtime",
+					},
+				},
+				result: k8tz.Patches{
+					{
+						Op:    "remove",
+						Path:  "/spec/containers/1/volumeMounts/0",
+						Value: "",
+					},
+				},
+				pathprefix: "/spec",
+			},
+		},
+		{
+			name: "test other ",
+			fields: fields{
+				Strategy:       HostPathInjectionStrategy,
+				Timezone:       "Asia/Shanghai",
+				HostPathPrefix: "/usr/share/zoneinfo",
+			},
+			args: args{
+				containerId: 0,
+				VolumeMount: []corev1.VolumeMount{
+					{
+						Name:      "k8tz",
+						MountPath: "/etc/localtime",
+					},
+					{
+						Name:      "data",
+						MountPath: "/data",
+					},
+					{
+						Name:      "k8tz",
+						MountPath: "/usr/share/zoneinfo",
+					},
+				},
+				result: k8tz.Patches{
+					{
+						Op:    "remove",
+						Path:  "/spec/containers/0/volumeMounts/2",
+						Value: "",
+					},
+					{
+						Op:    "remove",
+						Path:  "/spec/containers/0/volumeMounts/0",
+						Value: "",
+					},
+				},
+				pathprefix: "/spec",
+			},
+		},
+		{
+			name: "test /etc/localtime and /usr/share/zoneinfo",
+			fields: fields{
+				Strategy:       HostPathInjectionStrategy,
+				Timezone:       "Asia/Shanghai",
+				HostPathPrefix: "/usr/share/zoneinfo",
+			},
+			args: args{
+				containerId: 0,
+				VolumeMount: []corev1.VolumeMount{
+					{
+						Name:      "k8tz",
+						MountPath: "/etc/localtime",
+					},
+					{
+						Name:      "k8tz",
+						MountPath: "/usr/share/zoneinfo",
+					},
+				},
+				result: k8tz.Patches{
+					{
+						Op:    "remove",
+						Path:  "/spec/containers/0/volumeMounts/1",
+						Value: "",
+					},
+					{
+						Op:    "remove",
+						Path:  "/spec/containers/0/volumeMounts/0",
+						Value: "",
+					},
+				},
+				pathprefix: "/spec",
+			},
+		},
+	}
+	for _, tt := range tests {
+		var got k8tz.Patches
+		t.Run(tt.name, func(t *testing.T) {
+			g := &PatchGenerator{
+				Strategy:       tt.fields.Strategy,
+				Timezone:       tt.fields.Timezone,
+				HostPathPrefix: tt.fields.HostPathPrefix,
+				LocalTimePath:  "/etc/localtime",
+			}
+			got = g.removeContainerVolume(tt.args.VolumeMount, tt.args.pathprefix, tt.args.containerId)
+			if len(got) != len(tt.args.result) {
+				t.Fail()
+			}
+			for index, value := range got {
+				if value != tt.args.result[index] {
+					t.Fail()
+				}
+			}
+		})
+	}
+}
