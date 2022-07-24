@@ -217,6 +217,21 @@ func TestTransformer_Transform(t *testing.T) {
 			golden:  "testdata/list-of-uninjected-deployments-injected.yaml",
 			wantErr: false,
 		},
+		{
+			name: "container volumeMounts",
+			fields: fields{
+				PatchGenerator: PatchGenerator{
+					Strategy:           HostPathInjectionStrategy,
+					Timezone:           "UTC",
+					InitContainerImage: "testimage:0.0.0",
+					HostPathPrefix:     "/usr/share/zoneinfo",
+					LocalTimePath:      "/etc/localtime",
+				},
+				Inputs: []string{"testdata/test-pod-volumeMounts.yaml"},
+			},
+			golden:  "testdata/test-pod-volumeMounts-result.yaml",
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
