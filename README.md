@@ -207,12 +207,5 @@ The behaviour of the controller can be changed using annotations on both `Pod` a
 - [X] Implement `make install` for easier installation from source
 - [ ] Add VERBOSE flag to helm
 - [ ] Write verbose logs for webhook
-- [ ] Fix documentation about `uclibc`
-
-## Known Limitations
-
-`k8tz` has been tested widely with many popular base images and worked perfectly with `alpine`, `amazonlinux`, `busybox` (glibc, musl), `centos`, `clearlinux`, `debian`, `fedora`, `photon`, `ros`, `ubuntu` and many more.
-
-The only limitation found so far is that `uclibc` not respecting TZif files in `/etc/localtime`. Images as `busybox` built with `uclibc` will not be affected by `k8tz`.
 
 [^1]: Timezones for CronJobs are available only from kubernetes >=1.24.0-beta.0 with [`CronJobTimeZone`](https://github.com/kubernetes/enhancements/blob/aad71056d33eccf3845b73670106f06a9e74fec6/keps/sig-apps/3140-TimeZone-support-in-CronJob/README.md) feature gate enabled.
