@@ -15,7 +15,6 @@
 FROM alpine:3.13 AS src
 
 ARG tzdbversion=2022a
-
 RUN \
     apk add build-base lzip && \
     wget -O tzdb.tar.lz https://data.iana.org/time-zones/releases/tzdb-$tzdbversion.tar.lz && \
@@ -25,5 +24,5 @@ RUN \
     mkdir build && \
     make TOPDIR=build install
 
-FROM alpine:3.13
+FROM scratch
 COPY --from=src /tzdb/build/usr/share/zoneinfo /usr/share/zoneinfo
