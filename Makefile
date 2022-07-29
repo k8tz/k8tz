@@ -38,10 +38,18 @@ IMAGE_EXTRA_TAGS ?=
 IMAGE_LABELS ?= \
 	--label gitCommit=$(GIT_COMMIT) \
 	--label version=$(VERSION)$(VERSION_SUFFIX)
-IMAGE_TZDATA_VERSION ?= 2022a
+
+# Time-Zone Database Variables
+TZDATA_IMAGE_REPOSITORY ?= quay.io/k8tz/tzdata
+TZDATA_VERSION ?= 2022a
+TZDATA_IMAGE = $(TZDATA_IMAGE_REPOSITORY):$(TZDATA_VERSION)
 
 tzdata:
-		(cd tzdata && make TZDATA_VERSION=$(IMAGE_TZDATA_VERSION) clean import)
+		cd tzdata && \
+		make \
+			IMAGE_REPOSITORY=$(TZDATA_IMAGE_REPOSITORY) \
+			TZDATA_VERSION=$(TZDATA_VERSION) \
+			IMAGE=$(TZDATA_IMAGE)
 
 # Targets
 install: compile
@@ -59,7 +67,7 @@ coverage-report:
 		go test -coverprofile build/coverage-report.html ./...
 		go tool cover -html build/coverage-report.html
 
-build: compile # Alias
+build: compile # alias
 compile:
 		CGO_ENABLED=0 \
 		go build \
@@ -68,11 +76,12 @@ compile:
 		$(BUILD_FLAGS) \
 		.
 
-docker: docker-build # Alias
-docker-build: compile tzdata
+docker: docker-build # alias
+docker-build: compile
 		docker build \
 		-t $(IMAGE) \
 		--build-arg BINARY_LOCATION=$(OUT_DIR)$(BINARY_NAME) \
+		--build-arg TZDATA_IMAGE=$(TZDATA_IMAGE) \
 		$(IMAGE_LABELS)	\
 		.
 		$(foreach tag, $(IMAGE_EXTRA_TAGS), docker tag $(IMAGE) $(IMAGE_REPOSITORY):$(tag);)
@@ -82,7 +91,7 @@ docker-push: docker-build
 		$(foreach tag, $(IMAGE_EXTRA_TAGS), docker push $(IMAGE_REPOSITORY):$(tag);)
 
 
-helm: helm-package # Alias
+helm: helm-package # alias
 helm-package: helm-lint
 		@rm -rfv $(OUT_DIR)k8tz-*.tgz
 		helm package \

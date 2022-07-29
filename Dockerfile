@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM scratch
-ARG BINARY_LOCATION=k8tz
+ARG TZDATA_IMAGE=quay.io/k8tz/tzdata:2022a
+FROM $TZDATA_IMAGE
 
-COPY tzdata/zoneinfo /usr/share/zoneinfo
+ARG BINARY_LOCATION=k8tz
 COPY $BINARY_LOCATION /
 
 USER 1000

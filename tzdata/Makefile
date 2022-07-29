@@ -27,18 +27,7 @@ clean:
 build:
 		docker build -t $(IMAGE) --build-arg tzdbversion=$(TZDATA_VERSION) .
 
-import:
-		docker run \
-		-t \
-		-u $(shell id -u ${USER}):$(shell id -g ${USER}) \
-		-v $(mkfile_dir):/mnt/ \
-		$(IMAGE) \
-		cp -rv /usr/share/zoneinfo /mnt
-
-tar: import
-		(cd zoneinfo && tar -czvf ../tzdata-$(TZDATA_VERSION).tar.gz .)
-
 publish: build
 		docker push $(IMAGE)
 
-.PHONY: clean build import tar publish
+.PHONY: clean build publish
