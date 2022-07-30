@@ -865,7 +865,7 @@ func Test_removeContainerVolume(t *testing.T) {
 				HostPathPrefix: tt.fields.HostPathPrefix,
 				LocalTimePath:  "/etc/localtime",
 			}
-			got = g.removeContainerVolume(tt.args.VolumeMount, tt.args.pathprefix, tt.args.containerId)
+			got = g.removeContainerVolumeMounts(tt.args.VolumeMount, tt.args.pathprefix, tt.args.containerId)
 			if len(got) != len(tt.args.result) {
 				t.Fail()
 			}
