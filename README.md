@@ -13,7 +13,21 @@
 
 Containers do not inherit timezones from host machines and have only accessed to the clock from the kernel. The default timezone for most images is UTC, yet it is not guaranteed and may be different from container to container. With `k8tz` it is easy to standardize selected timezone across pods and namespaces automatically with minimal effort.
 
-Read article: [Timezone in Kubernetes With k8tz](https://medium.com/@yonatankahana/timezone-in-kubernetes-with-k8tz-fdefca785238)
+## Features
+
+:zap: Coordinate timezone for all pods in clusters and/or namespaces (force UTC by default)
+
+:zap: Standardize [tzdata](https://www.iana.org/time-zones) version across all pods in cluster
+
+:zap: Does not require [tzdata](https://www.iana.org/time-zones) installed in images or nodes
+
+:zap: Easy to configure with [Helm values](#values) and [Annotations](#annotations)
+
+:zap: [CLI tool](#cli) for manual timezone injection
+
+:zap: Supports Kubernetes 1.16+ and OpenShift 4.X
+
+Read more: [Timezone in Kubernetes With k8tz](https://medium.com/@yonatankahana/timezone-in-kubernetes-with-k8tz-fdefca785238)
 
 ## Admission Controller with Helm
 
