@@ -70,6 +70,7 @@ func (h *Server) Start(kubeconfigFlag string) error {
 
 	if h.Verbose {
 		verboseLogger.SetOutput(os.Stderr)
+		verboseLogger.Printf("server=%+v", *h)
 	}
 
 	err := h.Handler.InitializeClientset(kubeconfigFlag)

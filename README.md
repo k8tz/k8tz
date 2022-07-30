@@ -75,35 +75,36 @@ helm test k8tz
 
 ### Values
 
-| Parameter | Description | Default |
-| --------- | ----------- | ------- |
-| replicaCount | Amount of admission controller webhooks to spin up. For production use it is recommended to have at least 3 replicas | 1 |
-| namespace | The namespace where to install the admission controller | k8tz |
-| timezone | The default timezone to inject | UTC |
-| injectionStrategy | The default injection strategy to use | initContainer |
-| injectAll | If true, timezone will be injected to the pod even when there is no annotation with explicit injection request. When false, the `k8tz.io/inject: true` annotation is required | true |
-| cronJobTimeZone | Enable injection of `timeZone` field to `CronJob`s[^1] | false |
-| image.repository | The image repository for the admission controller and bootstrap image | quay.io/k8tz/k8tz |
-| image.pullPolicy | Admission controller image pull policy | IfNotPresent |
-| image.tag | The image tag for the admission controller and bootstrap image. The default is the chart appVersion | - |
-| imagePullSecrets | The image pull secrets for the admission controller | [] |
-| nameOverride | Helm application name override | - |
-| fullnameOverride | Helm application full name override | - |
-| serviceAccount.annotations | Annotations to add to the admission controller service account | {} |
-| serviceAccount.name | The name of the service account to use. If empty, a name is generated using the fullname template | - |
-| podAnnotations | Annotations to add to the admission controller pod | {} |
-| podSecurityContext | Pod security context for the admission controller pod | {} |
-| securityContext | Security context for the admission controller pod | {} |
-| service.type | Admission controller service type | ClusterIP |
-| service.port | Admission controller service port | 443 |
-| resources | Resource requests and limitations for the admission controller deployment | {} |
-| nodeSelector | Node selector for the admission controller deployment | {} |
-| tolerations | Tolerations for the admission controller deployment | {} |
-| affinity | Affinities and anti-affinities for the admission controller deployment | {} |
-| webhook.failurePolicy | Failure policy for the admission webhook. May be `Fail` or `Ignore` | `Fail` |
-| webhook.crtPEM | Certificate in PEM format for the admission controller webhook. Will be generated if not specified (Recommended) | - |
-| webhook.keyPEM | Private key for in PEM format for the admission controller webhook certificate. Will be generated if not specified (Recommended) | - |
-| webhook.caBundle | Certificate Authority Bundle for the admission controller webhook. Will be generated if not specified (Recommended) | - |
+| Parameter                  | Description                                                                                                                                                                   | Default           |
+|----------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------|
+| replicaCount               | Amount of admission controller webhooks to spin up. For production use it is recommended to have at least 3 replicas                                                          | 1                 |
+| namespace                  | The namespace where to install the admission controller                                                                                                                       | k8tz              |
+| timezone                   | The default timezone to inject                                                                                                                                                | UTC               |
+| injectionStrategy          | The default injection strategy to use                                                                                                                                         | initContainer     |
+| injectAll                  | If true, timezone will be injected to the pod even when there is no annotation with explicit injection request. When false, the `k8tz.io/inject: true` annotation is required | true              |
+| cronJobTimeZone            | Enable injection of `timeZone` field to `CronJob`s[^1]                                                                                                                        | false             |
+| verbose                    | Enable more detailed logs for debug purposes                                                                                                                                  | false             |
+| image.repository           | The image repository for the admission controller and bootstrap image                                                                                                         | quay.io/k8tz/k8tz |
+| image.pullPolicy           | Admission controller image pull policy                                                                                                                                        | IfNotPresent      |
+| image.tag                  | The image tag for the admission controller and bootstrap image. The default is the chart appVersion                                                                           | -                 |
+| imagePullSecrets           | The image pull secrets for the admission controller                                                                                                                           | []                |
+| nameOverride               | Helm application name override                                                                                                                                                | -                 |
+| fullnameOverride           | Helm application full name override                                                                                                                                           | -                 |
+| serviceAccount.annotations | Annotations to add to the admission controller service account                                                                                                                | {}                |
+| serviceAccount.name        | The name of the service account to use. If empty, a name is generated using the fullname template                                                                             | -                 |
+| podAnnotations             | Annotations to add to the admission controller pod                                                                                                                            | {}                |
+| podSecurityContext         | Pod security context for the admission controller pod                                                                                                                         | {}                |
+| securityContext            | Security context for the admission controller pod                                                                                                                             | {}                |
+| service.type               | Admission controller service type                                                                                                                                             | ClusterIP         |
+| service.port               | Admission controller service port                                                                                                                                             | 443               |
+| resources                  | Resource requests and limitations for the admission controller deployment                                                                                                     | {}                |
+| nodeSelector               | Node selector for the admission controller deployment                                                                                                                         | {}                |
+| tolerations                | Tolerations for the admission controller deployment                                                                                                                           | {}                |
+| affinity                   | Affinities and anti-affinities for the admission controller deployment                                                                                                        | {}                |
+| webhook.failurePolicy      | Failure policy for the admission webhook. May be `Fail` or `Ignore`                                                                                                           | `Fail`            |
+| webhook.crtPEM             | Certificate in PEM format for the admission controller webhook. Will be generated if not specified (Recommended)                                                              | -                 |
+| webhook.keyPEM             | Private key for in PEM format for the admission controller webhook certificate. Will be generated if not specified (Recommended)                                              | -                 |
+| webhook.caBundle           | Certificate Authority Bundle for the admission controller webhook. Will be generated if not specified (Recommended)                                                           | -                 |
 
 ### Uninstall
 
@@ -207,19 +208,21 @@ Another solution, which is generally safer, is to inject `initContainer` (bootst
 
 The behaviour of the controller can be changed using annotations on both `Pod` and/or `Namespace` objects. If the same annotation specified in both, the `Pod`'s annotation value will take place.
 
-| Annotation | Description | Default |
-| ---------- | ----------- | ------- |
-| `k8tz.io/inject` | Decide whether k8tz should inject timezone or not | `true` |
-| `k8tz.io/timezone` | Decide what timezone should be used, e.g: `Africa/Addis_Ababa` | `UTC` |
+| Annotation         | Description                                                            | Default         |
+|--------------------|------------------------------------------------------------------------|-----------------|
+| `k8tz.io/inject`   | Decide whether k8tz should inject timezone or not                      | `true`          |
+| `k8tz.io/timezone` | Decide what timezone should be used, e.g: `Africa/Addis_Ababa`         | `UTC`           |
 | `k8tz.io/strategy` | Decide what injection strategy to use, i.e: `hostPath`/`initContainer` | `initContainer` |
 
 ## Roadmap
 
 - [X] Support `StatefulSet` injection
-- [ ] Lookup for annotations in pods owner when possible
+- [X] Support `CronJob` injection
+- [ ] Better way to lookup pod owner annotations
 - [X] Test and document installation on OpenShift
 - [X] Implement `make install` for easier installation from source
-- [ ] Add VERBOSE flag to helm
-- [ ] Write verbose logs for webhook
+- [X] Add VERBOSE flag to helm
+- [X] Write verbose logs for webhook
+- [ ] Separate README for Helm chart
 
 [^1]: Timezones for CronJobs are available only from kubernetes >=1.24.0-beta.0 with [`CronJobTimeZone`](https://github.com/kubernetes/enhancements/blob/aad71056d33eccf3845b73670106f06a9e74fec6/keps/sig-apps/3140-TimeZone-support-in-CronJob/README.md) feature gate enabled.

@@ -94,7 +94,7 @@ func (h *RequestsHandler) handleFunc(w http.ResponseWriter, r *http.Request) {
 	review, header, err := h.readAdmissionReview(r)
 	if err != nil {
 		warningLogger.Printf("failed to parse review: %v\n", err)
-		http.Error(w, fmt.Sprintf("failed to parse admission review from request, error: %s", err.Error()), header)
+		http.Error(w, fmt.Sprintf("failed to parse admission review from request, error=%s", err.Error()), header)
 		return
 	}
 
@@ -105,9 +105,11 @@ func (h *RequestsHandler) handleFunc(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
+	verboseLogger.Printf("incoming review request=%+v", *review.Request)
+
 	patches, err := h.handleAdmissionReview(review)
 	if err != nil {
-		warningLogger.Printf("rejecting request (%s/%s): %v\n", review.Request.Namespace, review.Request.Name, err)
+		warningLogger.Printf("rejecting request: error=%v, review=%+v\n", err, *review)
 		reviewResponse.Response.Allowed = false
 		reviewResponse.Response.Result = &metav1.Status{
 			Message: err.Error(),
@@ -115,7 +117,7 @@ func (h *RequestsHandler) handleFunc(w http.ResponseWriter, r *http.Request) {
 	} else {
 		patchBytes, err := json.Marshal(patches)
 		if err != nil {
-			errorLogger.Printf("failed to marshal json patch: %v, error: %v\n", patches, err)
+			errorLogger.Printf("failed to marshal json patch: %+v, error=%v\n", patches, err)
 			http.Error(w, fmt.Sprintf("could not marshal JSON patch: %s", err.Error()), http.StatusInternalServerError)
 			return
 		}
@@ -124,12 +126,13 @@ func (h *RequestsHandler) handleFunc(w http.ResponseWriter, r *http.Request) {
 		reviewResponse.Response.PatchType = new(admission.PatchType)
 		*reviewResponse.Response.PatchType = admission.PatchTypeJSONPatch
 		reviewResponse.Response.Allowed = true
-		infoLogger.Printf("accepting request (%s/%s), %d patches generated\n", review.Request.Namespace, review.Request.Name, len(patches))
 	}
+
+	verboseLogger.Printf("sending response: allowed=%t, result=%+v, patches=%+v", reviewResponse.Response.Allowed, reviewResponse.Response.Result, patches)
 
 	bytes, err := json.Marshal(&reviewResponse)
 	if err != nil {
-		errorLogger.Printf("failed to marshal response review: %v, error: %v\n", reviewResponse, err)
+		errorLogger.Printf("failed to marshal response review: %+v, error=%v\n", reviewResponse, err)
 		http.Error(w, fmt.Sprintf("failed to marshal response review: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
@@ -142,7 +145,7 @@ func (h *RequestsHandler) handleFunc(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *RequestsHandler) handleAdmissionReview(review *admission.AdmissionReview) (k8tz.Patches, error) {
-	if review.Request.Operation == "CREATE" && review.Request.Namespace != metav1.NamespaceSystem {
+	if review.Request.Operation == admission.Create && review.Request.Namespace != metav1.NamespaceSystem {
 		var patches k8tz.Patches
 		var err error
 		if review.Request.Resource == podResource {
@@ -165,7 +168,7 @@ func (h *RequestsHandler) readAdmissionReview(r *http.Request) (*admission.Admis
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return nil, http.StatusBadRequest, fmt.Errorf("could not read request body, error: %s", err.Error())
+		return nil, http.StatusBadRequest, fmt.Errorf("could not read request body, error=%s", err.Error())
 	}
 
 	if contentType := r.Header.Get("Content-Type"); contentType != jsonContentType {
@@ -185,45 +188,45 @@ func (h *RequestsHandler) readAdmissionReview(r *http.Request) (*admission.Admis
 func (h *RequestsHandler) lookupPod(namespace string, pod *corev1.Pod) (*inject.PatchGenerator, error) {
 	namespaceObj, err := h.clientset.CoreV1().Namespaces().Get(context.TODO(), namespace, metav1.GetOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to lookup pod's namespace (%s/%s): %v", namespace, pod.Name, err)
+		return nil, fmt.Errorf("failed to lookup pod's namespace (%s): %v", formatObjectDetails(pod.ObjectMeta), err)
 	}
 
 	if _, ok := pod.Annotations[k8tz.InjectedAnnotation]; ok {
-		infoLogger.Printf("skipping pod (%s/%s) because its already injected", namespace, pod.Name)
+		infoLogger.Printf("skipping pod (%s) because its already injected", formatObjectDetails(pod.ObjectMeta))
 		return nil, nil
 	}
 
 	if val, ok := pod.Annotations[k8tz.InjectAnnotation]; ok {
 		if val == "false" {
-			infoLogger.Printf("skipping pod (%s/%s) because annotation on pod is explicitly false for injection", namespace, pod.Name)
+			infoLogger.Printf("skipping pod (%s) because annotation on pod is explicitly false for injection", formatObjectDetails(pod.ObjectMeta))
 			return nil, nil
 		}
 	} else if val, ok := namespaceObj.Annotations[k8tz.InjectAnnotation]; ok {
 		if val == "false" {
-			infoLogger.Printf("skipping pod (%s/%s) because annotation on namespace is explicitly false for injection", namespace, pod.Name)
+			infoLogger.Printf("skipping pod (%s) because annotation on namespace is explicitly false for injection", formatObjectDetails(pod.ObjectMeta))
 			return nil, nil
 		}
 	} else if !h.InjectByDefault {
-		infoLogger.Printf("skipping pod (%s/%s) because no other instruction and injection disabled by default", namespace, pod.Name)
+		infoLogger.Printf("skipping pod (%s) because no other instruction and injection disabled by default", formatObjectDetails(pod.ObjectMeta))
 		return nil, nil
 	}
 
 	timezone := h.DefaultTimezone
 	if val, ok := pod.Annotations[k8tz.TimezoneAnnotation]; ok {
 		timezone = val
-		infoLogger.Printf("explicit timezone requested on pod's (%s/%s) annotation: %s", namespace, pod.Name, val)
+		infoLogger.Printf("explicit timezone requested on pod's (%s) annotation: %s", formatObjectDetails(pod.ObjectMeta), val)
 	} else if val, ok := namespaceObj.Annotations[k8tz.TimezoneAnnotation]; ok {
 		timezone = val
-		infoLogger.Printf("explicit timezone requested on namespace (%s/%s) annotation: %s", namespace, pod.Name, val)
+		infoLogger.Printf("explicit timezone requested on namespace (%s) annotation: %s", formatObjectDetails(pod.ObjectMeta), val)
 	}
 
 	strategy := h.DefaultInjectionStrategy
 	if v, e := pod.Annotations[k8tz.InjectionStrategyAnnotation]; e {
 		strategy = inject.InjectionStrategy(v)
-		infoLogger.Printf("explicit injection strategy requested on pod's (%s/%s) annotation: %s", namespace, pod.Name, v)
+		infoLogger.Printf("explicit injection strategy requested on pod's (%s) annotation: %s", formatObjectDetails(pod.ObjectMeta), v)
 	} else if v, e := namespaceObj.Annotations[k8tz.InjectionStrategyAnnotation]; e {
 		strategy = inject.InjectionStrategy(v)
-		infoLogger.Printf("explicit injection strategy requested on namespace (%s/%s) annotation: %s", namespace, pod.Name, v)
+		infoLogger.Printf("explicit injection strategy requested on namespace (%s) annotation: %s", formatObjectDetails(pod.ObjectMeta), v)
 	}
 
 	return &inject.PatchGenerator{
@@ -238,36 +241,36 @@ func (h *RequestsHandler) lookupPod(namespace string, pod *corev1.Pod) (*inject.
 func (h *RequestsHandler) lookupCronJob(namespace string, cronJob *batchv1.CronJob) (*inject.PatchGenerator, error) {
 	namespaceObj, err := h.clientset.CoreV1().Namespaces().Get(context.TODO(), namespace, metav1.GetOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to lookup cronJob's namespace (%s/%s): %v", namespace, cronJob.Name, err)
+		return nil, fmt.Errorf("failed to lookup cronJob's namespace (%s): %v", formatObjectDetails(cronJob.ObjectMeta), err)
 	}
 
 	if _, ok := cronJob.Annotations[k8tz.InjectedAnnotation]; ok {
-		infoLogger.Printf("skipping cronJob (%s/%s) because its already injected", namespace, cronJob.Name)
+		infoLogger.Printf("skipping cronJob (%s) because its already injected", formatObjectDetails(cronJob.ObjectMeta))
 		return nil, nil
 	}
 
 	if val, ok := cronJob.Annotations[k8tz.InjectAnnotation]; ok {
 		if val == "false" {
-			infoLogger.Printf("skipping cronJob (%s/%s) because annotation on cronJob is explicitly false for injection", namespace, cronJob.Name)
+			infoLogger.Printf("skipping cronJob (%s) because annotation on cronJob is explicitly false for injection", formatObjectDetails(cronJob.ObjectMeta))
 			return nil, nil
 		}
 	} else if val, ok := namespaceObj.Annotations[k8tz.InjectAnnotation]; ok {
 		if val == "false" {
-			infoLogger.Printf("skipping cronJob (%s/%s) because annotation on namespace is explicitly false for injection", namespace, cronJob.Name)
+			infoLogger.Printf("skipping cronJob (%s) because annotation on namespace is explicitly false for injection", formatObjectDetails(cronJob.ObjectMeta))
 			return nil, nil
 		}
 	} else if !h.InjectByDefault {
-		infoLogger.Printf("skipping cronJob (%s/%s) because no other instruction and injection disabled by default", namespace, cronJob.Name)
+		infoLogger.Printf("skipping cronJob (%s) because no other instruction and injection disabled by default", formatObjectDetails(cronJob.ObjectMeta))
 		return nil, nil
 	}
 
 	timezone := h.DefaultTimezone
 	if val, ok := cronJob.Annotations[k8tz.TimezoneAnnotation]; ok {
 		timezone = val
-		infoLogger.Printf("explicit timezone requested on cronJob's (%s/%s) annotation: %s", namespace, cronJob.Name, val)
+		infoLogger.Printf("explicit timezone requested on cronJob's (%s) annotation: %s", formatObjectDetails(cronJob.ObjectMeta), val)
 	} else if val, ok := namespaceObj.Annotations[k8tz.TimezoneAnnotation]; ok {
 		timezone = val
-		infoLogger.Printf("explicit timezone requested on namespace (%s/%s) annotation: %s", namespace, cronJob.Name, val)
+		infoLogger.Printf("explicit timezone requested on namespace (%s) annotation: %s", formatObjectDetails(cronJob.ObjectMeta), val)
 	}
 
 	return &inject.PatchGenerator{
@@ -289,39 +292,51 @@ func (h *RequestsHandler) handlePodAdmissionRequest(req *admission.AdmissionRequ
 
 	generator, err := h.lookupPod(req.Namespace, &pod)
 	if err != nil {
-		return nil, fmt.Errorf("failed to lookup generator, error: %w", err)
+		return nil, fmt.Errorf("failed to lookup generator for pod, error=%w", err)
 	}
 
 	var patches k8tz.Patches
 	if generator != nil {
+		verboseLogger.Printf("Generating patches for pod (%s) using generator: %+v", formatObjectDetails(pod.ObjectMeta), *generator)
 		patches, err = generator.Generate(&pod, "")
 		if err != nil {
-			return nil, fmt.Errorf("failed to generate patches for pod, error: %w", err)
+			return nil, fmt.Errorf("failed to generate patches for pod, error=%w", err)
 		}
 	}
 
+	infoLogger.Printf("%d patches generated for pod (%s)", len(patches), formatObjectDetails(pod.ObjectMeta))
 	return patches, err
 }
 
 func (h *RequestsHandler) handleCronJobAdmissionRequest(req *admission.AdmissionRequest) (k8tz.Patches, error) {
 	raw := req.Object.Raw
-	cronjob := batchv1.CronJob{}
-	if _, _, err := k8sdecode.Decode(raw, nil, &cronjob); err != nil {
-		return nil, fmt.Errorf("could not deserialize pod object: %v", err)
+	cronJob := batchv1.CronJob{}
+	if _, _, err := k8sdecode.Decode(raw, nil, &cronJob); err != nil {
+		return nil, fmt.Errorf("could not deserialize cronJob object: %v", err)
 	}
 
-	generator, err := h.lookupCronJob(req.Namespace, &cronjob)
+	generator, err := h.lookupCronJob(req.Namespace, &cronJob)
+	verboseLogger.Printf("Generating patches for cronJob (%s) using generator: %+v", formatObjectDetails(cronJob.ObjectMeta), *generator)
 	if err != nil {
-		return nil, fmt.Errorf("failed to lookup generator, error: %w", err)
+		return nil, fmt.Errorf("failed to lookup generator for cronJob, error=%w", err)
 	}
 
 	var patches k8tz.Patches
 	if generator != nil {
-		patches, err = generator.Generate(&cronjob, "")
+		patches, err = generator.Generate(&cronJob, "")
 		if err != nil {
-			return nil, fmt.Errorf("failed to generate patches for pod, error: %w", err)
+			return nil, fmt.Errorf("failed to generate patches for pod, error=%w", err)
 		}
 	}
 
+	infoLogger.Printf("%d patches generated for cronJob (%s)", len(patches), formatObjectDetails(cronJob.ObjectMeta))
 	return patches, err
+}
+
+func formatObjectDetails(objectMeta metav1.ObjectMeta) string {
+	if len(objectMeta.GetGenerateName()) > 0 {
+		return fmt.Sprintf("namespace=%s, generateName=%s", objectMeta.Namespace, objectMeta.GenerateName)
+	}
+
+	return fmt.Sprintf("namespace=%s, name=%s", objectMeta.Namespace, objectMeta.Name)
 }

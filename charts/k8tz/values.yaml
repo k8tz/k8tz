@@ -7,6 +7,7 @@ injectionStrategy: initContainer
 timezone: UTC
 injectAll: true
 cronJobTimeZone: false  # requires kubernetes >=1.24.0-beta.0 with 'CronJobTimeZone' feature gate enabled (alpha)
+verbose: false
 
 webhook:
   failurePolicy: Fail
