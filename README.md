@@ -143,7 +143,7 @@ NOTE: The injection process is idempotent; you can do it multiple times and/or u
 You can install k8tz binary file by downloading precompiled binary and use it
 
 ```console
-wget -c https://github.com/k8tz/k8tz/releases/download/v0.5.1/k8tz_0.5.1_linux_amd64.tar.gz -O - | tar xz
+wget -c https://github.com/k8tz/k8tz/releases/download/v0.5.2/k8tz_0.5.2_linux_amd64.tar.gz -O - | tar xz
 chmod +x k8tz
 ./k8tz version
 ```
