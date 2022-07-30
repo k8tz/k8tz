@@ -211,6 +211,26 @@ func (g *PatchGenerator) createEnvironmentVariablePatches(spec *corev1.PodSpec, 
 	return patches
 }
 
+func (g *PatchGenerator) removeContainerVolumeMounts(volumeMounts []corev1.VolumeMount, pathprefix string, containerId int) k8tz.Patches {
+	patches := k8tz.Patches{}
+	for index := len(volumeMounts) - 1; index >= 0; index-- {
+		if volumeMounts[index].MountPath == g.LocalTimePath {
+			patches = append(patches, k8tz.Patch{
+				Op:    "remove",
+				Path:  fmt.Sprintf("%s/containers/%d/volumeMounts/%d", pathprefix, containerId, index),
+				Value: "",
+			})
+		} else if volumeMounts[index].MountPath == g.HostPathPrefix {
+			patches = append(patches, k8tz.Patch{
+				Op:    "remove",
+				Path:  fmt.Sprintf("%s/containers/%d/volumeMounts/%d", pathprefix, containerId, index),
+				Value: "",
+			})
+		}
+	}
+	return patches
+}
+
 func (g *PatchGenerator) createInitContainerPatches(spec *corev1.PodSpec, pathprefix string) k8tz.Patches {
 	var patches = k8tz.Patches{}
 
@@ -246,6 +266,8 @@ func (g *PatchGenerator) createInitContainerPatches(spec *corev1.PodSpec, pathpr
 				Value: []corev1.VolumeMount{},
 			})
 		}
+
+		patches = append(patches, g.removeContainerVolumeMounts(spec.Containers[containerId].VolumeMounts, pathprefix, containerId)...)
 
 		patches = append(patches, k8tz.Patch{
 			Op:   "add",
@@ -312,6 +334,8 @@ func (g *PatchGenerator) createHostPathPatches(spec *corev1.PodSpec, pathprefix 
 				Value: []corev1.VolumeMount{},
 			})
 		}
+
+		patches = append(patches, g.removeContainerVolumeMounts(spec.Containers[containerId].VolumeMounts, pathprefix, containerId)...)
 
 		patches = append(patches, k8tz.Patch{
 			Op:   "add",
