@@ -302,9 +302,10 @@ func (h *RequestsHandler) handlePodAdmissionRequest(req *admission.AdmissionRequ
 		if err != nil {
 			return nil, fmt.Errorf("failed to generate patches for pod, error=%w", err)
 		}
+
+		infoLogger.Printf("%d patches generated for pod (%s), timezone=%s, strategy=%s", len(patches), formatObjectDetails(pod.ObjectMeta), generator.Timezone, generator.Strategy)
 	}
 
-	infoLogger.Printf("%d patches generated for pod (%s)", len(patches), formatObjectDetails(pod.ObjectMeta))
 	return patches, err
 }
 
@@ -327,9 +328,10 @@ func (h *RequestsHandler) handleCronJobAdmissionRequest(req *admission.Admission
 		if err != nil {
 			return nil, fmt.Errorf("failed to generate patches for pod, error=%w", err)
 		}
+
+		infoLogger.Printf("%d patches generated for cronJob (%s), timezone=%s", len(patches), formatObjectDetails(cronJob.ObjectMeta), generator.Timezone)
 	}
 
-	infoLogger.Printf("%d patches generated for cronJob (%s)", len(patches), formatObjectDetails(cronJob.ObjectMeta))
 	return patches, err
 }
 
