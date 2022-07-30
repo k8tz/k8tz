@@ -42,6 +42,9 @@ spec:
           - "--inject={{ .Values.injectAll }}"
           - "--bootstrap-image"
           - "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          {{- if .Values.verbose }}
+          - "--verbose"
+          {{- end }}
           {{- if .Values.cronJobTimeZone }}
           {{- if and (ge .Capabilities.KubeVersion.Major "1") (ge .Capabilities.KubeVersion.Minor "24") }}
           - "--cronJobTimeZone"
