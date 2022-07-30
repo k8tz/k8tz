@@ -218,7 +218,7 @@ func TestTransformer_Transform(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "container volumeMounts",
+			name: "test container volumeMounts",
 			fields: fields{
 				PatchGenerator: PatchGenerator{
 					Strategy:           HostPathInjectionStrategy,
@@ -230,6 +230,21 @@ func TestTransformer_Transform(t *testing.T) {
 				Inputs: []string{"testdata/test-pod-volumeMounts.yaml"},
 			},
 			golden:  "testdata/test-pod-volumeMounts-result.yaml",
+			wantErr: false,
+		},
+		{
+			name: "test initContainer",
+			fields: fields{
+				PatchGenerator: PatchGenerator{
+					Strategy:           InitContainerInjectionStrategy,
+					Timezone:           "UTC",
+					InitContainerImage: "testimage:0.0.0",
+					HostPathPrefix:     "/usr/share/zoneinfo",
+					LocalTimePath:      "/etc/localtime",
+				},
+				Inputs: []string{"testdata/test-pod-volumeMounts.yaml"},
+			},
+			golden:  "testdata/test-pod-volumeMounts-initContainer-result.yaml",
 			wantErr: false,
 		},
 	}
