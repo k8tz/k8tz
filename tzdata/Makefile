@@ -18,9 +18,6 @@ IMAGE_REPOSITORY ?= quay.io/k8tz/tzdata
 TZDATA_VERSION ?= 2022a
 IMAGE = $(IMAGE_REPOSITORY):$(TZDATA_VERSION)
 
-mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
-mkfile_dir := $(dir $(mkfile_path))
-
 clean:
 		rm -rfv zoneinfo
 
