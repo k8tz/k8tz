@@ -1,3 +1,10 @@
+# 0.6.0
+
+- Update tzdata package to [2022b](https://mm.icann.org/pipermail/tz-announce/2022-August/000071.html) (https://github.com/k8tz/k8tz/pull/37)
+- Resolve: CVE-2022-1996, CVE-2019-19794, CVE-2021-38561 ([bc315ad8d](https://github.com/k8tz/k8tz/commit/bc315ad8dfcd73463f2d44bff50d56f08f477aec))
+- Separate README.md for helm chart (https://github.com/k8tz/k8tz/pull/34)
+- Add icon, home, sources and keywords to Chart.yaml (https://github.com/k8tz/k8tz/pull/33)
+
 # v0.5.2
 
 - Fix conflict with existing volumeMounts (https://github.com/k8tz/k8tz/pull/27)
