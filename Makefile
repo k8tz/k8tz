@@ -67,8 +67,11 @@ coverage-report:
 		go test -coverprofile build/coverage-report.html ./...
 		go tool cover -html build/coverage-report.html
 
+tidy:
+		@go mod tidy
+
 build: compile # alias
-compile:
+compile: tidy
 		CGO_ENABLED=0 \
 		go build \
 		-v \
@@ -111,4 +114,4 @@ helm-uninstall:
 release: test compile docker helm
 
 # Phony Targets
-.PHONY: install clean build test tzdata coverage-report compile docker docker-build docker-push helm-lint helm helm-package helm-install helm-uninstall release
+.PHONY: install clean tidy build test tzdata coverage-report compile docker docker-build docker-push helm-lint helm helm-package helm-install helm-uninstall release
