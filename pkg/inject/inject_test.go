@@ -19,7 +19,6 @@ package inject
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -302,7 +301,7 @@ func TestPatchGenerator_Generate(t *testing.T) {
 // 			}
 
 // 			list := corev1.List{}
-// 			bytes, err := ioutil.ReadFile(tt.listFile)
+// 			bytes, err := os.ReadFile(tt.listFile)
 // 			if err != nil {
 // 				t.Fatalf("TestLists failed to read list file: %s, error: %v", tt.listFile, err)
 // 				return
@@ -660,7 +659,7 @@ func comparePatches(got *k8tz.Patches, goldenFile string) error {
 
 func readGolden(file string) (*string, bool, error) {
 	if _, err := os.Stat(file); err == nil {
-		bytes, err := ioutil.ReadFile(file)
+		bytes, err := os.ReadFile(file)
 		if err != nil {
 			return nil, true, err
 		}

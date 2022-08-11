@@ -21,7 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	k8tz "github.com/k8tz/k8tz/pkg"
@@ -166,7 +166,7 @@ func (h *RequestsHandler) readAdmissionReview(r *http.Request) (*admission.Admis
 		return nil, http.StatusMethodNotAllowed, fmt.Errorf("invalid method %s, only POST requests are allowed", r.Method)
 	}
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		return nil, http.StatusBadRequest, fmt.Errorf("could not read request body, error=%s", err.Error())
 	}
