@@ -19,6 +19,7 @@ package admission
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -459,6 +460,9 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// long warnings are expected here and better not be logged
+			warningLogger.SetOutput(io.Discard)
+
 			h := &RequestsHandler{
 				DefaultTimezone:          tt.fields.DefaultTimezone,
 				BootstrapImage:           tt.fields.BootstrapImage,
