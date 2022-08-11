@@ -1,7 +1,6 @@
 dist: build
 before:
   hooks:
-    - make tzdata
     - go mod tidy
     - go test -v ./...
 builds:
