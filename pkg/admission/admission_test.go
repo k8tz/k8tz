@@ -19,7 +19,6 @@ package admission
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -534,7 +533,7 @@ func compareReviews(got *bytes.Buffer, goldenFile string) error {
 
 func readGolden(file string) (*string, bool, error) {
 	if _, err := os.Stat(file); err == nil {
-		data, err := ioutil.ReadFile(file)
+		data, err := os.ReadFile(file)
 		if err != nil {
 			return nil, true, err
 		}

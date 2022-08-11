@@ -18,7 +18,7 @@ package admission
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -94,7 +94,7 @@ func (h *Server) Start(kubeconfigFlag string) error {
 }
 
 func init() {
-	verboseLogger = log.New(ioutil.Discard, "VERBOSE: ", log.Ldate|log.Ltime|log.Lshortfile)
+	verboseLogger = log.New(io.Discard, "VERBOSE: ", log.Ldate|log.Ltime|log.Lshortfile)
 	infoLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
 	warningLogger = log.New(os.Stderr, "WARNING: ", log.Ldate|log.Ltime|log.Lshortfile)
 	errorLogger = log.New(os.Stderr, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)

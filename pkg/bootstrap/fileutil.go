@@ -3,13 +3,12 @@ package bootstrap
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 )
 
 func copyDirectory(src, dst string, overwrite bool) error {
-	entries, err := ioutil.ReadDir(src)
+	entries, err := os.ReadDir(src)
 	if err != nil {
 		return err
 	}
@@ -49,9 +48,9 @@ func copyDirectory(src, dst string, overwrite bool) error {
 			}
 		}
 
-		isLink := entry.Mode()&os.ModeSymlink != 0
+		isLink := fileInfo.Mode()&os.ModeSymlink != 0
 		if !isLink {
-			if err := os.Chmod(destPath, entry.Mode()); err != nil {
+			if err := os.Chmod(destPath, fileInfo.Mode()); err != nil {
 				return err
 			}
 		}
