@@ -14,7 +14,7 @@
 
 FROM alpine:3.13 AS src
 
-ARG tzdbversion=2022b
+ARG tzdbversion=2022c
 RUN \
     apk add build-base lzip && \
     wget -O tzdb.tar.lz https://data.iana.org/time-zones/releases/tzdb-$tzdbversion.tar.lz && \
