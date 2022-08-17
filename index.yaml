@@ -2,6 +2,37 @@ apiVersion: v1
 entries:
   k8tz:
   - annotations:
+      artifacthub.io/changes: "- kind: \"changed\"\n  description: \"Update tzdata
+        package to 2022c\"\n  links:\n    - name: \"2022c Announcement\" \n      url:
+        \"https://mm.icann.org/pipermail/tz-announce/2022-August/000072.html\"\n-
+        kind: \"security\"\n  description: \"Resolve: CVE-2022-27191, CVE-2021-44716
+        and CVE-2022-29526\"\n- kind: \"added\"\n  description: \"Add LICENSE file
+        to helm chart\"\n"
+      artifacthub.io/containsSecurityUpdates: "true"
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/links: |
+        - name: "source"
+          url: "https://github.com/k8tz/k8tz"
+    apiVersion: v1
+    appVersion: 0.7.0
+    created: "2022-08-17T17:12:24.185465216Z"
+    description: Kubernetes admission controller to inject timezones into Pods and
+      CronJobs
+    digest: b177a5be0c570ac2019a6211c69983c0cd111660f106eff6fd76e60030a7e13d
+    home: http://k8tz.io
+    icon: https://github.com/k8tz/k8tz/raw/master/assets/k8tz-icon-transparent.png
+    keywords:
+    - timezone
+    - timezones
+    - admission
+    - controller
+    name: k8tz
+    sources:
+    - https://github.com/k8tz/k8tz
+    urls:
+    - https://github.com/k8tz/k8tz/releases/download/helm-chart-v0.7.1-k8tz-v0.7.0/k8tz-0.7.1.tgz
+    version: 0.7.1
+  - annotations:
       artifacthub.io/changes: "- kind: changed\n  description: Update tzdata package
         to 2022c\n  links:\n    - name: 2022c Announcement \n      url: https://mm.icann.org/pipermail/tz-announce/2022-August/000072.html\n-
         kind: security\n  description: Resolve: CVE-2022-27191, CVE-2021-44716 and
@@ -135,4 +166,4 @@ entries:
     urls:
     - https://github.com/k8tz/k8tz/releases/download/helm-chart-v0.2.1-k8tz-v0.3.0/k8tz-0.2.1.tgz
     version: 0.2.1
-generated: "2022-08-17T16:36:14.280714236Z"
+generated: "2022-08-17T17:12:24.185656826Z"
