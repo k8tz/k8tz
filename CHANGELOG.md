@@ -1,3 +1,8 @@
+# 0.7.0
+
+- Update tzdata package to [2022c](https://mm.icann.org/pipermail/tz-announce/2022-August/000072.html) (https://github.com/k8tz/k8tz/pull/39)
+- Resolve: CVE-2022-27191, CVE-2021-44716 and CVE-2022-29526 (https://github.com/k8tz/k8tz/pull/40)
+
 # 0.6.0
 
 - Update tzdata package to [2022b](https://mm.icann.org/pipermail/tz-announce/2022-August/000071.html) (https://github.com/k8tz/k8tz/pull/37)
