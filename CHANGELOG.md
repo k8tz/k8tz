@@ -1,7 +1,11 @@
+# 0.9.0
+
+- Update tzdata package to [2022e](https://mm.icann.org/pipermail/tz-announce/2022-October/000074.html)
+- Resolve: CVE-2022-27664, CVE-2021-44716, CVE-2022-32149
+
 # 0.8.0
 
 - Update tzdata package to [2022d](https://mm.icann.org/pipermail/tz-announce/2022-September/000073.html)
-- Resolve: CVE-2022-27664
 
 # 0.7.0
 
