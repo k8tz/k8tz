@@ -1,3 +1,7 @@
+# 0.10.0
+
+- Update tzdata package to [2022f](https://mm.icann.org/pipermail/tz-announce/2022-October/000075.html)
+
 # 0.9.0
 
 - Update tzdata package to [2022e](https://mm.icann.org/pipermail/tz-announce/2022-October/000074.html)
