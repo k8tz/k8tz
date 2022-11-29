@@ -1,0 +1,17 @@
+{{- if .Values.webhook.certManager.enabled -}}
+{{- $fqdn := printf "%s.%s.svc" (include "k8tz.serviceName" .) .Values.namespace }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "k8tz.fullname" . }}-tls
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "k8tz.labels" . | nindent 4 }}
+spec:
+  secretName: {{ include "k8tz.fullname" . }}-tls
+  dnsNames: {{ (list $fqdn) }}
+  {{- with .Values.webhook.certManager.issuerRef }}
+  issuerRef:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

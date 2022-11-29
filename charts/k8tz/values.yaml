@@ -12,6 +12,12 @@ verbose: false
 webhook:
   failurePolicy: Fail
 
+  certManager:
+    enabled: false
+    issuerRef:
+      name: selfsigned
+      kind: Issuer
+
   crtPEM: |
 
   keyPEM: |
