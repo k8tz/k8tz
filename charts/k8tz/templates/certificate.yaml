@@ -9,6 +9,10 @@ metadata:
     {{- include "k8tz.labels" . | nindent 4 }}
 spec:
   secretName: {{ include "k8tz.fullname" . }}-tls
+  {{- with .Values.webhook.certManager.secretTemplate }}
+  secretTemplate:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   dnsNames: {{ (list $fqdn) }}
   {{- with .Values.webhook.certManager.issuerRef }}
   issuerRef:
