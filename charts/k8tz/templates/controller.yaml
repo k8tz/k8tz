@@ -1,12 +1,17 @@
+{{- if and (ne .Values.kind "DaemonSet") (ne .Values.kind "Deployment") }}
+  {{ fail "kind must be Deployment or DaemonSet (case sensitive)" }}
+{{- end }}
 apiVersion: apps/v1
-kind: Deployment
+kind: {{ .Values.kind }}
 metadata:
   name: {{ include "k8tz.fullname" . }}
   namespace: {{ .Values.namespace }}
   labels:
     {{- include "k8tz.labels" . | nindent 4 }}
-spec:  
+spec:
+  {{- if eq .Values.kind "Deployment" }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "k8tz.selectorLabels" . | nindent 6 }}

@@ -1,5 +1,6 @@
 # Default values for k8tz.
 
+kind: Deployment
 replicaCount: 1
 
 namespace: k8tz
