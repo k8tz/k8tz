@@ -14,6 +14,8 @@ spec:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   dnsNames: {{ (list $fqdn) }}
+  duration: {{ .Values.webhook.certManager.duration }}
+  renewBefore: {{ .Values.webhook.certManager.renewBefore }}
   {{- with .Values.webhook.certManager.issuerRef }}
   issuerRef:
     {{- toYaml . | nindent 4 }}
