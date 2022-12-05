@@ -15,8 +15,8 @@ webhook:
   certManager:
     enabled: false
     secretTemplate: {}
-    duration: 5114d
-    renewBefore: 30d
+    duration: 122736h
+    renewBefore: 720h
     issuerRef:
       name: selfsigned
       kind: Issuer
