@@ -17,7 +17,7 @@ annotations:
     - kind: "changed"
       description: "Update tzdata package to 2022f"
       links:
-        - name: "2022f Announcement" 
+        - name: "2022f Announcement"
           url: "https://mm.icann.org/pipermail/tz-announce/2022-October/000075.html"
   artifacthub.io/links: |
     - name: "source"
