@@ -20,7 +20,7 @@ webhook:
     renewBefore: 720h
     issuerRef:
       name: selfsigned
-      kind: Issuer
+      kind: ClusterIssuer
 
   crtPEM: |
 
