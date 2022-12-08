@@ -1,5 +1,6 @@
 {{- $fqdn := printf "%s.%s.svc" (include "k8tz.serviceName" .) .Values.namespace }}
 {{- $ca := genSelfSignedCert $fqdn (list) (list $fqdn) 5114 }}
+{{- if (not .Values.webhook.certManager.enabled) -}}
 apiVersion: v1
 data:
   tls.crt: {{ ternary (b64enc (trim $ca.Cert)) (b64enc (trim .Values.webhook.crtPEM)) (empty .Values.webhook.crtPEM) }}
@@ -11,11 +12,16 @@ metadata:
   name: {{ include "k8tz.fullname" . }}-tls
   labels:
     {{- include "k8tz.labels" . | nindent 4 }}
+{{- end }}
 ---
 apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   name: {{ include "k8tz.fullname" . }}
+  {{- if .Values.webhook.certManager.enabled }}
+  annotations:
+    cert-manager.io/inject-ca-from: {{ .Values.namespace }}/{{ include "k8tz.fullname" . }}-tls
+  {{- end }}
   labels:
     {{- include "k8tz.labels" . | nindent 4 }}
 webhooks:
@@ -34,7 +40,9 @@ webhooks:
         namespace: {{ .Values.namespace }}
         path: "/"
         port: {{ .Values.service.port }}
+      {{- if (not .Values.webhook.certManager.enabled) }}
       caBundle: {{ ternary (b64enc (trim $ca.Cert)) (b64enc (trim .Values.webhook.caBundle)) (empty .Values.webhook.caBundle) }}
+      {{- end }}
     rules:
       - operations: [ "CREATE" ]
         apiGroups: [""]

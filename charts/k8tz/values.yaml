@@ -13,6 +13,15 @@ verbose: false
 webhook:
   failurePolicy: Fail
 
+  certManager:
+    enabled: false
+    secretTemplate: {}
+    duration: 122736h
+    renewBefore: 720h
+    issuerRef:
+      name: selfsigned
+      kind: ClusterIssuer
+
   crtPEM: |
 
   keyPEM: |
