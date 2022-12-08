@@ -1,3 +1,9 @@
+# 0.11.0
+
+- Update tzdata package to [2022g](https://mm.icann.org/pipermail/tz-announce/2022-November/000076.html)
+- Helm: add option to use daemonset instead of deployment
+- Helm: add support for managing certificate with cert-manager
+
 # 0.10.0
 
 - Update tzdata package to [2022f](https://mm.icann.org/pipermail/tz-announce/2022-October/000075.html)
