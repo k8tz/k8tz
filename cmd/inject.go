@@ -76,4 +76,5 @@ func init() {
 	injectCmd.Flags().StringVar(&patchGenerator.HostPathPrefix, "hostpath", patchGenerator.HostPathPrefix, "Location of TZif files on host machines")
 	injectCmd.Flags().StringVarP(&patchGenerator.LocalTimePath, "mountpath", "m", patchGenerator.LocalTimePath, "Mount path for TZif file on containers")
 	injectCmd.Flags().BoolVar(&patchGenerator.CronJobTimeZone, "cronJobTimeZone", patchGenerator.CronJobTimeZone, "Enable CronJob injection. Requires kubernetes >=1.24.0-beta.0 and the 'CronJobTimeZone' feature gate enabled (alpha)")
+	injectCmd.Flags().StringArrayVar(&patchGenerator.ImagePullSecrets, "imagePullSecret", patchGenerator.ImagePullSecrets, "Append imagePullSecret names to injected Pods (initContainer strategy only)")
 }

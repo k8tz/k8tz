@@ -247,6 +247,78 @@ func TestTransformer_Transform(t *testing.T) {
 			golden:  "testdata/test-pod-volumeMounts-initContainer-result.yaml",
 			wantErr: false,
 		},
+		{
+			name: "patch pod with initContainer and imagePullSecrets",
+			fields: fields{
+				PatchGenerator: PatchGenerator{
+					Strategy:           InitContainerInjectionStrategy,
+					Timezone:           "America/Jamaica",
+					InitContainerImage: "quay.io/k8tz/k8tz:0.0.1-beta2",
+					HostPathPrefix:     "/usr/share/zoneinfo",
+					LocalTimePath:      "/etc/localtime",
+					ImagePullSecrets: []string{
+						"myPrivateRegistryPullSecret",
+					},
+				},
+				Inputs: []string{"testdata/simple-pod.yaml"},
+			},
+			golden:  "testdata/test-pod-initContainer-imagePullSecrets-1.yaml",
+			wantErr: false,
+		},
+		{
+			name: "patch pod with initContainer and existing other imagePullSecrets",
+			fields: fields{
+				PatchGenerator: PatchGenerator{
+					Strategy:           InitContainerInjectionStrategy,
+					Timezone:           "America/Jamaica",
+					InitContainerImage: "quay.io/k8tz/k8tz:0.0.1-beta2",
+					HostPathPrefix:     "/usr/share/zoneinfo",
+					LocalTimePath:      "/etc/localtime",
+					ImagePullSecrets: []string{
+						"myPrivateRegistryPullSecret",
+					},
+				},
+				Inputs: []string{"testdata/simple-pod-with-existing-imagePullSecrets.yaml"},
+			},
+			golden:  "testdata/simple-pod-with-existing-imagePullSecrets-result.yaml",
+			wantErr: false,
+		},
+		{
+			name: "patch pod with initContainer and conflicting imagePullSecrets",
+			fields: fields{
+				PatchGenerator: PatchGenerator{
+					Strategy:           InitContainerInjectionStrategy,
+					Timezone:           "America/Jamaica",
+					InitContainerImage: "quay.io/k8tz/k8tz:0.0.1-beta2",
+					HostPathPrefix:     "/usr/share/zoneinfo",
+					LocalTimePath:      "/etc/localtime",
+					ImagePullSecrets: []string{
+						"myPrivateRegistryPullSecret",
+					},
+				},
+				Inputs: []string{"testdata/simple-pod-with-conflicting-imagePullSecrets.yaml"},
+			},
+			golden:  "testdata/simple-pod-with-conflicting-imagePullSecrets-result.yaml",
+			wantErr: false,
+		},
+		{
+			name: "patch pod with hostPath and imagePullSecrets - should ignore ImagePullSecrets",
+			fields: fields{
+				PatchGenerator: PatchGenerator{
+					Strategy:           HostPathInjectionStrategy,
+					Timezone:           "America/Jamaica",
+					InitContainerImage: "quay.io/k8tz/k8tz:0.0.1-beta2",
+					HostPathPrefix:     "/usr/share/zoneinfo",
+					LocalTimePath:      "/etc/localtime",
+					ImagePullSecrets: []string{
+						"myPrivateRegistryPullSecret",
+					},
+				},
+				Inputs: []string{"testdata/simple-pod.yaml"},
+			},
+			golden:  "testdata/test-pod-hostPath-imagePullSecrets-1.yaml",
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

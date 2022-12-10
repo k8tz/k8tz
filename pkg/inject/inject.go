@@ -62,6 +62,7 @@ type PatchGenerator struct {
 	HostPathPrefix     string
 	LocalTimePath      string
 	CronJobTimeZone    bool
+	ImagePullSecrets   []string
 }
 
 func NewPatchGenerator() PatchGenerator {
@@ -72,6 +73,7 @@ func NewPatchGenerator() PatchGenerator {
 		HostPathPrefix:     DefaultHostPathPrefix,
 		LocalTimePath:      DefaultLocalTimePath,
 		CronJobTimeZone:    false,
+		ImagePullSecrets:   []string{},
 	}
 }
 
@@ -316,6 +318,8 @@ func (g *PatchGenerator) createInitContainerPatches(spec *corev1.PodSpec, pathpr
 		},
 	})
 
+	patches = append(patches, g.createImagePullSecretsPatches(spec, pathprefix)...)
+
 	return patches
 }
 
@@ -405,6 +409,51 @@ func (g *PatchGenerator) createPostInjectionAnnotations(meta *metav1.ObjectMeta,
 	})
 
 	return patches
+}
+
+func (g *PatchGenerator) createImagePullSecretsPatches(spec *corev1.PodSpec, pathprefix string) k8tz.Patches {
+	var patches = k8tz.Patches{}
+
+	if len(g.ImagePullSecrets) > 0 {
+		if len(spec.ImagePullSecrets) == 0 {
+			patches = append(patches, k8tz.Patch{
+				Op:    "add",
+				Path:  fmt.Sprintf("%s/imagePullSecrets", pathprefix),
+				Value: []corev1.LocalObjectReference{},
+			})
+		}
+
+		for _, v := range g.ImagePullSecrets {
+			// avoid creating double references
+			if imagePullSecretsNameExists(spec.ImagePullSecrets, v) {
+				continue
+			}
+
+			patches = append(patches, k8tz.Patch{
+				Op:   "add",
+				Path: fmt.Sprintf("%s/imagePullSecrets/-", pathprefix),
+				Value: corev1.LocalObjectReference{
+					Name: v,
+				},
+			})
+		}
+	}
+
+	return patches
+}
+
+func imagePullSecretsNameExists(imagePullSecrets []corev1.LocalObjectReference, name string) bool {
+	if imagePullSecrets == nil {
+		return false
+	}
+
+	for _, secret := range imagePullSecrets {
+		if secret.Name == name {
+			return true
+		}
+	}
+
+	return false
 }
 
 // TODO: unit test
