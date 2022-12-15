@@ -1,6 +1,6 @@
 # Kubernetes Timezone Controller
 
-![Build Workflow Status](https://img.shields.io/github/workflow/status/k8tz/k8tz/Go)
+![Build Workflow Status](https://img.shields.io/github/actions/workflow/status/k8tz/k8tz/go.yaml?branch=master)
 [![Go Report Card](https://img.shields.io/badge/go%20report-A+-brightgreen.svg?style=flat)](https://goreportcard.com/report/github.com/k8tz/k8tz)
 [![codecov](https://codecov.io/gh/k8tz/k8tz/branch/master/graph/badge.svg?token=3HEoptX1C0)](https://codecov.io/gh/k8tz/k8tz)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/k8tz/k8tz)](go.mod)

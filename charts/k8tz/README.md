@@ -1,7 +1,7 @@
 # Kubernetes Timezone Controller - Helm Chart
 
-![Lint Chart Workflow Status](https://img.shields.io/github/workflow/status/k8tz/k8tz/Lint%20Helm%20Charts?label=Lint)
-![Build Chart Workflow Status](https://img.shields.io/github/workflow/status/k8tz/k8tz/Release%20Helm%20Charts?label=Release)
+![Lint Chart Workflow Status](https://img.shields.io/github/actions/workflow/status/k8tz/k8tz/helm-lint.yaml?branch=master&label=Lint)
+![Build Chart Workflow Status](https://img.shields.io/github/actions/workflow/status/k8tz/k8tz/helm-release.yaml?branch=master&label=Release)
 ![Helm 2 Compatible](https://img.shields.io/badge/Helm%202-Compatible-blue)
 ![Helm 2 Compatible](https://img.shields.io/badge/Helm%203-Compatible-blue)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/k8tz)](https://artifacthub.io/packages/search?repo=k8tz)
