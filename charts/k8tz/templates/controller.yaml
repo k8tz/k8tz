@@ -29,6 +29,10 @@ spec:
       - name: tls
         secret:
           secretName: {{ include "k8tz.fullname" . }}-tls
+      {{- if .Values.webhook.certManager.enabled }}
+      - name: shared-tls
+        emptyDir: {}
+      {{- end }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -37,6 +41,29 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
+        {{- if .Values.webhook.certManager.enabled }}
+        - name: {{ .Chart.Name }}-watcher
+          args:
+          - "watcher"
+          - "--tls-crt"
+          - "/run/secrets/shared-tls/tls.crt"
+          - "--tls-key"
+          - "/run/secrets/shared-tls/tls.key"
+          - "--secret-name"
+          - {{ include "k8tz.fullname" . }}-tls
+          - "--secret-namespace"
+          - {{ .Values.namespace }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            - name: tls
+              mountPath: /run/secrets/tls
+              readOnly: true
+            - name: shared-tls
+              mountPath: /run/secrets/shared-tls
+        {{- end }}
         - name: {{ .Chart.Name }}
           args:
           - "webhook"
@@ -49,6 +76,12 @@ spec:
           - "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           {{- if .Values.verbose }}
           - "--verbose"
+          {{- end }}
+          {{- if .Values.webhook.certManager.enabled }}
+          - "--tls-crt"
+          - "/run/secrets/shared-tls/tls.crt"
+          - "--tls-key"
+          - "/run/secrets/shared-tls/tls.key"
           {{- end }}
           {{- if .Values.cronJobTimeZone }}
           {{- if and (ge .Capabilities.KubeVersion.Major "1") (ge .Capabilities.KubeVersion.Minor "24") }}
@@ -65,6 +98,11 @@ spec:
             - name: tls
               mountPath: /run/secrets/tls
               readOnly: true
+            {{- if .Values.webhook.certManager.enabled }}
+            - name: shared-tls
+              mountPath: /run/secrets/shared-tls
+              readOnly: true
+            {{- end }}
           ports:
             - name: https
               containerPort: 8443
