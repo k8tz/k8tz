@@ -24,17 +24,16 @@ var (
 	errorLogger   *log.Logger
 )
 
-type Watcher struct {
+type CertWatcher struct {
 	TLSCertFile     string
 	TLSKeyFile      string
 	SecretName      string
 	SecretNamespace string
 	Verbose         bool
-	clientset       kubernetes.Interface
 }
 
-func NewCertWatcher() *Watcher {
-	return &Watcher{
+func NewCertWatcher() *CertWatcher {
+	return &CertWatcher{
 		TLSCertFile:     "/run/secrets/tls/tls.crt",
 		TLSKeyFile:      "/run/secrets/tls/tls.key",
 		SecretName:      "k8tz-tls",
@@ -43,19 +42,19 @@ func NewCertWatcher() *Watcher {
 	}
 }
 
-func (w *Watcher) Start(kubeconfigFlag string) error {
+func (w *CertWatcher) Start(kubeconfigFlag string) error {
 	infoLogger.Println(version.DisplayVersion())
 
 	if w.Verbose {
 		verboseLogger.SetOutput(os.Stderr)
-		verboseLogger.Printf("server=%+v", *w)
+		verboseLogger.Printf("cert-watcher=%+v", *w)
 	}
 
 	infoLogger.Printf("Watching kubenetes secret: %s/%s", w.SecretNamespace, w.SecretName)
 	infoLogger.Printf("Syncing tls.crt on %s", w.TLSCertFile)
 	infoLogger.Printf("Syncing tls.key on %s", w.TLSKeyFile)
 
-	err := w.InitializeClientset(kubeconfigFlag)
+	clientset, err := initializeClientset(kubeconfigFlag)
 	if err != nil {
 		errorLogger.Printf("failed to setup connection with kubernetes api: %v", err)
 		return fmt.Errorf("failed to setup connection with kubernetes api: %w", err)
@@ -64,7 +63,7 @@ func (w *Watcher) Start(kubeconfigFlag string) error {
 	stopper := make(chan struct{})
 	defer close(stopper)
 
-	factory := informers.NewSharedInformerFactoryWithOptions(w.clientset, 0, informers.WithNamespace(w.SecretNamespace))
+	factory := informers.NewSharedInformerFactoryWithOptions(clientset, 0, informers.WithNamespace(w.SecretNamespace))
 	secretInformer := factory.Core().V1().Secrets().Informer()
 
 	defer runtime.HandleCrash()
@@ -79,11 +78,11 @@ func (w *Watcher) Start(kubeconfigFlag string) error {
 	secretInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			infoLogger.Printf("receiving add event on secret %s/%s", w.SecretNamespace, w.SecretName)
-			w.ProcessSecret(obj)
+			w.ProcessSecret(obj.(*corev1.Secret))
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
 			infoLogger.Printf("receiving update event on secret %s/%s", w.SecretNamespace, w.SecretName)
-			w.ProcessSecret(newObj)
+			w.ProcessSecret(newObj.(*corev1.Secret))
 		},
 	})
 
@@ -107,19 +106,18 @@ func getKubeconfig(kubeconfPath string) (*restclient.Config, error) {
 		&clientcmd.ConfigOverrides{ClusterInfo: clientcmdapi.Cluster{Server: ""}}).ClientConfig()
 }
 
-func (w *Watcher) InitializeClientset(kubeconfPath string) error {
+func initializeClientset(kubeconfPath string) (*kubernetes.Clientset, error) {
 	config, err := getKubeconfig(kubeconfPath)
 	if err != nil {
-		return fmt.Errorf("failed to get in-cluster config: %v", err)
+		return nil, fmt.Errorf("failed to get in-cluster config: %v", err)
 	}
 
 	clientset, _ := kubernetes.NewForConfig(config)
 	if err != nil {
-		return fmt.Errorf("failed to create k8s client: %v", err)
+		return nil, fmt.Errorf("failed to create k8s client: %v", err)
 	}
 
-	w.clientset = clientset
-	return nil
+	return clientset, nil
 }
 
 func overwriteFile(filepath string, filecontent []byte) {
@@ -137,8 +135,7 @@ func overwriteFile(filepath string, filecontent []byte) {
 	}
 }
 
-func (w *Watcher) ProcessSecret(Obj interface{}) {
-	secret := Obj.(*corev1.Secret)
+func (w *CertWatcher) ProcessSecret(secret *corev1.Secret) {
 	if secret.Namespace == w.SecretNamespace && secret.Name == w.SecretName {
 		infoLogger.Printf("processing secret %s/%s ", secret.Namespace, secret.Name)
 
