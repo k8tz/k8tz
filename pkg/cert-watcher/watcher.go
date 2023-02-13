@@ -125,13 +125,13 @@ func overwriteFile(filepath string, filecontent []byte) {
 
 	fileCrt, err := os.Create(filepath)
 	if err != nil {
-		errorLogger.Printf("error creating file: %s, error=%v", filepath, err)
+		errorLogger.Panicf("error creating file: %s, error=%v", filepath, err)
 	}
 
 	defer fileCrt.Close()
 	_, err = fileCrt.Write(filecontent)
 	if err != nil {
-		errorLogger.Printf("error writing file: %s, error=%v", filepath, err)
+		errorLogger.Panicf("error writing file: %s, error=%v", filepath, err)
 	}
 }
 
