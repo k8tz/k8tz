@@ -80,7 +80,19 @@
           "name": "k8tz",
           "mountPath": "/mnt/zoneinfo"
         }
-      ]
+      ],
+      "securityContext": {
+        "capabilities": {
+          "drop": [
+            "ALL"
+          ]
+        },
+        "runAsNonRoot": true,
+        "allowPrivilegeEscalation": false,
+        "seccompProfile": {
+          "type": "RuntimeDefault"
+        }
+      }
     }
   }
 ]

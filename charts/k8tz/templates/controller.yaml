@@ -35,7 +35,7 @@ spec:
       {{- end }}
       serviceAccountName: {{ include "k8tz.serviceAccountName" . }}
       securityContext:
-        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        {{- include "k8tz.podSecurityContext" . | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
           args:
@@ -58,7 +58,7 @@ spec:
           {{- end }}
           {{- end }}
           securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
+            {{- include "k8tz.securityContext" . | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           volumeMounts:

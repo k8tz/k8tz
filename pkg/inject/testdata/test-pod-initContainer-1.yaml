@@ -26,6 +26,14 @@ spec:
     image: quay.io/k8tz/k8tz:0.0.1-beta2
     name: k8tz
     resources: {}
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      runAsNonRoot: true
+      seccompProfile:
+        type: RuntimeDefault
     volumeMounts:
     - mountPath: /mnt/zoneinfo
       name: k8tz
