@@ -52,10 +52,23 @@ Common labels
 {{- define "k8tz.labels" -}}
 helm.sh/chart: {{ include "k8tz.chart" . }}
 {{ include "k8tz.selectorLabels" . }}
+{{- with .Values.labels }}
+{{ toYaml . | trim }}
+{{- end }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Pod labels
+*/}}
+{{- define "k8tz.podLabels" -}}
+{{ include "k8tz.selectorLabels" . }}
+{{- with .Values.labels }}
+{{ toYaml . | trim }}
+{{- end }}
 {{- end }}
 
 {{/*

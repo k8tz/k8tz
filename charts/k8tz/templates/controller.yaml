@@ -23,7 +23,7 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
       labels:
-        {{- include "k8tz.selectorLabels" . | nindent 8 }}
+        {{- include "k8tz.podLabels" . | nindent 8 }}
     spec:
       volumes:
       - name: tls
