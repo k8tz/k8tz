@@ -53,6 +53,9 @@ const (
 
 var (
 	jsonPointerEscapeReplacer = strings.NewReplacer("~", "~0", "/", "~1")
+
+	True  = true
+	False = false
 )
 
 type PatchGenerator struct {
@@ -306,6 +309,18 @@ func (g *PatchGenerator) createInitContainerPatches(spec *corev1.PodSpec, pathpr
 			Name:  "k8tz",
 			Image: g.InitContainerImage,
 			Args:  []string{"bootstrap"},
+			SecurityContext: &corev1.SecurityContext{
+				AllowPrivilegeEscalation: &False,
+				RunAsNonRoot:             &True,
+				SeccompProfile: &corev1.SeccompProfile{
+					Type: "RuntimeDefault",
+				},
+				Capabilities: &corev1.Capabilities{
+					Drop: []corev1.Capability{
+						"ALL",
+					},
+				},
+			},
 			VolumeMounts: []corev1.VolumeMount{
 				{
 					Name:      "k8tz",

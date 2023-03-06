@@ -44,6 +44,14 @@ spec:
         image: testimage:0.0.0
         name: k8tz
         resources: {}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
         volumeMounts:
         - mountPath: /mnt/zoneinfo
           name: k8tz
