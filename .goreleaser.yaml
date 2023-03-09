@@ -36,8 +36,16 @@ builds:
       - 6
       - 7
 archives:
-  - replacements:
-      386: i386
+  - id: k8tz
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- .Version }}_
+      {{- .Os }}_
+      {{- if eq .Arch "386" }}i386
+      {{- else }}
+      {{- .Arch }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+      {{- end }}
 checksum:
   name_template: 'checksums.txt'
 snapshot:
@@ -60,6 +68,16 @@ release:
     We are happy to announce a new version of k8tz, these are the changes in this version:
 
   footer: |
+    ## Docker images
+
+    - `quay.io/k8tz/k8tz:{{ .Version }}`
+    - `quay.io/k8tz/k8tz:{{ .Version }}-amd64`
+    - `quay.io/k8tz/k8tz:{{ .Version }}-arm64`
+    - `quay.io/k8tz/k8tz:{{ .Version }}-i386`
+    - `quay.io/k8tz/k8tz:{{ .Version }}-ppc64le`
+    - `quay.io/k8tz/k8tz:{{ .Version }}-armv6`
+    - `quay.io/k8tz/k8tz:{{ .Version }}-armv7`
+
     ## Install with Go
 
     ```console
