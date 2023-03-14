@@ -1,6 +1,23 @@
+/*
+Copyright © 2021 Yonatan Kahana
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package certwatcher
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -30,15 +47,24 @@ type CertWatcher struct {
 	SecretName      string
 	SecretNamespace string
 	Verbose         bool
+	clientset       kubernetes.Interface
+
+	ctx    context.Context
+	cancel context.CancelFunc
 }
 
 func NewCertWatcher() *CertWatcher {
+	ctx, cancel := context.WithCancel(context.Background())
 	return &CertWatcher{
 		TLSCertFile:     "/run/secrets/tls/tls.crt",
 		TLSKeyFile:      "/run/secrets/tls/tls.key",
 		SecretName:      "k8tz-tls",
 		SecretNamespace: "k8tz",
 		Verbose:         false,
+		clientset:       nil,
+
+		ctx:    ctx,
+		cancel: cancel,
 	}
 }
 
@@ -54,23 +80,27 @@ func (w *CertWatcher) Start(kubeconfigFlag string) error {
 	infoLogger.Printf("Syncing tls.crt on %s", w.TLSCertFile)
 	infoLogger.Printf("Syncing tls.key on %s", w.TLSKeyFile)
 
-	clientset, err := initializeClientset(kubeconfigFlag)
+	err := w.initializeClientset(kubeconfigFlag)
 	if err != nil {
 		errorLogger.Printf("failed to setup connection with kubernetes api: %v", err)
 		return fmt.Errorf("failed to setup connection with kubernetes api: %w", err)
 	}
 
-	stopper := make(chan struct{})
-	defer close(stopper)
+	return w.startWatcher()
+}
 
-	factory := informers.NewSharedInformerFactoryWithOptions(clientset, 0, informers.WithNamespace(w.SecretNamespace))
+func (w *CertWatcher) startWatcher() error {
+	factory := informers.NewSharedInformerFactoryWithOptions(
+		w.clientset, 0,
+		informers.WithNamespace(w.SecretNamespace),
+	)
 	secretInformer := factory.Core().V1().Secrets().Informer()
 
 	defer runtime.HandleCrash()
 
-	go factory.Start(stopper)
+	go factory.Start(w.ctx.Done())
 
-	if !cache.WaitForCacheSync(stopper, secretInformer.HasSynced) {
+	if !cache.WaitForCacheSync(w.ctx.Done(), secretInformer.HasSynced) {
 		runtime.HandleError(fmt.Errorf("timed out waiting for secretInformer caches to sync"))
 		return fmt.Errorf("timed out waiting for secretInformer caches to sync")
 	}
@@ -86,7 +116,7 @@ func (w *CertWatcher) Start(kubeconfigFlag string) error {
 		},
 	})
 
-	<-stopper
+	<-w.ctx.Done()
 
 	return nil
 }
@@ -106,18 +136,19 @@ func getKubeconfig(kubeconfPath string) (*restclient.Config, error) {
 		&clientcmd.ConfigOverrides{ClusterInfo: clientcmdapi.Cluster{Server: ""}}).ClientConfig()
 }
 
-func initializeClientset(kubeconfPath string) (*kubernetes.Clientset, error) {
+func (w *CertWatcher) initializeClientset(kubeconfPath string) error {
 	config, err := getKubeconfig(kubeconfPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get in-cluster config: %v", err)
+		return fmt.Errorf("failed to get in-cluster config: %v", err)
 	}
 
 	clientset, _ := kubernetes.NewForConfig(config)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create k8s client: %v", err)
+		return fmt.Errorf("failed to create k8s client: %v", err)
 	}
 
-	return clientset, nil
+	w.clientset = clientset
+	return nil
 }
 
 func overwriteFile(filepath string, filecontent []byte) {
