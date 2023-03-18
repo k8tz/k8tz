@@ -17,6 +17,7 @@ limitations under the License.
 package admission
 
 import (
+	"crypto/tls"
 	"fmt"
 	"io"
 	"log"
@@ -88,9 +89,18 @@ func (h *Server) Start(kubeconfigFlag string) error {
 	server := &http.Server{
 		Addr:    h.Address,
 		Handler: mux,
+		TLSConfig: &tls.Config{
+			GetCertificate: func(chi *tls.ClientHelloInfo) (*tls.Certificate, error) {
+				cert, err := tls.LoadX509KeyPair(h.TLSCertFile, h.TLSKeyFile)
+				if err != nil {
+					return nil, err
+				}
+				return &cert, nil
+			},
+		},
 	}
 
-	return server.ListenAndServeTLS(h.TLSCertFile, h.TLSKeyFile)
+	return server.ListenAndServeTLS("", "")
 }
 
 func init() {
