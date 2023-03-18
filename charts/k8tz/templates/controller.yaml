@@ -54,10 +54,12 @@ spec:
           {{- if .Values.verbose }}
           - "--verbose"
           {{- end }}
+          {{- if .Values.webhook.certManager.enabled }}
           - "--tls-crt"
           - "/run/secrets/shared-tls/tls.crt"
           - "--tls-key"
           - "/run/secrets/shared-tls/tls.key"
+          {{- end }}
           {{- if .Values.cronJobTimeZone }}
           {{- if and (ge .Capabilities.KubeVersion.Major "1") (ge .Capabilities.KubeVersion.Minor "24") }}
           - "--cronJobTimeZone"
@@ -73,9 +75,11 @@ spec:
             - name: tls
               mountPath: /run/secrets/tls
               readOnly: true
+            {{- if .Values.webhook.certManager.enabled }}
             - name: shared-tls
               mountPath: /run/secrets/shared-tls
               readOnly: true
+            {{- end }}
           ports:
             - name: https
               containerPort: 8443
@@ -92,6 +96,7 @@ spec:
               scheme: HTTPS
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+        {{- if .Values.webhook.certManager.enabled }}
         - name: {{ .Chart.Name }}-cert-watcher
           args:
           - "cert-watcher"
@@ -104,7 +109,7 @@ spec:
           - "--secret-namespace"
           - {{ .Values.namespace }}
           securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
+            {{- include "k8tz.securityContext" . | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           volumeMounts:
@@ -113,6 +118,7 @@ spec:
               readOnly: true
             - name: shared-tls
               mountPath: /run/secrets/shared-tls
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
