@@ -105,7 +105,7 @@ func (w *CertWatcher) startWatcher() error {
 		return fmt.Errorf("timed out waiting for secretInformer caches to sync")
 	}
 
-	secretInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
+	_, err := secretInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
 			infoLogger.Printf("receiving add event on secret %s/%s", w.SecretNamespace, w.SecretName)
 			w.ProcessSecret(obj.(*corev1.Secret))
@@ -115,6 +115,9 @@ func (w *CertWatcher) startWatcher() error {
 			w.ProcessSecret(newObj.(*corev1.Secret))
 		},
 	})
+	if err != nil {
+		return fmt.Errorf("failed to register EventHandler for secretInformer")
+	}
 
 	<-w.ctx.Done()
 
