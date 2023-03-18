@@ -1,3 +1,19 @@
+/*
+Copyright © 2023 Andika Ahmad Ramadhan
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package certwatcher
 
 import (
@@ -86,14 +102,19 @@ func TestCertWatcher_startWatcher(t *testing.T) {
 				if tlsCrt, err := os.ReadFile(cw.TLSCertFile); err != nil {
 					t.Errorf("error read tls.crt: %v", err)
 				} else if string(tlsCrt) != test.fields.NewTLSCert {
-					t.Errorf("tls.crt data missmatch with data from %s: %v", cw.TLSCertFile, err)
+					t.Logf("tls.crt data missmatch with data from %s: %v", cw.TLSCertFile, err)
+					t.Logf("expecting: %s", test.fields.NewTLSCert)
+					t.Logf("got: %s", string(tlsCrt))
+					t.Fail()
 				}
 				if tlsKey, err := os.ReadFile(cw.TLSKeyFile); err != nil {
 					t.Errorf("error read tls.key: %v", err)
 				} else if string(tlsKey) != test.fields.NewTLSKey {
-					t.Errorf("tls.key data missmatch with data from %s: %v", cw.TLSCertFile, err)
+					t.Logf("tls.key data missmatch with data from %s: %v", cw.TLSKeyFile, err)
+					t.Logf("expecting: %s", test.fields.NewTLSKey)
+					t.Logf("got: %s", string(tlsKey))
+					t.Fail()
 				}
-				time.Sleep(1 * time.Second)
 			}
 			cw.cancel()
 		})
@@ -101,7 +122,7 @@ func TestCertWatcher_startWatcher(t *testing.T) {
 
 	t.Run("run cert-watcher with kubernetes api mock", func(t *testing.T) {
 		if err := cw.startWatcher(); err != nil {
-			t.Fatal(err)
+			t.Errorf("TestCertWatcher_startWatcher: %v", err)
 		}
 	})
 }
