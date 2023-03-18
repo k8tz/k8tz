@@ -2,8 +2,7 @@
 
 ![Lint Chart Workflow Status](https://img.shields.io/github/actions/workflow/status/k8tz/k8tz/helm-lint.yaml?branch=master&label=Lint)
 ![Build Chart Workflow Status](https://img.shields.io/github/actions/workflow/status/k8tz/k8tz/helm-release.yaml?branch=master&label=Release)
-![Helm 2 Compatible](https://img.shields.io/badge/Helm%202-Compatible-blue)
-![Helm 2 Compatible](https://img.shields.io/badge/Helm%203-Compatible-blue)
+![Helm 3 Compatible](https://img.shields.io/badge/Helm%203-Compatible-blue)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/k8tz)](https://artifacthub.io/packages/search?repo=k8tz)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](https://github.com/k8tz/k8tz/blob/master/CODE_OF_CONDUCT.md)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -20,7 +19,7 @@ helm install k8tz k8tz/k8tz --set timezone=Europe/London
 ```
 
 ## Prerequisites
-- Helm 2 or later
+- Helm 3
 - Kubernetes 1.16+ or OpenShift 4.X
 - Permissions to use `emptyDir` or `hostPath`
 
@@ -58,6 +57,7 @@ helm upgrade --install k8tz k8tz/k8tz \
 | injectAll                          | If true, timezone will be injected to the pod even when there is no annotation with explicit injection request. When false, the `k8tz.io/inject: true` annotation is required | true              |
 | cronJobTimeZone                    | Enable injection of `timeZone` field to `CronJob`s[^1]                                                                                                                        | false             |
 | verbose                            | Enable more detailed logs for debug purposes                                                                                                                                  | false             |
+| labels                             | Labels to apply to all resources                                                                                                                                              | {}                |
 | image.repository                   | The image repository for the admission controller and bootstrap image                                                                                                         | quay.io/k8tz/k8tz |
 | image.pullPolicy                   | Admission controller image pull policy                                                                                                                                        | IfNotPresent      |
 | image.tag                          | The image tag for the admission controller and bootstrap image. The default is the chart appVersion                                                                           | -                 |

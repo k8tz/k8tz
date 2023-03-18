@@ -52,10 +52,23 @@ Common labels
 {{- define "k8tz.labels" -}}
 helm.sh/chart: {{ include "k8tz.chart" . }}
 {{ include "k8tz.selectorLabels" . }}
+{{- with .Values.labels }}
+{{ toYaml . | trim }}
+{{- end }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Pod labels
+*/}}
+{{- define "k8tz.podLabels" -}}
+{{ include "k8tz.selectorLabels" . }}
+{{- with .Values.labels }}
+{{ toYaml . | trim }}
+{{- end }}
 {{- end }}
 
 {{/*
@@ -78,4 +91,48 @@ Defines the service name for the webhook
 */}}
 {{- define "k8tz.serviceName" -}}
 {{ .Release.Name }}
+{{- end }}
+
+{{/*
+The default security context fields to be merged with the user defined settings.
+The settings may differ between different versions of Kubernetes.
+*/}}
+{{- define "k8tz.defaultSecurityContext" -}}
+allowPrivilegeEscalation: false
+{{- if and (ge .Capabilities.KubeVersion.Major "1") (ge .Capabilities.KubeVersion.Minor "22") }}
+capabilities:
+  drop:
+  - ALL
+{{- end }}
+runAsNonRoot: true
+{{- if and (ge .Capabilities.KubeVersion.Major "1") (ge .Capabilities.KubeVersion.Minor "19") }}
+seccompProfile:
+  type: RuntimeDefault
+{{- end }}
+{{- end }}
+
+{{/*
+The default pod security context fields to be merged with the user defined settings.
+The settings may differ between different versions of Kubernetes.
+*/}}
+{{- define "k8tz.defaultPodSecurityContext" -}}
+runAsNonRoot: true
+{{- if and (ge .Capabilities.KubeVersion.Major "1") (ge .Capabilities.KubeVersion.Minor "19") }}
+seccompProfile:
+  type: RuntimeDefault
+{{- end }}
+{{- end }}
+
+{{/*
+Merges the default security context settings with the user defined ones
+*/}}
+{{- define "k8tz.securityContext" -}}
+{{- mergeOverwrite (include "k8tz.defaultSecurityContext" . | fromYaml) .Values.securityContext | toYaml }}
+{{- end }}
+
+{{/*
+Merges the default pod security context settings with the user defined ones
+*/}}
+{{- define "k8tz.podSecurityContext" -}}
+{{- mergeOverwrite (include "k8tz.defaultPodSecurityContext" . | fromYaml) .Values.podSecurityContext | toYaml }}
 {{- end }}
