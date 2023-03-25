@@ -4,6 +4,47 @@ entries:
   - annotations:
       artifacthub.io/changes: |
         - kind: "changed"
+          description: "Update tzdata package to 2023b"
+          links:
+            - name: "2023b Announcement"
+              url: "https://mm.icann.org/pipermail/tz-announce/2023-March/000078.html"
+        - kind: "added"
+          description: "Add possibility to add custom labels to k8tz resources"
+        - kind: "added"
+          description: "Add restricted SecurityContext to controller and initContainers"
+        - kind: "added"
+          description: "Automatically update webhook TLS key pair for cert-manager"
+        - kind: "changed"
+          description: "Upgrade go to 1.18 and update dependencies to latest"
+        - kind: "security"
+          description: "Resolved: CVE-2022-41721, CVE-2022-41717, CVE-2022-41723, CVE-2022-28948"
+      artifacthub.io/containsSecurityUpdates: "true"
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/links: |
+        - name: "source"
+          url: "https://github.com/k8tz/k8tz"
+    apiVersion: v2
+    appVersion: 0.12.0
+    created: "2023-03-25T17:31:18.528623559Z"
+    description: Kubernetes admission controller to inject timezones into Pods and
+      CronJobs
+    digest: f386a5cde724c1753f4b3cfb6962b64c1885264216bc1d7de69985c4d0bca749
+    home: http://k8tz.io
+    icon: https://github.com/k8tz/k8tz/raw/master/assets/k8tz-icon-transparent.png
+    keywords:
+    - timezone
+    - timezones
+    - admission
+    - controller
+    name: k8tz
+    sources:
+    - https://github.com/k8tz/k8tz
+    urls:
+    - https://github.com/k8tz/k8tz/releases/download/helm-chart-v0.12.0-k8tz-v0.12.0/k8tz-0.12.0.tgz
+    version: 0.12.0
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: "changed"
           description: "Update tzdata package to 2022g"
           links:
             - name: "2022g Announcement"
@@ -289,4 +330,4 @@ entries:
     urls:
     - https://github.com/k8tz/k8tz/releases/download/helm-chart-v0.2.1-k8tz-v0.3.0/k8tz-0.2.1.tgz
     version: 0.2.1
-generated: "2022-12-08T22:11:40.205276401Z"
+generated: "2023-03-25T17:31:18.528723861Z"
