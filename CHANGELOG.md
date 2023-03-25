@@ -1,3 +1,11 @@
+# 0.12.0
+
+- Update tzdata package to [2023b](https://mm.icann.org/pipermail/tz-announce/2023-March/000078.html) (https://github.com/k8tz/k8tz/pull/65)
+- Helm: Add possibility to add custom labels to k8tz resources (https://github.com/k8tz/k8tz/pull/59)
+- Add restricted SecurityContext to controller and initContainers (https://github.com/k8tz/k8tz/pull/58)
+- Automatically update webhook TLS key pair for cert-manager (https://github.com/k8tz/k8tz/pull/55)
+- Upgrade go to 1.18 and update dependencies to latest (CVE-2022-41721, CVE-2022-41717, CVE-2022-41723, CVE-2022-28948) (https://github.com/k8tz/k8tz/pull/61)
+
 # 0.11.0
 
 - Update tzdata package to [2022g](https://mm.icann.org/pipermail/tz-announce/2022-November/000076.html) (https://github.com/k8tz/k8tz/pull/48)
