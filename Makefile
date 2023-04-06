@@ -17,8 +17,8 @@
 # Build Variables
 BINARY_NAME ?= k8tz
 OUT_DIR ?= build/
-VERSION ?= 0.12.0
-VERSION_SUFFIX ?=
+VERSION ?= 0.13.0
+VERSION_SUFFIX ?= -beta0
 TARGET=/usr/local/bin
 INSTALLCMD=install -v $(OUT_DIR)$(BINARY_NAME) $(TARGET)
 BUILD_FLAGS ?= \
@@ -41,7 +41,7 @@ IMAGE_LABELS ?= \
 
 # Time-Zone Database Variables
 TZDATA_IMAGE_REPOSITORY ?= quay.io/k8tz/tzdata
-TZDATA_VERSION ?= 2023b
+TZDATA_VERSION ?= 2023c
 TZDATA_IMAGE = $(TZDATA_IMAGE_REPOSITORY):$(TZDATA_VERSION)
 
 tzdata:
