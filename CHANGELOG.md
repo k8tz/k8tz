@@ -1,3 +1,7 @@
+# 0.13.0
+
+- Update tzdata package to [2023c](https://mm.icann.org/pipermail/tz-announce/2023-March/000079.html) (https://github.com/k8tz/k8tz/pull/67)
+
 # 0.12.0
 
 - Update tzdata package to [2023b](https://mm.icann.org/pipermail/tz-announce/2023-March/000078.html) (https://github.com/k8tz/k8tz/pull/65)
