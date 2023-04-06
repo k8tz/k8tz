@@ -3,7 +3,7 @@
 ![Lint Chart Workflow Status](https://img.shields.io/github/actions/workflow/status/k8tz/k8tz/helm-lint.yaml?branch=master&label=Lint)
 ![Build Chart Workflow Status](https://img.shields.io/github/actions/workflow/status/k8tz/k8tz/helm-release.yaml?branch=master&label=Release)
 ![Helm 3 Compatible](https://img.shields.io/badge/Helm%203-Compatible-blue)
-[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/k8tz)](https://artifacthub.io/packages/search?repo=k8tz)
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/k8tz)](https://artifacthub.io/packages/helm/k8tz/k8tz)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](https://github.com/k8tz/k8tz/blob/master/CODE_OF_CONDUCT.md)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
