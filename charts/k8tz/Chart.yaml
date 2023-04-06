@@ -1,8 +1,8 @@
 apiVersion: v2
 name: k8tz
 description: Kubernetes admission controller to inject timezones into Pods and CronJobs
-version: 0.12.0
-appVersion: "0.12.0"
+version: 0.13.0
+appVersion: "0.13.0"
 icon: https://github.com/k8tz/k8tz/raw/master/assets/k8tz-icon-transparent.png
 home: http://k8tz.io
 sources:
@@ -12,25 +12,17 @@ keywords:
   - timezones
   - admission
   - controller
+  - tzdata
+  - tzdb
 annotations:
   artifacthub.io/changes: |
     - kind: "changed"
-      description: "Update tzdata package to 2023b"
+      description: "Update tzdata package to 2023c"
       links:
-        - name: "2023b Announcement"
-          url: "https://mm.icann.org/pipermail/tz-announce/2023-March/000078.html"
-    - kind: "added"
-      description: "Add possibility to add custom labels to k8tz resources"
-    - kind: "added"
-      description: "Add restricted SecurityContext to controller and initContainers"
-    - kind: "added"
-      description: "Automatically update webhook TLS key pair for cert-manager"
-    - kind: "changed"
-      description: "Upgrade go to 1.18 and update dependencies to latest"
-    - kind: "security"
-      description: "Resolved: CVE-2022-41721, CVE-2022-41717, CVE-2022-41723, CVE-2022-28948"
+        - name: "2023c Announcement"
+          url: "https://mm.icann.org/pipermail/tz-announce/2023-March/000079.html"
   artifacthub.io/links: |
     - name: "source"
       url: "https://github.com/k8tz/k8tz"
-  artifacthub.io/containsSecurityUpdates: "true"
+  artifacthub.io/containsSecurityUpdates: "false"
   artifacthub.io/license: "Apache-2.0"
