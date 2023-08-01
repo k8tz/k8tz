@@ -317,13 +317,13 @@ func (h *RequestsHandler) handleCronJobAdmissionRequest(req *admission.Admission
 	}
 
 	generator, err := h.lookupCronJob(req.Namespace, &cronJob)
-	verboseLogger.Printf("Generating patches for cronJob (%s) using generator: %+v", formatObjectDetails(cronJob.ObjectMeta), *generator)
 	if err != nil {
 		return nil, fmt.Errorf("failed to lookup generator for cronJob, error=%w", err)
 	}
 
 	var patches k8tz.Patches
 	if generator != nil {
+		verboseLogger.Printf("Generating patches for cronJob (%s) using generator: %+v", formatObjectDetails(cronJob.ObjectMeta), *generator)
 		patches, err = generator.Generate(&cronJob, "")
 		if err != nil {
 			return nil, fmt.Errorf("failed to generate patches for pod, error=%w", err)

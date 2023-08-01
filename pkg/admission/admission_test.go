@@ -145,6 +145,30 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 			},
 		},
 		{
+			name: "cronjob request should be ignored when feature enabled but InjectByDefault is false and not overridden by annotation",
+			fields: fields{
+				DefaultTimezone:          pkg.UTCTimezone,
+				BootstrapImage:           "test:0.0.0",
+				DefaultInjectionStrategy: inject.InitContainerInjectionStrategy,
+				InjectByDefault:          false,
+				HostPathPrefix:           "/usr/share/zoneinfo",
+				LocalTimePath:            "/etc/localtime",
+				ContentType:              "application/json",
+				Method:                   "POST",
+				ReviewFile:               "testdata/review-cronjob.json",
+				GoldenFile:               "testdata/review-cronjob-ignored.json",
+				WantCode:                 http.StatusOK,
+				CronJobTimeZone:          true,
+				FakeObjects: []runtime.Object{
+					&corev1.Namespace{
+						ObjectMeta: v1.ObjectMeta{
+							Name: "default",
+						},
+					},
+				},
+			},
+		},
+		{
 			name: "unparsable review should be considered bad request",
 			fields: fields{
 				DefaultTimezone:          pkg.UTCTimezone,
