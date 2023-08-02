@@ -1,3 +1,7 @@
+# 0.13.1
+
+- Prevent null pointer de-referencing on cronjobs (https://github.com/k8tz/k8tz/pull/73)
+
 # 0.13.0
 
 - Update tzdata package to [2023c](https://mm.icann.org/pipermail/tz-announce/2023-March/000079.html) (https://github.com/k8tz/k8tz/pull/67)
