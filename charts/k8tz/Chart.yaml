@@ -1,8 +1,8 @@
 apiVersion: v2
 name: k8tz
 description: Kubernetes admission controller to inject timezones into Pods and CronJobs
-version: 0.13.0
-appVersion: "0.13.0"
+version: 0.13.1
+appVersion: "0.13.1"
 icon: https://github.com/k8tz/k8tz/raw/master/assets/k8tz-icon-transparent.png
 home: http://k8tz.io
 sources:
@@ -16,11 +16,8 @@ keywords:
   - tzdb
 annotations:
   artifacthub.io/changes: |
-    - kind: "changed"
-      description: "Update tzdata package to 2023c"
-      links:
-        - name: "2023c Announcement"
-          url: "https://mm.icann.org/pipermail/tz-announce/2023-March/000079.html"
+    - kind: "fixed"
+      description: "Prevent null pointer de-referencing on cronjobs"
   artifacthub.io/links: |
     - name: "source"
       url: "https://github.com/k8tz/k8tz"
