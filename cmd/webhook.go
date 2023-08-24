@@ -17,8 +17,11 @@ limitations under the License.
 package cmd
 
 import (
+	"strings"
+
 	"github.com/k8tz/k8tz/pkg/admission"
 	"github.com/spf13/cobra"
+	cliflag "k8s.io/component-base/cli/flag"
 )
 
 var webhook = admission.NewAdmissionServer()
@@ -51,6 +54,17 @@ func init() {
 
 	webhookCmd.Flags().StringVar(&webhook.TLSCertFile, "tls-crt", webhook.TLSCertFile, "TLS Certificate file")
 	webhookCmd.Flags().StringVar(&webhook.TLSKeyFile, "tls-key", webhook.TLSKeyFile, "TLS Key file")
+	tlsCipherPreferredValues := cliflag.PreferredTLSCipherNames()
+	tlsCipherInsecureValues := cliflag.InsecureTLSCipherNames()
+	webhookCmd.Flags().StringSliceVar(&webhook.TLSCipherSuites, "tls-cipher-suites", webhook.TLSCipherSuites,
+		"Comma-separated list of cipher suites for the server. "+
+			"If omitted, the default Go cipher suites will be used. \n"+
+			"Preferred values: "+strings.Join(tlsCipherPreferredValues, ", ")+". \n"+
+			"Insecure values: "+strings.Join(tlsCipherInsecureValues, ", ")+".")
+	tlsPossibleVersions := cliflag.TLSPossibleVersions()
+	webhookCmd.Flags().StringVar(&webhook.TLSMinVersion, "tls-min-version", webhook.TLSMinVersion,
+		"Minimum TLS version supported. "+
+			"Possible values: "+strings.Join(tlsPossibleVersions, ", "))
 	webhookCmd.Flags().StringVar(&webhook.Address, "addr", webhook.Address, "Webhook bind address")
 	webhookCmd.Flags().StringVarP(&webhook.Handler.DefaultTimezone, "timezone", "t", webhook.Handler.DefaultTimezone, "Default timezone if not specified explicitly")
 	webhookCmd.Flags().StringVar(&webhook.Handler.BootstrapImage, "bootstrap-image", webhook.Handler.BootstrapImage, "initContainer bootstrap image")
