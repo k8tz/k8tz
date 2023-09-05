@@ -28,6 +28,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
+	cliflag "k8s.io/component-base/cli/flag"
 )
 
 const (
@@ -45,11 +46,13 @@ var (
 )
 
 type Server struct {
-	TLSCertFile string
-	TLSKeyFile  string
-	Address     string
-	Handler     RequestsHandler
-	Verbose     bool
+	TLSCertFile     string
+	TLSKeyFile      string
+	TLSCipherSuites []string
+	TLSMinVersion   string
+	Address         string
+	Handler         RequestsHandler
+	Verbose         bool
 }
 
 func NewAdmissionServer() *Server {
@@ -73,9 +76,16 @@ func (h *Server) Start(kubeconfigFlag string) error {
 		verboseLogger.SetOutput(os.Stderr)
 		verboseLogger.Printf("server=%+v", *h)
 	}
-
-	err := h.Handler.InitializeClientset(kubeconfigFlag)
+	minTLSVersion, err := cliflag.TLSVersion(h.TLSMinVersion)
 	if err != nil {
+		return err
+	}
+	tlsCipherSuites, err := cliflag.TLSCipherSuites(h.TLSCipherSuites)
+	if err != nil {
+		return err
+	}
+
+	if err = h.Handler.InitializeClientset(kubeconfigFlag); err != nil {
 		return fmt.Errorf("failed to setup connection with kubernetes api: %w", err)
 	}
 
@@ -97,6 +107,8 @@ func (h *Server) Start(kubeconfigFlag string) error {
 				}
 				return &cert, nil
 			},
+			CipherSuites: tlsCipherSuites,
+			MinVersion:   minTLSVersion,
 		},
 	}
 
