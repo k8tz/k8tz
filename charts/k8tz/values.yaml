@@ -31,6 +31,12 @@ webhook:
 
   caBundle: |
 
+  # Minimum TLS version supported. Possible values: VersionTLS10, VersionTLS11, VersionTLS12, VersionTLS13
+  # If omitted, the default VersionTLS12 will be used.
+  tlsMinVersion: ""
+  # Comma-separated list of cipher suites for the server. If omitted, the default Go cipher suites will be used.
+  tlsCipherSuites: ""
+
 image:
   repository: quay.io/k8tz/k8tz
   pullPolicy: IfNotPresent
