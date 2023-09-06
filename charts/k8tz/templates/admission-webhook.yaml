@@ -31,6 +31,12 @@ webhooks:
       - key: k8tz.io/controller-namespace
         operator: NotIn
         values: ["true"]
+      {{- if gt (len .Values.skipInjectNamespaces) 0 }}
+      - key: kubernetes.io/metadata.name
+        operator: NotIn
+        values: 
+        {{- toYaml .Values.skipInjectNamespaces | nindent 8 }}
+      {{- end }}
     sideEffects: None
     failurePolicy: {{ .Values.webhook.failurePolicy }}
     admissionReviewVersions: ["v1", "v1beta1"]
