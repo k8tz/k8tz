@@ -145,7 +145,7 @@ func (h *RequestsHandler) handleFunc(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *RequestsHandler) handleAdmissionReview(review *admission.AdmissionReview) (k8tz.Patches, error) {
-	if review.Request.Operation == admission.Create && review.Request.Namespace != metav1.NamespaceSystem {
+	if review.Request.Operation == admission.Create {
 		var patches k8tz.Patches
 		var err error
 		if review.Request.Resource == podResource {
