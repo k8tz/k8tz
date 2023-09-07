@@ -13,9 +13,6 @@ verbose: false
 # Labels to apply to all resources
 labels: {}
 
-skipInjectNamespaces:
-- kube-system
-
 webhook:
   failurePolicy: Fail
 
@@ -33,6 +30,9 @@ webhook:
   keyPEM: |
 
   caBundle: |
+
+  ignoredNamespaces:
+    - kube-system
 
 image:
   repository: quay.io/k8tz/k8tz

@@ -31,11 +31,11 @@ webhooks:
       - key: k8tz.io/controller-namespace
         operator: NotIn
         values: ["true"]
-      {{- if gt (len .Values.skipInjectNamespaces) 0 }}
+      {{- if gt (len .Values.webhook.ignoredNamespaces) 0 }}
       - key: kubernetes.io/metadata.name
         operator: NotIn
         values: 
-        {{- toYaml .Values.skipInjectNamespaces | nindent 8 }}
+        {{- toYaml .Values.webhook.ignoredNamespaces | nindent 8 }}
       {{- end }}
     sideEffects: None
     failurePolicy: {{ .Values.webhook.failurePolicy }}
