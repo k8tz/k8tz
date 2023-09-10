@@ -31,7 +31,6 @@ spec:
       capabilities:
         drop:
         - ALL
-      runAsNonRoot: true
       seccompProfile:
         type: RuntimeDefault
     volumeMounts:
@@ -74,7 +73,6 @@ spec:
       capabilities:
         drop:
         - ALL
-      runAsNonRoot: true
       seccompProfile:
         type: RuntimeDefault
     volumeMounts:
@@ -117,7 +115,6 @@ spec:
       capabilities:
         drop:
         - ALL
-      runAsNonRoot: true
       seccompProfile:
         type: RuntimeDefault
     volumeMounts:

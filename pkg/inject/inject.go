@@ -311,7 +311,6 @@ func (g *PatchGenerator) createInitContainerPatches(spec *corev1.PodSpec, pathpr
 			Args:  []string{"bootstrap"},
 			SecurityContext: &corev1.SecurityContext{
 				AllowPrivilegeEscalation: &False,
-				RunAsNonRoot:             &True,
 				SeccompProfile: &corev1.SeccompProfile{
 					Type: "RuntimeDefault",
 				},
