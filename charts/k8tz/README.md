@@ -85,6 +85,8 @@ helm upgrade --install k8tz k8tz/k8tz \
 | webhook.crtPEM                     | Certificate in PEM format for the admission controller webhook. Will be generated if not specified (Recommended)                                                              | -                 |
 | webhook.keyPEM                     | Private key for in PEM format for the admission controller webhook certificate. Will be generated if not specified (Recommended)                                              | -                 |
 | webhook.caBundle                   | Certificate Authority Bundle for the admission controller webhook. Will be generated if not specified (Recommended)                                                           | -                 |
+| webhook.tlsMinVersion              | Minimum TLS version supported. Possible values: VersionTLS10, VersionTLS11, VersionTLS12, VersionTLS13, If omitted, the default VersionTLS12 will be used                     | -                 |
+| webhook.tlsCipherSuites            | Comma-separated list of cipher suites for the server. If omitted, the default Go cipher suites will be used                                                                   | -                 |
 
 ## Optional: Test Installation
 
