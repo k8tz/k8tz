@@ -15,7 +15,8 @@ labels: {}
 
 webhook:
   failurePolicy: Fail
-
+  tlsMinVersion: ""
+  tlsCipherSuites: ""
   certManager:
     enabled: false
     secretTemplate: {}
@@ -30,10 +31,6 @@ webhook:
   keyPEM: |
 
   caBundle: |
-
-  tlsMinVersion: ""
-
-  tlsCipherSuites: ""
 
 image:
   repository: quay.io/k8tz/k8tz
