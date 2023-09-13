@@ -31,6 +31,9 @@ webhook:
 
   caBundle: |
 
+  ignoredNamespaces:
+    - kube-system
+
 image:
   repository: quay.io/k8tz/k8tz
   pullPolicy: IfNotPresent

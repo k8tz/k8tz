@@ -85,6 +85,7 @@ helm upgrade --install k8tz k8tz/k8tz \
 | webhook.crtPEM                     | Certificate in PEM format for the admission controller webhook. Will be generated if not specified (Recommended)                                                              | -                 |
 | webhook.keyPEM                     | Private key for in PEM format for the admission controller webhook certificate. Will be generated if not specified (Recommended)                                              | -                 |
 | webhook.caBundle                   | Certificate Authority Bundle for the admission controller webhook. Will be generated if not specified (Recommended)                                                           | -                 |
+| webhook.ignoredNamespaces          | List of namespaces that should be ignored by k8tz                                                                                                                             | ["kube-system"]   |
 
 ## Optional: Test Installation
 
