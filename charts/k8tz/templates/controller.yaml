@@ -67,6 +67,10 @@ spec:
           {{- fail "CronJob injection requires kubernetes >=1.24.0-beta.0 with 'CronJobTimeZone' feature gate enabled" }}
           {{- end }}
           {{- end }}
+          {{- range $s := .Values.imagePullSecrets }}
+          - "--imagePullSecret"
+          - {{ $s.name | quote }}
+          {{- end }}
           securityContext:
             {{- include "k8tz.securityContext" . | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"

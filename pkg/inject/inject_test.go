@@ -876,3 +876,75 @@ func Test_removeContainerVolume(t *testing.T) {
 		})
 	}
 }
+
+func Test_imagePullSecretsNameExists(t *testing.T) {
+	type args struct {
+		imagePullSecrets []corev1.LocalObjectReference
+		name             string
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		{
+			name: "null secrets list",
+			args: args{
+				imagePullSecrets: nil,
+				name:             "someSecretName",
+			},
+			want: false,
+		},
+		{
+			name: "empty secrets list",
+			args: args{
+				imagePullSecrets: []corev1.LocalObjectReference{},
+				name:             "someSecretName",
+			},
+			want: false,
+		},
+		{
+			name: "secrets list with non existing secrets",
+			args: args{
+				imagePullSecrets: []corev1.LocalObjectReference{
+					{
+						Name: "someOtherSecretName1",
+					},
+					{
+						Name: "someOtherSecretName2",
+					},
+					{
+						Name: "someOtherSecretName3",
+					},
+				},
+				name: "someSecretName",
+			},
+			want: false,
+		},
+		{
+			name: "secrets list with existing secret",
+			args: args{
+				imagePullSecrets: []corev1.LocalObjectReference{
+					{
+						Name: "someOtherSecretName1",
+					},
+					{
+						Name: "someSecretName",
+					},
+					{
+						Name: "someOtherSecretName3",
+					},
+				},
+				name: "someSecretName",
+			},
+			want: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := imagePullSecretsNameExists(tt.args.imagePullSecrets, tt.args.name); got != tt.want {
+				t.Errorf("imagePullSecretsNameExists() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

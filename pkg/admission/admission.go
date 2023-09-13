@@ -45,6 +45,7 @@ type RequestsHandler struct {
 	HostPathPrefix           string
 	LocalTimePath            string
 	CronJobTimeZone          bool
+	ImagePullSecrets         []string
 	clientset                kubernetes.Interface
 }
 
@@ -57,6 +58,7 @@ func NewRequestsHandler() RequestsHandler {
 		HostPathPrefix:           inject.DefaultHostPathPrefix,
 		LocalTimePath:            inject.DefaultLocalTimePath,
 		CronJobTimeZone:          false,
+		ImagePullSecrets:         []string{},
 	}
 }
 
@@ -235,6 +237,7 @@ func (h *RequestsHandler) lookupPod(namespace string, pod *corev1.Pod) (*inject.
 		InitContainerImage: h.BootstrapImage,
 		HostPathPrefix:     h.HostPathPrefix,
 		LocalTimePath:      h.LocalTimePath,
+		ImagePullSecrets:   h.ImagePullSecrets,
 	}, nil
 }
 
@@ -280,6 +283,7 @@ func (h *RequestsHandler) lookupCronJob(namespace string, cronJob *batchv1.CronJ
 		HostPathPrefix:     h.HostPathPrefix,
 		LocalTimePath:      h.LocalTimePath,
 		CronJobTimeZone:    h.CronJobTimeZone,
+		ImagePullSecrets:   h.ImagePullSecrets,
 	}, nil
 }
 
