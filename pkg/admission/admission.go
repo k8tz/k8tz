@@ -39,6 +39,7 @@ import (
 
 type RequestsHandler struct {
 	DefaultTimezone          string
+	ContainerName            string
 	BootstrapImage           string
 	DefaultInjectionStrategy inject.InjectionStrategy
 	InjectByDefault          bool
@@ -51,6 +52,7 @@ type RequestsHandler struct {
 func NewRequestsHandler() RequestsHandler {
 	return RequestsHandler{
 		DefaultTimezone:          k8tz.DefaultTimezone,
+		ContainerName:            inject.DefaultInitContainerName,
 		BootstrapImage:           version.Image(),
 		DefaultInjectionStrategy: inject.DefaultInjectionStrategy,
 		InjectByDefault:          true,
@@ -232,6 +234,7 @@ func (h *RequestsHandler) lookupPod(namespace string, pod *corev1.Pod) (*inject.
 	return &inject.PatchGenerator{
 		Strategy:           strategy,
 		Timezone:           timezone,
+		InitContainerName:  h.ContainerName,
 		InitContainerImage: h.BootstrapImage,
 		HostPathPrefix:     h.HostPathPrefix,
 		LocalTimePath:      h.LocalTimePath,
@@ -276,6 +279,7 @@ func (h *RequestsHandler) lookupCronJob(namespace string, cronJob *batchv1.CronJ
 	return &inject.PatchGenerator{
 		Strategy:           h.DefaultInjectionStrategy,
 		Timezone:           timezone,
+		InitContainerName:  h.ContainerName,
 		InitContainerImage: h.BootstrapImage,
 		HostPathPrefix:     h.HostPathPrefix,
 		LocalTimePath:      h.LocalTimePath,

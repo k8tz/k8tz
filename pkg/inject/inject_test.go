@@ -431,6 +431,7 @@ func TestPatchGenerator_createInitContainerPatches(t *testing.T) {
 	type fields struct {
 		Strategy           InjectionStrategy
 		Timezone           string
+		InitContainerName  string
 		InitContainerImage string
 		HostPathPrefix     string
 	}
@@ -450,6 +451,7 @@ func TestPatchGenerator_createInitContainerPatches(t *testing.T) {
 			fields: fields{
 				Strategy:           InitContainerInjectionStrategy,
 				Timezone:           "Pacific/Fiji",
+				InitContainerName:  "k8tz",
 				InitContainerImage: version.Image(),
 			},
 			args: args{
@@ -464,6 +466,7 @@ func TestPatchGenerator_createInitContainerPatches(t *testing.T) {
 			fields: fields{
 				Strategy:           InitContainerInjectionStrategy,
 				Timezone:           "America/Panama",
+				InitContainerName:  "k8tz",
 				InitContainerImage: "custom.registry.local:5000/repository/k8tz:1.0.0-beta1",
 			},
 			args: args{
@@ -490,6 +493,7 @@ func TestPatchGenerator_createInitContainerPatches(t *testing.T) {
 			g := &PatchGenerator{
 				Strategy:           tt.fields.Strategy,
 				Timezone:           tt.fields.Timezone,
+				InitContainerName:  "k8tz",
 				InitContainerImage: tt.fields.InitContainerImage,
 				HostPathPrefix:     "/usr/share/zoneinfo",
 				LocalTimePath:      "/etc/localtime",

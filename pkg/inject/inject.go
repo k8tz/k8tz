@@ -38,6 +38,8 @@ const (
 	DefaultHostPathPrefix string = "/usr/share/zoneinfo"
 	DefaultLocalTimePath  string = "/etc/localtime"
 
+	// DefaultInitContainerName is the default name for initContainer of k8tz
+	DefaultInitContainerName string = "k8tz"
 	// DefaultInjectionStrategy is the default injection strategy of k8tz
 	DefaultInjectionStrategy = InitContainerInjectionStrategy
 	// InitContainerInjectionStrategy is an injection strategy where we inject
@@ -62,6 +64,7 @@ type PatchGenerator struct {
 	Strategy           InjectionStrategy
 	Timezone           string
 	InitContainerImage string
+	InitContainerName  string
 	HostPathPrefix     string
 	LocalTimePath      string
 	CronJobTimeZone    bool
@@ -72,6 +75,7 @@ func NewPatchGenerator() PatchGenerator {
 		Strategy:           DefaultInjectionStrategy,
 		Timezone:           k8tz.DefaultTimezone,
 		InitContainerImage: version.Image(),
+		InitContainerName:  DefaultInitContainerName,
 		HostPathPrefix:     DefaultHostPathPrefix,
 		LocalTimePath:      DefaultLocalTimePath,
 		CronJobTimeZone:    false,
@@ -254,7 +258,7 @@ func (g *PatchGenerator) createInitContainerPatches(spec *corev1.PodSpec, pathpr
 		Op:   "add",
 		Path: fmt.Sprintf("%s/volumes/-", pathprefix),
 		Value: corev1.Volume{
-			Name: "k8tz",
+			Name: g.InitContainerName,
 			VolumeSource: corev1.VolumeSource{
 				EmptyDir: &corev1.EmptyDirVolumeSource{},
 			},
@@ -306,7 +310,7 @@ func (g *PatchGenerator) createInitContainerPatches(spec *corev1.PodSpec, pathpr
 		Op:   "add",
 		Path: fmt.Sprintf("%s/initContainers/-", pathprefix),
 		Value: corev1.Container{
-			Name:  "k8tz",
+			Name:  g.InitContainerName,
 			Image: g.InitContainerImage,
 			Args:  []string{"bootstrap"},
 			SecurityContext: &corev1.SecurityContext{
