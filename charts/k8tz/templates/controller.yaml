@@ -67,6 +67,14 @@ spec:
           {{- fail "CronJob injection requires kubernetes >=1.24.0-beta.0 with 'CronJobTimeZone' feature gate enabled" }}
           {{- end }}
           {{- end }}
+          {{- if .Values.webhook.tlsMinVersion }}
+          - "--tls-min-version"
+          - "{{ .Values.webhook.tlsMinVersion }}"
+          {{- end }}
+          {{- if .Values.webhook.tlsCipherSuites }}
+          - "--tls-cipher-suites"
+          - "{{ .Values.webhook.tlsCipherSuites }}"
+          {{- end }}
           securityContext:
             {{- include "k8tz.securityContext" . | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"

@@ -16,6 +16,9 @@ labels: {}
 webhook:
   failurePolicy: Fail
 
+  tlsMinVersion: ""
+  tlsCipherSuites: ""
+
   certManager:
     enabled: false
     secretTemplate: {}
