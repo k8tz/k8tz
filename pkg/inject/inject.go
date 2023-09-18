@@ -17,6 +17,7 @@ limitations under the License.
 package inject
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -59,22 +60,24 @@ var (
 )
 
 type PatchGenerator struct {
-	Strategy           InjectionStrategy
-	Timezone           string
-	InitContainerImage string
-	HostPathPrefix     string
-	LocalTimePath      string
-	CronJobTimeZone    bool
+	Strategy               InjectionStrategy
+	Timezone               string
+	InitContainerImage     string
+	InitContainerResources string
+	HostPathPrefix         string
+	LocalTimePath          string
+	CronJobTimeZone        bool
 }
 
 func NewPatchGenerator() PatchGenerator {
 	return PatchGenerator{
-		Strategy:           DefaultInjectionStrategy,
-		Timezone:           k8tz.DefaultTimezone,
-		InitContainerImage: version.Image(),
-		HostPathPrefix:     DefaultHostPathPrefix,
-		LocalTimePath:      DefaultLocalTimePath,
-		CronJobTimeZone:    false,
+		Strategy:               DefaultInjectionStrategy,
+		Timezone:               k8tz.DefaultTimezone,
+		InitContainerImage:     version.Image(),
+		InitContainerResources: "",
+		HostPathPrefix:         DefaultHostPathPrefix,
+		LocalTimePath:          DefaultLocalTimePath,
+		CronJobTimeZone:        false,
 	}
 }
 
@@ -327,6 +330,7 @@ func (g *PatchGenerator) createInitContainerPatches(spec *corev1.PodSpec, pathpr
 					ReadOnly:  false,
 				},
 			},
+			Resources: *g.populateResourceRequirements(),
 		},
 	})
 
@@ -419,6 +423,23 @@ func (g *PatchGenerator) createPostInjectionAnnotations(meta *metav1.ObjectMeta,
 	})
 
 	return patches
+}
+
+func (g *PatchGenerator) populateResourceRequirements() *corev1.ResourceRequirements {
+	
+	if len(g.InitContainerResources) > 0 {
+		resourceRequirement := corev1.ResourceRequirements{}
+		err := json.Unmarshal([]byte(g.InitContainerResources), &resourceRequirement)
+		if err != nil {
+			// Return an empty object if json parsing fails
+			fmt.Errorf("fail to parse InitContainerResources Json, error=%w", err)
+			return &corev1.ResourceRequirements{}
+		}
+		
+		return &resourceRequirement
+	}
+	
+	return &corev1.ResourceRequirements{}
 }
 
 // TODO: unit test
