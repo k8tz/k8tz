@@ -78,7 +78,7 @@ spec:
           {{- if .Values.resources }}
           - "--resources"
           - {{ .Values.resources | toJson | quote }}
-          {{-end}}
+          {{- end}}
           securityContext:
             {{- include "k8tz.securityContext" . | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"

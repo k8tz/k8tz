@@ -432,7 +432,7 @@ func (g *PatchGenerator) populateResourceRequirements() *corev1.ResourceRequirem
 		err := json.Unmarshal([]byte(g.InitContainerResources), &resourceRequirement)
 		if err != nil {
 			// Return an empty object if json parsing fails
-			fmt.Errorf("fail to parse InitContainerResources Json, error=%w", err)
+			fmt.Printf("fail to parse InitContainerResources Json, error=%v\n", err)
 			return &corev1.ResourceRequirements{}
 		}
 		
