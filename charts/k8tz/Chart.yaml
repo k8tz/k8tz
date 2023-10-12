@@ -3,6 +3,7 @@ name: k8tz
 description: Kubernetes admission controller to inject timezones into Pods and CronJobs
 version: 0.14.0
 appVersion: "0.14.0"
+kubeVersion: ">= 1.21.0"
 icon: https://github.com/k8tz/k8tz/raw/master/assets/k8tz-icon-transparent.png
 home: http://k8tz.io
 sources:
