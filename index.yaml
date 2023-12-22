@@ -4,6 +4,44 @@ entries:
   - annotations:
       artifacthub.io/changes: |
         - kind: "added"
+          description: "Allow to override injected initContainer name"
+        - kind: "added"
+          description: "Allow using helm built-in namespace"
+        - kind: "added"
+          description: "Add possibility to set topologySpreadConstraints to k8tz controller"
+        - kind: "security"
+          description: "Bump golang.org/x/net from 0.7.0 to 0.17.0"
+        - kind: "changed"
+          description: "Upgrade to go 1.21"
+      artifacthub.io/containsSecurityUpdates: "true"
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/links: |
+        - name: "source"
+          url: "https://github.com/k8tz/k8tz"
+    apiVersion: v2
+    appVersion: 0.14.1
+    created: "2023-12-22T12:05:48.583390672Z"
+    description: Kubernetes admission controller to inject timezones into Pods and
+      CronJobs
+    digest: 01ad44d6683673762fd7b5154fb71e494eb961789a2096f5501ac76bdf9a2f48
+    home: http://k8tz.io
+    icon: https://github.com/k8tz/k8tz/raw/master/assets/k8tz-icon-transparent.png
+    keywords:
+    - timezone
+    - timezones
+    - admission
+    - controller
+    - tzdata
+    - tzdb
+    name: k8tz
+    sources:
+    - https://github.com/k8tz/k8tz
+    urls:
+    - https://github.com/k8tz/k8tz/releases/download/helm-chart-v0.14.1-k8tz-v0.14.1/k8tz-0.14.1.tgz
+    version: 0.14.1
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: "added"
           description: "Add tlsMinVersion and tlsCipherSuites to webhook configurations"
         - kind: "fixed"
           description: "Don't explicitly set runAsNonRoot to avoid conflict with pod security context"
@@ -429,4 +467,4 @@ entries:
     urls:
     - https://github.com/k8tz/k8tz/releases/download/helm-chart-v0.2.1-k8tz-v0.3.0/k8tz-0.2.1.tgz
     version: 0.2.1
-generated: "2023-09-29T11:08:10.90843783Z"
+generated: "2023-12-22T12:05:48.583560657Z"
