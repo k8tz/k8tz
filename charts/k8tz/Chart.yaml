@@ -1,8 +1,8 @@
 apiVersion: v2
 name: k8tz
 description: Kubernetes admission controller to inject timezones into Pods and CronJobs
-version: 0.13.1
-appVersion: "0.13.1"
+version: 0.14.0
+appVersion: "0.14.0"
 icon: https://github.com/k8tz/k8tz/raw/master/assets/k8tz-icon-transparent.png
 home: http://k8tz.io
 sources:
@@ -16,8 +16,14 @@ keywords:
   - tzdb
 annotations:
   artifacthub.io/changes: |
+    - kind: "added"
+      description: "Add tlsMinVersion and tlsCipherSuites to webhook configurations"
     - kind: "fixed"
-      description: "Prevent null pointer de-referencing on cronjobs"
+      description: "Don't explicitly set runAsNonRoot to avoid conflict with pod security context"
+    - kind: "fixed"
+      description: "Skip kube-system namespace early in webhook"
+    - kind: "added"
+      description: "add configurable ignoredNamespaces option"
   artifacthub.io/links: |
     - name: "source"
       url: "https://github.com/k8tz/k8tz"

@@ -1,3 +1,9 @@
+# 0.14.0
+
+- Add flags `--tls-cipher-suites` and `--tls-min-version` to the admission controller (https://github.com/k8tz/k8tz/pull/75, https://github.com/k8tz/k8tz/pull/78)
+- Don't explicitly set `runAsNonRoot` to avoid conflict with pod security context (https://github.com/k8tz/k8tz/pull/82)
+- Skip `kube-system` namespace early and add configurable `ignoredNamespaces` option (https://github.com/k8tz/k8tz/pull/79)
+
 # 0.13.1
 
 - Prevent null pointer de-referencing on cronjobs (https://github.com/k8tz/k8tz/pull/73)

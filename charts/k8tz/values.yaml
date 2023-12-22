@@ -3,7 +3,8 @@
 kind: Deployment
 replicaCount: 1
 
-namespace: k8tz
+namespace: k8tz  # set to `null` to use helm built-in namespace
+createNamespace: true  # set to `false` to disable namespace creation by the helm chart
 injectionStrategy: initContainer
 timezone: UTC
 injectedInitContainerName: k8tz
@@ -16,6 +17,9 @@ labels: {}
 
 webhook:
   failurePolicy: Fail
+
+  tlsMinVersion: ""
+  tlsCipherSuites: ""
 
   certManager:
     enabled: false
@@ -77,5 +81,7 @@ resources: {}
 nodeSelector: {}
 
 tolerations: []
+
+topologySpreadConstraints: []
 
 affinity: {}
