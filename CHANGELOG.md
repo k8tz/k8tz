@@ -1,3 +1,11 @@
+# 0.14.1
+
+- Allow to override injected initContainer name (https://github.com/k8tz/k8tz/pull/84)
+- Helm: Allow using helm built-in namespace (https://github.com/k8tz/k8tz/pull/92)
+- Helm: Add possibility to set topologySpreadConstraints to k8tz controller (https://github.com/k8tz/k8tz/pull/90)
+- Bump golang.org/x/net from 0.7.0 to 0.17.0 (https://github.com/k8tz/k8tz/pull/89)
+- Upgrade to go 1.21 (https://github.com/k8tz/k8tz/pull/87)
+
 # 0.14.0
 
 - Add flags `--tls-cipher-suites` and `--tls-min-version` to the admission controller (https://github.com/k8tz/k8tz/pull/75, https://github.com/k8tz/k8tz/pull/78)
