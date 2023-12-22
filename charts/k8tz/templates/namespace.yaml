@@ -1,3 +1,4 @@
+{{- if (and .Values.namespace .Values.createNamespace) }}
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -5,3 +6,4 @@ metadata:
   labels:
     k8tz.io/controller-namespace: "true"
     {{- include "k8tz.labels" . | nindent 4 }}
+{{- end }}

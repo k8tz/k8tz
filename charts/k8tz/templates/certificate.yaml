@@ -1,10 +1,10 @@
 {{- if .Values.webhook.certManager.enabled -}}
-{{- $fqdn := printf "%s.%s.svc" (include "k8tz.serviceName" .) .Values.namespace }}
+{{- $fqdn := printf "%s.%s.svc" (include "k8tz.serviceName" .) (include "k8tz.namespace" .) }}
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: {{ include "k8tz.fullname" . }}-tls
-  namespace: {{ .Values.namespace }}
+  namespace: {{ include "k8tz.namespace" . }}
   labels:
     {{- include "k8tz.labels" . | nindent 4 }}
 spec:

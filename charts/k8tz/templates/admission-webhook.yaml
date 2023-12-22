@@ -1,4 +1,4 @@
-{{- $fqdn := printf "%s.%s.svc" (include "k8tz.serviceName" .) .Values.namespace }}
+{{- $fqdn := printf "%s.%s.svc" (include "k8tz.serviceName" .) (include "k8tz.namespace" .) }}
 {{- $ca := genSelfSignedCert $fqdn (list) (list $fqdn) 5114 }}
 {{- if (not .Values.webhook.certManager.enabled) -}}
 apiVersion: v1
@@ -7,7 +7,7 @@ data:
   tls.key: {{ ternary (b64enc (trim $ca.Key)) (b64enc (trim .Values.webhook.keyPEM)) (empty .Values.webhook.keyPEM) }}
 kind: Secret
 metadata:
-  namespace: {{ .Values.namespace }}
+  namespace: {{ include "k8tz.namespace" . }}
   creationTimestamp: null
   name: {{ include "k8tz.fullname" . }}-tls
   labels:
@@ -20,7 +20,7 @@ metadata:
   name: {{ include "k8tz.fullname" . }}
   {{- if .Values.webhook.certManager.enabled }}
   annotations:
-    cert-manager.io/inject-ca-from: {{ .Values.namespace }}/{{ include "k8tz.fullname" . }}-tls
+    cert-manager.io/inject-ca-from: {{ include "k8tz.namespace" . }}/{{ include "k8tz.fullname" . }}-tls
   {{- end }}
   labels:
     {{- include "k8tz.labels" . | nindent 4 }}
@@ -31,19 +31,17 @@ webhooks:
       - key: k8tz.io/controller-namespace
         operator: NotIn
         values: ["true"]
-      {{- if .Values.webhook.ignoredNamespaces }}
       - key: kubernetes.io/metadata.name
         operator: NotIn
         values:
-        {{- toYaml .Values.webhook.ignoredNamespaces | nindent 8 }}
-      {{- end }}
+        {{- include "k8tz.webhook.ignoredNamespaces" . | nindent 8 }}
     sideEffects: None
     failurePolicy: {{ .Values.webhook.failurePolicy }}
     admissionReviewVersions: ["v1", "v1beta1"]
     clientConfig:
       service:
         name: {{ include "k8tz.serviceName" . }}
-        namespace: {{ .Values.namespace }}
+        namespace: {{ include "k8tz.namespace" . }}
         path: "/"
         port: {{ .Values.service.port }}
       {{- if (not .Values.webhook.certManager.enabled) }}

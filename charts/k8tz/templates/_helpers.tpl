@@ -136,3 +136,24 @@ Merges the default pod security context settings with the user defined ones
 {{- define "k8tz.podSecurityContext" -}}
 {{- mergeOverwrite (include "k8tz.defaultPodSecurityContext" . | fromYaml) .Values.podSecurityContext | toYaml }}
 {{- end }}
+
+{{/*
+Returns the namespace of k8tz controller.
+If namespace specified in values (by default) it will be used,
+unless the built-in namespace from helm will be used.
+*/}}
+{{- define "k8tz.namespace" }}
+{{- default .Release.Namespace .Values.namespace }}
+{{- end }}
+
+{{/*
+Returns list of namespaces which k8tz controller
+should ignore in webhook level. It contains k8tz
+namespace by default.
+*/}}
+{{- define "k8tz.webhook.ignoredNamespaces" -}}
+- {{ include "k8tz.namespace" . }}
+{{- if .Values.webhook.ignoredNamespaces }}
+{{ toYaml .Values.webhook.ignoredNamespaces }}
+{{- end }}
+{{- end }}
