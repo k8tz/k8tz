@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    k8tz.io/injected: "true"
+    k8tz.io/timezone: America/Jamaica
+  name: nginx
+spec:
+  containers:
+  - env:
+    - name: TZ
+      value: America/Jamaica
+    image: nginx
+    name: nginx
+    volumeMounts:
+    - mountPath: /etc/localtime
+      name: k8tz
+      readOnly: true
+      subPath: America/Jamaica
+    - mountPath: /usr/share/zoneinfo
+      name: k8tz
+      readOnly: true
+  initContainers:
+  - args:
+    - bootstrap
+    image: quay.io/k8tz/k8tz:0.0.1-beta2
+    name: k8tz
+    resources:
+      limits:
+        memory: 128Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+      seccompProfile:
+        type: RuntimeDefault
+    volumeMounts:
+    - mountPath: /mnt/zoneinfo
+      name: k8tz
+  volumes:
+  - emptyDir: {}
+    name: k8tz
