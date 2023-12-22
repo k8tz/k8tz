@@ -5,7 +5,7 @@ apiVersion: apps/v1
 kind: {{ .Values.kind }}
 metadata:
   name: {{ include "k8tz.fullname" . }}
-  namespace: {{ .Values.namespace }}
+  namespace: {{ include "k8tz.namespace" . }}
   labels:
     {{- include "k8tz.labels" . | nindent 4 }}
 spec:
@@ -115,7 +115,7 @@ spec:
           - "--secret-name"
           - {{ include "k8tz.fullname" . }}-tls
           - "--secret-namespace"
-          - {{ .Values.namespace }}
+          - {{ include "k8tz.namespace" . }}
           securityContext:
             {{- include "k8tz.securityContext" . | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
