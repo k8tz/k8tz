@@ -7,6 +7,7 @@ namespace: k8tz  # set to `null` to use helm built-in namespace
 createNamespace: true  # set to `false` to disable namespace creation by the helm chart
 injectionStrategy: initContainer
 timezone: UTC
+injectedInitContainerName: k8tz
 injectAll: true
 cronJobTimeZone: false  # requires kubernetes >=1.24.0-beta.0 with 'CronJobTimeZone' feature gate enabled (alpha)
 verbose: false

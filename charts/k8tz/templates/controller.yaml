@@ -49,6 +49,7 @@ spec:
           - "--injection-strategy"
           - {{ .Values.injectionStrategy | quote }}
           - "--inject={{ .Values.injectAll }}"
+          - "--container-name={{ .Values.injectedInitContainerName }}"
           - "--bootstrap-image"
           - "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           {{- if .Values.verbose }}

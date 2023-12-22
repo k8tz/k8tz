@@ -431,6 +431,7 @@ func TestPatchGenerator_createInitContainerPatches(t *testing.T) {
 	type fields struct {
 		Strategy           InjectionStrategy
 		Timezone           string
+		InitContainerName  string
 		InitContainerImage string
 		HostPathPrefix     string
 	}
@@ -450,6 +451,7 @@ func TestPatchGenerator_createInitContainerPatches(t *testing.T) {
 			fields: fields{
 				Strategy:           InitContainerInjectionStrategy,
 				Timezone:           "Pacific/Fiji",
+				InitContainerName:  "k8tz",
 				InitContainerImage: version.Image(),
 			},
 			args: args{
@@ -464,6 +466,7 @@ func TestPatchGenerator_createInitContainerPatches(t *testing.T) {
 			fields: fields{
 				Strategy:           InitContainerInjectionStrategy,
 				Timezone:           "America/Panama",
+				InitContainerName:  "k8tz",
 				InitContainerImage: "custom.registry.local:5000/repository/k8tz:1.0.0-beta1",
 			},
 			args: args{
@@ -484,12 +487,35 @@ func TestPatchGenerator_createInitContainerPatches(t *testing.T) {
 			},
 			golden: "testdata/initcontainerstrategy-2-containers.json",
 		},
+		{
+			name: "test initContainer patch with different init container name",
+			fields: fields{
+				Strategy:           InitContainerInjectionStrategy,
+				Timezone:           "Asia/Jakarta",
+				InitContainerName:  "k8tz-init",
+				InitContainerImage: "custom.registry.local:5000/repository/k8tz:1.0.0-beta1",
+			},
+			args: args{
+				metadata: &metav1.ObjectMeta{Name: "myPod"},
+				spec: &corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:  "container1",
+							Image: "container:1",
+						},
+					},
+				},
+				pathprefix: "/spec",
+			},
+			golden: "testdata/initcontainerstrategy-custom-name.json",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := &PatchGenerator{
 				Strategy:           tt.fields.Strategy,
 				Timezone:           tt.fields.Timezone,
+				InitContainerName:  tt.fields.InitContainerName,
 				InitContainerImage: tt.fields.InitContainerImage,
 				HostPathPrefix:     "/usr/share/zoneinfo",
 				LocalTimePath:      "/etc/localtime",

@@ -31,6 +31,7 @@ func TestTransformer_Transform(t *testing.T) {
 				PatchGenerator: PatchGenerator{
 					Strategy:           InitContainerInjectionStrategy,
 					Timezone:           "America/Jamaica",
+					InitContainerName:  "k8tz",
 					InitContainerImage: "quay.io/k8tz/k8tz:0.0.1-beta2",
 					HostPathPrefix:     "/usr/share/zoneinfo",
 					LocalTimePath:      "/etc/localtime",
@@ -87,6 +88,7 @@ func TestTransformer_Transform(t *testing.T) {
 				PatchGenerator: PatchGenerator{
 					Strategy:           InitContainerInjectionStrategy,
 					Timezone:           "Europe/Luxembourg",
+					InitContainerName:  "k8tz",
 					InitContainerImage: "testimage:0.0.0",
 					HostPathPrefix:     "/usr/share/zoneinfo",
 					LocalTimePath:      "/etc/localtime",
@@ -102,6 +104,7 @@ func TestTransformer_Transform(t *testing.T) {
 				PatchGenerator: PatchGenerator{
 					Strategy:           InitContainerInjectionStrategy,
 					Timezone:           "UTC",
+					InitContainerName:  "k8tz",
 					InitContainerImage: "testimage:0.0.0",
 					HostPathPrefix:     "/usr/share/zoneinfo",
 					LocalTimePath:      "/etc/localtime",
@@ -117,6 +120,7 @@ func TestTransformer_Transform(t *testing.T) {
 				PatchGenerator: PatchGenerator{
 					Strategy:           InitContainerInjectionStrategy,
 					Timezone:           "UTC",
+					InitContainerName:  "k8tz",
 					InitContainerImage: "testimage:0.0.0",
 					HostPathPrefix:     "/usr/share/zoneinfo",
 					LocalTimePath:      "/etc/localtime",
@@ -132,6 +136,7 @@ func TestTransformer_Transform(t *testing.T) {
 				PatchGenerator: PatchGenerator{
 					Strategy:           InitContainerInjectionStrategy,
 					Timezone:           "UTC",
+					InitContainerName:  "k8tz",
 					InitContainerImage: "testimage:0.0.0",
 					HostPathPrefix:     "/usr/share/zoneinfo",
 					LocalTimePath:      "/etc/localtime",
@@ -147,6 +152,7 @@ func TestTransformer_Transform(t *testing.T) {
 				PatchGenerator: PatchGenerator{
 					Strategy:           InitContainerInjectionStrategy,
 					Timezone:           "UTC",
+					InitContainerName:  "k8tz",
 					InitContainerImage: "testimage:0.0.0",
 					HostPathPrefix:     "/usr/share/zoneinfo",
 					LocalTimePath:      "/etc/localtime",
@@ -162,6 +168,7 @@ func TestTransformer_Transform(t *testing.T) {
 				PatchGenerator: PatchGenerator{
 					Strategy:           InitContainerInjectionStrategy,
 					Timezone:           "UTC",
+					InitContainerName:  "k8tz",
 					InitContainerImage: "testimage:0.0.0",
 					HostPathPrefix:     "/usr/share/zoneinfo",
 					LocalTimePath:      "/etc/localtime",
@@ -177,6 +184,7 @@ func TestTransformer_Transform(t *testing.T) {
 				PatchGenerator: PatchGenerator{
 					Strategy:           InitContainerInjectionStrategy,
 					Timezone:           "UTC",
+					InitContainerName:  "k8tz",
 					InitContainerImage: "testimage:0.0.0",
 					HostPathPrefix:     "/usr/share/zoneinfo",
 					LocalTimePath:      "/etc/localtime",
@@ -192,6 +200,7 @@ func TestTransformer_Transform(t *testing.T) {
 				PatchGenerator: PatchGenerator{
 					Strategy:           InitContainerInjectionStrategy,
 					Timezone:           "Europe/Dublin",
+					InitContainerName:  "k8tz",
 					InitContainerImage: "testimage:0.0.0",
 					HostPathPrefix:     "/usr/share/zoneinfo",
 					LocalTimePath:      "/etc/localtime",
@@ -208,6 +217,7 @@ func TestTransformer_Transform(t *testing.T) {
 				PatchGenerator: PatchGenerator{
 					Strategy:           InitContainerInjectionStrategy,
 					Timezone:           "UTC",
+					InitContainerName:  "k8tz",
 					InitContainerImage: "testimage:0.0.0",
 					HostPathPrefix:     "/usr/share/zoneinfo",
 					LocalTimePath:      "/etc/localtime",
@@ -223,6 +233,7 @@ func TestTransformer_Transform(t *testing.T) {
 				PatchGenerator: PatchGenerator{
 					Strategy:           HostPathInjectionStrategy,
 					Timezone:           "UTC",
+					InitContainerName:  "k8tz",
 					InitContainerImage: "testimage:0.0.0",
 					HostPathPrefix:     "/usr/share/zoneinfo",
 					LocalTimePath:      "/etc/localtime",
@@ -238,6 +249,7 @@ func TestTransformer_Transform(t *testing.T) {
 				PatchGenerator: PatchGenerator{
 					Strategy:           InitContainerInjectionStrategy,
 					Timezone:           "UTC",
+					InitContainerName:  "k8tz",
 					InitContainerImage: "testimage:0.0.0",
 					HostPathPrefix:     "/usr/share/zoneinfo",
 					LocalTimePath:      "/etc/localtime",
