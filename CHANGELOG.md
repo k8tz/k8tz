@@ -1,3 +1,7 @@
+# 0.15.0
+
+- Update tzdata package to [2023d](https://github.com/k8tz/k8tz/pull/94)
+
 # 0.14.1
 
 - Allow to override injected initContainer name (https://github.com/k8tz/k8tz/pull/84)
