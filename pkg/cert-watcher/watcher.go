@@ -19,11 +19,10 @@ package certwatcher
 import (
 	"context"
 	"fmt"
-	"io"
-	"log"
+	k8tz "github.com/k8tz/k8tz/pkg"
+	"github.com/k8tz/k8tz/pkg/version"
 	"os"
 
-	"github.com/k8tz/k8tz/pkg/version"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/client-go/informers"
@@ -32,13 +31,6 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
-)
-
-var (
-	verboseLogger *log.Logger
-	warningLogger *log.Logger
-	infoLogger    *log.Logger
-	errorLogger   *log.Logger
 )
 
 type CertWatcher struct {
@@ -69,20 +61,20 @@ func NewCertWatcher() *CertWatcher {
 }
 
 func (w *CertWatcher) Start(kubeconfigFlag string) error {
-	infoLogger.Println(version.DisplayVersion())
+	k8tz.InfoLogger.Println(version.DisplayVersion())
 
 	if w.Verbose {
-		verboseLogger.SetOutput(os.Stderr)
-		verboseLogger.Printf("cert-watcher=%+v", *w)
+		k8tz.VerboseLogger.SetOutput(os.Stderr)
+		k8tz.VerboseLogger.Printf("cert-watcher=%+v", *w)
 	}
 
-	infoLogger.Printf("Watching kubenetes secret: %s/%s", w.SecretNamespace, w.SecretName)
-	infoLogger.Printf("Syncing tls.crt on %s", w.TLSCertFile)
-	infoLogger.Printf("Syncing tls.key on %s", w.TLSKeyFile)
+	k8tz.InfoLogger.Printf("Watching kubenetes secret: %s/%s", w.SecretNamespace, w.SecretName)
+	k8tz.InfoLogger.Printf("Syncing tls.crt on %s", w.TLSCertFile)
+	k8tz.InfoLogger.Printf("Syncing tls.key on %s", w.TLSKeyFile)
 
 	err := w.initializeClientset(kubeconfigFlag)
 	if err != nil {
-		errorLogger.Printf("failed to setup connection with kubernetes api: %v", err)
+		k8tz.ErrorLogger.Printf("failed to setup connection with kubernetes api: %v", err)
 		return fmt.Errorf("failed to setup connection with kubernetes api: %w", err)
 	}
 
@@ -107,11 +99,11 @@ func (w *CertWatcher) startWatcher() error {
 
 	_, err := secretInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
-			infoLogger.Printf("receiving add event on secret %s/%s", w.SecretNamespace, w.SecretName)
+			k8tz.InfoLogger.Printf("receiving add event on secret %s/%s", w.SecretNamespace, w.SecretName)
 			w.ProcessSecret(obj.(*corev1.Secret))
 		},
 		UpdateFunc: func(oldObj, newObj interface{}) {
-			infoLogger.Printf("receiving update event on secret %s/%s", w.SecretNamespace, w.SecretName)
+			k8tz.InfoLogger.Printf("receiving update event on secret %s/%s", w.SecretNamespace, w.SecretName)
 			w.ProcessSecret(newObj.(*corev1.Secret))
 		},
 	})
@@ -126,13 +118,13 @@ func (w *CertWatcher) startWatcher() error {
 
 func getKubeconfig(kubeconfPath string) (*restclient.Config, error) {
 	if kubeconfPath == "" {
-		verboseLogger.Println("--kubeconfig not specified. Using the inClusterConfig. This might not work.")
+		k8tz.VerboseLogger.Println("--kubeconfig not specified. Using the inClusterConfig. This might not work.")
 		kubeconfig, err := restclient.InClusterConfig()
 		if err == nil {
 			return kubeconfig, nil
 		}
 
-		warningLogger.Println("error creating inClusterConfig, falling back to default config.")
+		k8tz.WarningLogger.Println("error creating inClusterConfig, falling back to default config.")
 	}
 	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
 		&clientcmd.ClientConfigLoadingRules{ExplicitPath: kubeconfPath},
@@ -155,32 +147,25 @@ func (w *CertWatcher) initializeClientset(kubeconfPath string) error {
 }
 
 func overwriteFile(filepath string, filecontent []byte) {
-	infoLogger.Printf("overwriting file %s", filepath)
+	k8tz.InfoLogger.Printf("overwriting file %s", filepath)
 
 	fileCrt, err := os.Create(filepath)
 	if err != nil {
-		errorLogger.Panicf("error creating file: %s, error=%v", filepath, err)
+		k8tz.ErrorLogger.Panicf("error creating file: %s, error=%v", filepath, err)
 	}
 
 	defer fileCrt.Close()
 	_, err = fileCrt.Write(filecontent)
 	if err != nil {
-		errorLogger.Panicf("error writing file: %s, error=%v", filepath, err)
+		k8tz.ErrorLogger.Panicf("error writing file: %s, error=%v", filepath, err)
 	}
 }
 
 func (w *CertWatcher) ProcessSecret(secret *corev1.Secret) {
 	if secret.Namespace == w.SecretNamespace && secret.Name == w.SecretName {
-		infoLogger.Printf("processing secret %s/%s ", secret.Namespace, secret.Name)
+		k8tz.InfoLogger.Printf("processing secret %s/%s ", secret.Namespace, secret.Name)
 
 		overwriteFile(w.TLSCertFile, secret.Data["tls.crt"])
 		overwriteFile(w.TLSKeyFile, secret.Data["tls.key"])
 	}
-}
-
-func init() {
-	verboseLogger = log.New(io.Discard, "VERBOSE: ", log.Ldate|log.Ltime|log.Lshortfile)
-	infoLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
-	warningLogger = log.New(os.Stderr, "WARNING: ", log.Ldate|log.Ltime|log.Lshortfile)
-	errorLogger = log.New(os.Stderr, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
 }

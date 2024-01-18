@@ -18,10 +18,7 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/k8tz/k8tz/pkg/bootstrap"
-	"github.com/k8tz/k8tz/pkg/version"
 	"github.com/spf13/cobra"
 )
 
@@ -39,7 +36,6 @@ This command is used inside a bootstrap initContainer to extract
 files stored in the k8tz image to emptyDir so other containers
 will be able to mount the required TZif file from it.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Fprintf(os.Stderr, "%s\n", version.DisplayVersion())
 		cobra.CheckErr(operation.Bootstrap())
 	},
 }
@@ -50,4 +46,5 @@ func init() {
 	bootstrapCmd.Flags().StringVarP(&operation.From, "from", "f", operation.From, "Path to directory where to take the files from")
 	bootstrapCmd.Flags().StringVarP(&operation.To, "to", "t", operation.To, "Path to directory where copy the files to")
 	bootstrapCmd.Flags().BoolVarP(&operation.Overwrite, "overwrite", "o", operation.Overwrite, "If true and file already exists in target directory, it will be overwritten. If false it will be skipped.")
+	bootstrapCmd.Flags().BoolVarP(&operation.Verbose, "verbose", "v", operation.Verbose, "Print more verbose logs for debugging")
 }

@@ -429,11 +429,12 @@ func TestPatchGenerator_createEnvironmentVariablePatches(t *testing.T) {
 
 func TestPatchGenerator_createInitContainerPatches(t *testing.T) {
 	type fields struct {
-		Strategy           InjectionStrategy
-		Timezone           string
-		InitContainerName  string
-		InitContainerImage string
-		HostPathPrefix     string
+		Strategy             InjectionStrategy
+		Timezone             string
+		InitContainerName    string
+		InitContainerImage   string
+		InitContainerVerbose bool
+		HostPathPrefix       string
 	}
 	type args struct {
 		metadata   *metav1.ObjectMeta
@@ -509,16 +510,40 @@ func TestPatchGenerator_createInitContainerPatches(t *testing.T) {
 			},
 			golden: "testdata/initcontainerstrategy-custom-name.json",
 		},
+		{
+			name: "test initContainer patch with verbose flag enabled",
+			fields: fields{
+				Strategy:             InitContainerInjectionStrategy,
+				Timezone:             "Asia/Jakarta",
+				InitContainerName:    "k8tz-init",
+				InitContainerImage:   "k8tz",
+				InitContainerVerbose: true,
+			},
+			args: args{
+				metadata: &metav1.ObjectMeta{Name: "myPod"},
+				spec: &corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:  "container1",
+							Image: "container:1",
+						},
+					},
+				},
+				pathprefix: "/spec",
+			},
+			golden: "testdata/initcontainerstrategy-verbose.json",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			g := &PatchGenerator{
-				Strategy:           tt.fields.Strategy,
-				Timezone:           tt.fields.Timezone,
-				InitContainerName:  tt.fields.InitContainerName,
-				InitContainerImage: tt.fields.InitContainerImage,
-				HostPathPrefix:     "/usr/share/zoneinfo",
-				LocalTimePath:      "/etc/localtime",
+				Strategy:             tt.fields.Strategy,
+				Timezone:             tt.fields.Timezone,
+				InitContainerName:    tt.fields.InitContainerName,
+				InitContainerImage:   tt.fields.InitContainerImage,
+				InitContainerVerbose: tt.fields.InitContainerVerbose,
+				HostPathPrefix:       "/usr/share/zoneinfo",
+				LocalTimePath:        "/etc/localtime",
 			}
 
 			got := g.createInitContainerPatches(tt.args.spec, tt.args.pathprefix)

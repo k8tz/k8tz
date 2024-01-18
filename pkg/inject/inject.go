@@ -61,24 +61,26 @@ var (
 )
 
 type PatchGenerator struct {
-	Strategy           InjectionStrategy
-	Timezone           string
-	InitContainerImage string
-	InitContainerName  string
-	HostPathPrefix     string
-	LocalTimePath      string
-	CronJobTimeZone    bool
+	Strategy             InjectionStrategy
+	Timezone             string
+	InitContainerImage   string
+	InitContainerName    string
+	InitContainerVerbose bool
+	HostPathPrefix       string
+	LocalTimePath        string
+	CronJobTimeZone      bool
 }
 
 func NewPatchGenerator() PatchGenerator {
 	return PatchGenerator{
-		Strategy:           DefaultInjectionStrategy,
-		Timezone:           k8tz.DefaultTimezone,
-		InitContainerImage: version.Image(),
-		InitContainerName:  DefaultInitContainerName,
-		HostPathPrefix:     DefaultHostPathPrefix,
-		LocalTimePath:      DefaultLocalTimePath,
-		CronJobTimeZone:    false,
+		Strategy:             DefaultInjectionStrategy,
+		Timezone:             k8tz.DefaultTimezone,
+		InitContainerImage:   version.Image(),
+		InitContainerName:    DefaultInitContainerName,
+		InitContainerVerbose: false,
+		HostPathPrefix:       DefaultHostPathPrefix,
+		LocalTimePath:        DefaultLocalTimePath,
+		CronJobTimeZone:      false,
 	}
 }
 
@@ -306,13 +308,18 @@ func (g *PatchGenerator) createInitContainerPatches(spec *corev1.PodSpec, pathpr
 		})
 	}
 
+	bootstrapArgs := []string{"bootstrap"}
+	if g.InitContainerVerbose {
+		bootstrapArgs = append(bootstrapArgs, "--verbose")
+	}
+
 	patches = append(patches, k8tz.Patch{
 		Op:   "add",
 		Path: fmt.Sprintf("%s/initContainers/-", pathprefix),
 		Value: corev1.Container{
 			Name:  g.InitContainerName,
 			Image: g.InitContainerImage,
-			Args:  []string{"bootstrap"},
+			Args:  bootstrapArgs,
 			SecurityContext: &corev1.SecurityContext{
 				AllowPrivilegeEscalation: &False,
 				SeccompProfile: &corev1.SeccompProfile{

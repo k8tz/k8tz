@@ -2,6 +2,7 @@ package bootstrap
 
 import (
 	"fmt"
+	k8tz "github.com/k8tz/k8tz/pkg"
 	"io"
 	"os"
 	"path/filepath"
@@ -44,7 +45,7 @@ func copyDirectory(src, dst string, overwrite bool) error {
 					return fmt.Errorf("failed to copy file from '%s' to '%s', error: %w", sourcePath, destPath, err)
 				}
 			} else {
-				fmt.Fprintf(os.Stderr, "skipping file '%s' because it already exists\n", destPath)
+				k8tz.VerboseLogger.Printf("skipping file '%s' because it already exists\n", destPath)
 			}
 		}
 
@@ -60,7 +61,7 @@ func copyDirectory(src, dst string, overwrite bool) error {
 }
 
 func copyFile(src, dst string) error {
-	fmt.Fprintf(os.Stderr, "Copying '%s' to '%s'\n", src, dst)
+	k8tz.VerboseLogger.Printf("Copying '%s' to '%s'\n", src, dst)
 	out, err := os.Create(dst)
 	if err != nil {
 		return err
@@ -101,7 +102,7 @@ func createIfNotExists(dir string, perm os.FileMode) error {
 	}
 
 	if exists {
-		fmt.Fprintf(os.Stderr, "not creating '%s' since its already exists\n", dir)
+		k8tz.VerboseLogger.Printf("not creating '%s' since its already exists\n", dir)
 		return nil
 	}
 
@@ -109,7 +110,7 @@ func createIfNotExists(dir string, perm os.FileMode) error {
 		return fmt.Errorf("failed to create directory: '%s', error: '%w'", dir, err)
 	}
 
-	fmt.Fprintf(os.Stderr, "directory created: %s\n", dir)
+	k8tz.VerboseLogger.Printf("directory created: %s\n", dir)
 	return nil
 }
 
@@ -126,7 +127,7 @@ func copySymLinkIfNotExists(source, dest string, force bool) error {
 				return fmt.Errorf("failed to remove symlink for overwrite: %s error: %w", dest, err)
 			}
 		} else {
-			fmt.Fprintf(os.Stderr, "skipping symlink '%s' because it already exists\n", dest)
+			k8tz.VerboseLogger.Printf("skipping symlink '%s' because it already exists\n", dest)
 			return nil
 		}
 	}
@@ -141,6 +142,6 @@ func copySymLinkIfNotExists(source, dest string, force bool) error {
 		return fmt.Errorf("failed to create symlink from '%s' to '%s', error: %w", dest, link, err)
 	}
 
-	fmt.Fprintf(os.Stderr, "symlink created: '%s' => '%s'\n", dest, link)
+	k8tz.VerboseLogger.Printf("symlink created: '%s' => '%s'\n", dest, link)
 	return nil
 }
