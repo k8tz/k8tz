@@ -19,12 +19,11 @@ package admission
 import (
 	"crypto/tls"
 	"fmt"
-	"io"
-	"log"
+	k8tz "github.com/k8tz/k8tz/pkg"
+	"github.com/k8tz/k8tz/pkg/version"
 	"net/http"
 	"os"
 
-	"github.com/k8tz/k8tz/pkg/version"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
@@ -39,10 +38,6 @@ var (
 	k8sdecode       = serializer.NewCodecFactory(runtime.NewScheme()).UniversalDeserializer()
 	podResource     = metav1.GroupVersionResource{Version: "v1", Resource: "pods"}
 	cronJobResource = metav1.GroupVersionResource{Version: "v1", Resource: "cronjobs", Group: "batch"}
-	verboseLogger   *log.Logger
-	warningLogger   *log.Logger
-	infoLogger      *log.Logger
-	errorLogger     *log.Logger
 )
 
 type Server struct {
@@ -70,11 +65,11 @@ func (h *Server) health(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (h *Server) Start(kubeconfigFlag string) error {
-	infoLogger.Println(version.DisplayVersion())
+	k8tz.InfoLogger.Println(version.DisplayVersion())
 
 	if h.Verbose {
-		verboseLogger.SetOutput(os.Stderr)
-		verboseLogger.Printf("server=%+v", *h)
+		k8tz.VerboseLogger.SetOutput(os.Stderr)
+		k8tz.VerboseLogger.Printf("server=%+v", *h)
 	}
 	minTLSVersion, err := cliflag.TLSVersion(h.TLSMinVersion)
 	if err != nil {
@@ -89,7 +84,7 @@ func (h *Server) Start(kubeconfigFlag string) error {
 		return fmt.Errorf("failed to setup connection with kubernetes api: %w", err)
 	}
 
-	infoLogger.Printf("Listening on %s\n", h.Address)
+	k8tz.InfoLogger.Printf("Listening on %s\n", h.Address)
 
 	mux := http.NewServeMux()
 
@@ -113,11 +108,4 @@ func (h *Server) Start(kubeconfigFlag string) error {
 	}
 
 	return server.ListenAndServeTLS("", "")
-}
-
-func init() {
-	verboseLogger = log.New(io.Discard, "VERBOSE: ", log.Ldate|log.Ltime|log.Lshortfile)
-	infoLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
-	warningLogger = log.New(os.Stderr, "WARNING: ", log.Ldate|log.Ltime|log.Lshortfile)
-	errorLogger = log.New(os.Stderr, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
 }

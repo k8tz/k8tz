@@ -41,6 +41,7 @@ type RequestsHandler struct {
 	DefaultTimezone          string
 	ContainerName            string
 	BootstrapImage           string
+	BootstrapVerbose         bool
 	DefaultInjectionStrategy inject.InjectionStrategy
 	InjectByDefault          bool
 	HostPathPrefix           string
@@ -54,6 +55,7 @@ func NewRequestsHandler() RequestsHandler {
 		DefaultTimezone:          k8tz.DefaultTimezone,
 		ContainerName:            inject.DefaultInitContainerName,
 		BootstrapImage:           version.Image(),
+		BootstrapVerbose:         false,
 		DefaultInjectionStrategy: inject.DefaultInjectionStrategy,
 		InjectByDefault:          true,
 		HostPathPrefix:           inject.DefaultHostPathPrefix,
@@ -64,13 +66,13 @@ func NewRequestsHandler() RequestsHandler {
 
 func getKubeconfig(kubeconfPath string) (*restclient.Config, error) {
 	if kubeconfPath == "" {
-		verboseLogger.Println("--kubeconfig not specified. Using the inClusterConfig. This might not work.")
+		k8tz.VerboseLogger.Println("--kubeconfig not specified. Using the inClusterConfig. This might not work.")
 		kubeconfig, err := restclient.InClusterConfig()
 		if err == nil {
 			return kubeconfig, nil
 		}
 
-		warningLogger.Println("error creating inClusterConfig, falling back to default config.")
+		k8tz.WarningLogger.Println("error creating inClusterConfig, falling back to default config.")
 	}
 	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
 		&clientcmd.ClientConfigLoadingRules{ExplicitPath: kubeconfPath},
@@ -95,7 +97,7 @@ func (h *RequestsHandler) InitializeClientset(kubeconfPath string) error {
 func (h *RequestsHandler) handleFunc(w http.ResponseWriter, r *http.Request) {
 	review, header, err := h.readAdmissionReview(r)
 	if err != nil {
-		warningLogger.Printf("failed to parse review: %v\n", err)
+		k8tz.WarningLogger.Printf("failed to parse review: %v\n", err)
 		http.Error(w, fmt.Sprintf("failed to parse admission review from request, error=%s", err.Error()), header)
 		return
 	}
@@ -107,11 +109,11 @@ func (h *RequestsHandler) handleFunc(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	verboseLogger.Printf("incoming review request=%+v", *review.Request)
+	k8tz.VerboseLogger.Printf("incoming review request=%+v", *review.Request)
 
 	patches, err := h.handleAdmissionReview(review)
 	if err != nil {
-		warningLogger.Printf("rejecting request: error=%v, review=%+v\n", err, *review)
+		k8tz.WarningLogger.Printf("rejecting request: error=%v, review=%+v\n", err, *review)
 		reviewResponse.Response.Allowed = false
 		reviewResponse.Response.Result = &metav1.Status{
 			Message: err.Error(),
@@ -119,7 +121,7 @@ func (h *RequestsHandler) handleFunc(w http.ResponseWriter, r *http.Request) {
 	} else {
 		patchBytes, err := json.Marshal(patches)
 		if err != nil {
-			errorLogger.Printf("failed to marshal json patch: %+v, error=%v\n", patches, err)
+			k8tz.ErrorLogger.Printf("failed to marshal json patch: %+v, error=%v\n", patches, err)
 			http.Error(w, fmt.Sprintf("could not marshal JSON patch: %s", err.Error()), http.StatusInternalServerError)
 			return
 		}
@@ -130,18 +132,18 @@ func (h *RequestsHandler) handleFunc(w http.ResponseWriter, r *http.Request) {
 		reviewResponse.Response.Allowed = true
 	}
 
-	verboseLogger.Printf("sending response: allowed=%t, result=%+v, patches=%+v", reviewResponse.Response.Allowed, reviewResponse.Response.Result, patches)
+	k8tz.VerboseLogger.Printf("sending response: allowed=%t, result=%+v, patches=%+v", reviewResponse.Response.Allowed, reviewResponse.Response.Result, patches)
 
 	bytes, err := json.Marshal(&reviewResponse)
 	if err != nil {
-		errorLogger.Printf("failed to marshal response review: %+v, error=%v\n", reviewResponse, err)
+		k8tz.ErrorLogger.Printf("failed to marshal response review: %+v, error=%v\n", reviewResponse, err)
 		http.Error(w, fmt.Sprintf("failed to marshal response review: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
 
 	_, err = w.Write(bytes)
 	if err != nil {
-		errorLogger.Printf("failed to write response to output http stream: %v\n", err)
+		k8tz.ErrorLogger.Printf("failed to write response to output http stream: %v\n", err)
 		http.Error(w, fmt.Sprintf("failed to write response: %s", err.Error()), http.StatusInternalServerError)
 	}
 }
@@ -194,41 +196,41 @@ func (h *RequestsHandler) lookupPod(namespace string, pod *corev1.Pod) (*inject.
 	}
 
 	if _, ok := pod.Annotations[k8tz.InjectedAnnotation]; ok {
-		infoLogger.Printf("skipping pod (%s) because its already injected", formatObjectDetails(pod.ObjectMeta))
+		k8tz.InfoLogger.Printf("skipping pod (%s) because its already injected", formatObjectDetails(pod.ObjectMeta))
 		return nil, nil
 	}
 
 	if val, ok := pod.Annotations[k8tz.InjectAnnotation]; ok {
 		if val == "false" {
-			infoLogger.Printf("skipping pod (%s) because annotation on pod is explicitly false for injection", formatObjectDetails(pod.ObjectMeta))
+			k8tz.InfoLogger.Printf("skipping pod (%s) because annotation on pod is explicitly false for injection", formatObjectDetails(pod.ObjectMeta))
 			return nil, nil
 		}
 	} else if val, ok := namespaceObj.Annotations[k8tz.InjectAnnotation]; ok {
 		if val == "false" {
-			infoLogger.Printf("skipping pod (%s) because annotation on namespace is explicitly false for injection", formatObjectDetails(pod.ObjectMeta))
+			k8tz.InfoLogger.Printf("skipping pod (%s) because annotation on namespace is explicitly false for injection", formatObjectDetails(pod.ObjectMeta))
 			return nil, nil
 		}
 	} else if !h.InjectByDefault {
-		infoLogger.Printf("skipping pod (%s) because no other instruction and injection disabled by default", formatObjectDetails(pod.ObjectMeta))
+		k8tz.InfoLogger.Printf("skipping pod (%s) because no other instruction and injection disabled by default", formatObjectDetails(pod.ObjectMeta))
 		return nil, nil
 	}
 
 	timezone := h.DefaultTimezone
 	if val, ok := pod.Annotations[k8tz.TimezoneAnnotation]; ok {
 		timezone = val
-		infoLogger.Printf("explicit timezone requested on pod's (%s) annotation: %s", formatObjectDetails(pod.ObjectMeta), val)
+		k8tz.InfoLogger.Printf("explicit timezone requested on pod's (%s) annotation: %s", formatObjectDetails(pod.ObjectMeta), val)
 	} else if val, ok := namespaceObj.Annotations[k8tz.TimezoneAnnotation]; ok {
 		timezone = val
-		infoLogger.Printf("explicit timezone requested on namespace (%s) annotation: %s", formatObjectDetails(pod.ObjectMeta), val)
+		k8tz.InfoLogger.Printf("explicit timezone requested on namespace (%s) annotation: %s", formatObjectDetails(pod.ObjectMeta), val)
 	}
 
 	strategy := h.DefaultInjectionStrategy
 	if v, e := pod.Annotations[k8tz.InjectionStrategyAnnotation]; e {
 		strategy = inject.InjectionStrategy(v)
-		infoLogger.Printf("explicit injection strategy requested on pod's (%s) annotation: %s", formatObjectDetails(pod.ObjectMeta), v)
+		k8tz.InfoLogger.Printf("explicit injection strategy requested on pod's (%s) annotation: %s", formatObjectDetails(pod.ObjectMeta), v)
 	} else if v, e := namespaceObj.Annotations[k8tz.InjectionStrategyAnnotation]; e {
 		strategy = inject.InjectionStrategy(v)
-		infoLogger.Printf("explicit injection strategy requested on namespace (%s) annotation: %s", formatObjectDetails(pod.ObjectMeta), v)
+		k8tz.InfoLogger.Printf("explicit injection strategy requested on namespace (%s) annotation: %s", formatObjectDetails(pod.ObjectMeta), v)
 	}
 
 	return &inject.PatchGenerator{
@@ -248,32 +250,32 @@ func (h *RequestsHandler) lookupCronJob(namespace string, cronJob *batchv1.CronJ
 	}
 
 	if _, ok := cronJob.Annotations[k8tz.InjectedAnnotation]; ok {
-		infoLogger.Printf("skipping cronJob (%s) because its already injected", formatObjectDetails(cronJob.ObjectMeta))
+		k8tz.InfoLogger.Printf("skipping cronJob (%s) because its already injected", formatObjectDetails(cronJob.ObjectMeta))
 		return nil, nil
 	}
 
 	if val, ok := cronJob.Annotations[k8tz.InjectAnnotation]; ok {
 		if val == "false" {
-			infoLogger.Printf("skipping cronJob (%s) because annotation on cronJob is explicitly false for injection", formatObjectDetails(cronJob.ObjectMeta))
+			k8tz.InfoLogger.Printf("skipping cronJob (%s) because annotation on cronJob is explicitly false for injection", formatObjectDetails(cronJob.ObjectMeta))
 			return nil, nil
 		}
 	} else if val, ok := namespaceObj.Annotations[k8tz.InjectAnnotation]; ok {
 		if val == "false" {
-			infoLogger.Printf("skipping cronJob (%s) because annotation on namespace is explicitly false for injection", formatObjectDetails(cronJob.ObjectMeta))
+			k8tz.InfoLogger.Printf("skipping cronJob (%s) because annotation on namespace is explicitly false for injection", formatObjectDetails(cronJob.ObjectMeta))
 			return nil, nil
 		}
 	} else if !h.InjectByDefault {
-		infoLogger.Printf("skipping cronJob (%s) because no other instruction and injection disabled by default", formatObjectDetails(cronJob.ObjectMeta))
+		k8tz.InfoLogger.Printf("skipping cronJob (%s) because no other instruction and injection disabled by default", formatObjectDetails(cronJob.ObjectMeta))
 		return nil, nil
 	}
 
 	timezone := h.DefaultTimezone
 	if val, ok := cronJob.Annotations[k8tz.TimezoneAnnotation]; ok {
 		timezone = val
-		infoLogger.Printf("explicit timezone requested on cronJob's (%s) annotation: %s", formatObjectDetails(cronJob.ObjectMeta), val)
+		k8tz.InfoLogger.Printf("explicit timezone requested on cronJob's (%s) annotation: %s", formatObjectDetails(cronJob.ObjectMeta), val)
 	} else if val, ok := namespaceObj.Annotations[k8tz.TimezoneAnnotation]; ok {
 		timezone = val
-		infoLogger.Printf("explicit timezone requested on namespace (%s) annotation: %s", formatObjectDetails(cronJob.ObjectMeta), val)
+		k8tz.InfoLogger.Printf("explicit timezone requested on namespace (%s) annotation: %s", formatObjectDetails(cronJob.ObjectMeta), val)
 	}
 
 	return &inject.PatchGenerator{
@@ -301,13 +303,14 @@ func (h *RequestsHandler) handlePodAdmissionRequest(req *admission.AdmissionRequ
 
 	var patches k8tz.Patches
 	if generator != nil {
-		verboseLogger.Printf("Generating patches for pod (%s) using generator: %+v", formatObjectDetails(pod.ObjectMeta), *generator)
+		generator.InitContainerVerbose = h.BootstrapVerbose
+		k8tz.VerboseLogger.Printf("Generating patches for pod (%s) using generator: %+v", formatObjectDetails(pod.ObjectMeta), *generator)
 		patches, err = generator.Generate(&pod, "")
 		if err != nil {
 			return nil, fmt.Errorf("failed to generate patches for pod, error=%w", err)
 		}
 
-		infoLogger.Printf("%d patches generated for pod (%s), timezone=%s, strategy=%s", len(patches), formatObjectDetails(pod.ObjectMeta), generator.Timezone, generator.Strategy)
+		k8tz.InfoLogger.Printf("%d patches generated for pod (%s), timezone=%s, strategy=%s", len(patches), formatObjectDetails(pod.ObjectMeta), generator.Timezone, generator.Strategy)
 	}
 
 	return patches, err
@@ -327,13 +330,13 @@ func (h *RequestsHandler) handleCronJobAdmissionRequest(req *admission.Admission
 
 	var patches k8tz.Patches
 	if generator != nil {
-		verboseLogger.Printf("Generating patches for cronJob (%s) using generator: %+v", formatObjectDetails(cronJob.ObjectMeta), *generator)
+		k8tz.VerboseLogger.Printf("Generating patches for cronJob (%s) using generator: %+v", formatObjectDetails(cronJob.ObjectMeta), *generator)
 		patches, err = generator.Generate(&cronJob, "")
 		if err != nil {
 			return nil, fmt.Errorf("failed to generate patches for pod, error=%w", err)
 		}
 
-		infoLogger.Printf("%d patches generated for cronJob (%s), timezone=%s", len(patches), formatObjectDetails(cronJob.ObjectMeta), generator.Timezone)
+		k8tz.InfoLogger.Printf("%d patches generated for cronJob (%s), timezone=%s", len(patches), formatObjectDetails(cronJob.ObjectMeta), generator.Timezone)
 	}
 
 	return patches, err

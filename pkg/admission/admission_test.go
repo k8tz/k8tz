@@ -25,7 +25,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/k8tz/k8tz/pkg"
+	k8tz "github.com/k8tz/k8tz/pkg"
 	"github.com/k8tz/k8tz/pkg/inject"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -59,7 +59,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 		{
 			name: "simple valid request",
 			fields: fields{
-				DefaultTimezone:          pkg.UTCTimezone,
+				DefaultTimezone:          k8tz.UTCTimezone,
 				ContainerName:            "k8tz",
 				BootstrapImage:           "test:0.0.0",
 				DefaultInjectionStrategy: inject.InitContainerInjectionStrategy,
@@ -77,7 +77,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 		{
 			name: "request with wrong method: get",
 			fields: fields{
-				DefaultTimezone:          pkg.UTCTimezone,
+				DefaultTimezone:          k8tz.UTCTimezone,
 				BootstrapImage:           "test:0.0.0",
 				DefaultInjectionStrategy: inject.InitContainerInjectionStrategy,
 				InjectByDefault:          true,
@@ -93,7 +93,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 		{
 			name: "request with wrong content type: text/plain",
 			fields: fields{
-				DefaultTimezone:          pkg.UTCTimezone,
+				DefaultTimezone:          k8tz.UTCTimezone,
 				ContainerName:            "k8tz",
 				BootstrapImage:           "test:0.0.0",
 				DefaultInjectionStrategy: inject.InitContainerInjectionStrategy,
@@ -110,7 +110,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 		{
 			name: "unsupported object as namespace should be ignored",
 			fields: fields{
-				DefaultTimezone:          pkg.UTCTimezone,
+				DefaultTimezone:          k8tz.UTCTimezone,
 				ContainerName:            "k8tz",
 				BootstrapImage:           "test:0.0.0",
 				DefaultInjectionStrategy: inject.InitContainerInjectionStrategy,
@@ -127,7 +127,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 		{
 			name: "cronjob request should be handled when feature enabled",
 			fields: fields{
-				DefaultTimezone:          pkg.UTCTimezone,
+				DefaultTimezone:          k8tz.UTCTimezone,
 				ContainerName:            "k8tz",
 				BootstrapImage:           "test:0.0.0",
 				DefaultInjectionStrategy: inject.InitContainerInjectionStrategy,
@@ -152,7 +152,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 		{
 			name: "cronjob request should be ignored when feature enabled but InjectByDefault is false and not overridden by annotation",
 			fields: fields{
-				DefaultTimezone:          pkg.UTCTimezone,
+				DefaultTimezone:          k8tz.UTCTimezone,
 				ContainerName:            "k8tz",
 				BootstrapImage:           "test:0.0.0",
 				DefaultInjectionStrategy: inject.InitContainerInjectionStrategy,
@@ -177,7 +177,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 		{
 			name: "unparsable review should be considered bad request",
 			fields: fields{
-				DefaultTimezone:          pkg.UTCTimezone,
+				DefaultTimezone:          k8tz.UTCTimezone,
 				ContainerName:            "k8tz",
 				BootstrapImage:           "test:0.0.0",
 				DefaultInjectionStrategy: inject.InitContainerInjectionStrategy,
@@ -194,7 +194,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 		{
 			name: "review without request",
 			fields: fields{
-				DefaultTimezone:          pkg.UTCTimezone,
+				DefaultTimezone:          k8tz.UTCTimezone,
 				ContainerName:            "k8tz",
 				BootstrapImage:           "test:0.0.0",
 				DefaultInjectionStrategy: inject.InitContainerInjectionStrategy,
@@ -211,7 +211,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 		{
 			name: "request with invalid namespace should raise an error",
 			fields: fields{
-				DefaultTimezone:          pkg.UTCTimezone,
+				DefaultTimezone:          k8tz.UTCTimezone,
 				ContainerName:            "k8tz",
 				BootstrapImage:           "test:0.0.0",
 				DefaultInjectionStrategy: inject.InitContainerInjectionStrategy,
@@ -228,7 +228,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 		{
 			name: "valid request will skip injection because of namespace annotation",
 			fields: fields{
-				DefaultTimezone:          pkg.UTCTimezone,
+				DefaultTimezone:          k8tz.UTCTimezone,
 				ContainerName:            "k8tz",
 				BootstrapImage:           "test:0.0.0",
 				DefaultInjectionStrategy: inject.InitContainerInjectionStrategy,
@@ -255,7 +255,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 		{
 			name: "valid request will skip injection because of pod annotation",
 			fields: fields{
-				DefaultTimezone:          pkg.UTCTimezone,
+				DefaultTimezone:          k8tz.UTCTimezone,
 				ContainerName:            "k8tz",
 				BootstrapImage:           "test:0.0.0",
 				DefaultInjectionStrategy: inject.InitContainerInjectionStrategy,
@@ -279,7 +279,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 		{
 			name: "valid request will skip injection when default is false and no annotations found",
 			fields: fields{
-				DefaultTimezone:          pkg.UTCTimezone,
+				DefaultTimezone:          k8tz.UTCTimezone,
 				ContainerName:            "k8tz",
 				BootstrapImage:           "test:0.0.0",
 				DefaultInjectionStrategy: inject.InitContainerInjectionStrategy,
@@ -303,7 +303,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 		{
 			name: "valid request will be injected when default is false and pod annotation found",
 			fields: fields{
-				DefaultTimezone:          pkg.UTCTimezone,
+				DefaultTimezone:          k8tz.UTCTimezone,
 				ContainerName:            "k8tz",
 				BootstrapImage:           "test:0.0.0",
 				DefaultInjectionStrategy: inject.InitContainerInjectionStrategy,
@@ -327,7 +327,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 		{
 			name: "valid request will be injected when default is false and namespace annotation found",
 			fields: fields{
-				DefaultTimezone:          pkg.UTCTimezone,
+				DefaultTimezone:          k8tz.UTCTimezone,
 				ContainerName:            "k8tz",
 				BootstrapImage:           "test:0.0.0",
 				DefaultInjectionStrategy: inject.InitContainerInjectionStrategy,
@@ -354,7 +354,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 		{
 			name: "valid request will be injected when default is true but pod annotation is explicitly false",
 			fields: fields{
-				DefaultTimezone:          pkg.UTCTimezone,
+				DefaultTimezone:          k8tz.UTCTimezone,
 				ContainerName:            "k8tz",
 				BootstrapImage:           "test:0.0.0",
 				DefaultInjectionStrategy: inject.InitContainerInjectionStrategy,
@@ -378,7 +378,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 		{
 			name: "explicit timezone annotation on pod",
 			fields: fields{
-				DefaultTimezone:          pkg.UTCTimezone,
+				DefaultTimezone:          k8tz.UTCTimezone,
 				ContainerName:            "k8tz",
 				BootstrapImage:           "test:0.0.0",
 				DefaultInjectionStrategy: inject.InitContainerInjectionStrategy,
@@ -402,7 +402,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 		{
 			name: "explicit timezone annotation on namespace",
 			fields: fields{
-				DefaultTimezone:          pkg.UTCTimezone,
+				DefaultTimezone:          k8tz.UTCTimezone,
 				ContainerName:            "k8tz",
 				BootstrapImage:           "test:0.0.0",
 				DefaultInjectionStrategy: inject.InitContainerInjectionStrategy,
@@ -429,7 +429,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 		{
 			name: "explicit strategy annotation on pod",
 			fields: fields{
-				DefaultTimezone:          pkg.UTCTimezone,
+				DefaultTimezone:          k8tz.UTCTimezone,
 				ContainerName:            "k8tz",
 				BootstrapImage:           "test:0.0.0",
 				DefaultInjectionStrategy: inject.InitContainerInjectionStrategy,
@@ -453,7 +453,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 		{
 			name: "explicit strategy annotation on namespace",
 			fields: fields{
-				DefaultTimezone:          pkg.UTCTimezone,
+				DefaultTimezone:          k8tz.UTCTimezone,
 				ContainerName:            "k8tz",
 				BootstrapImage:           "test:0.0.0",
 				DefaultInjectionStrategy: inject.InitContainerInjectionStrategy,
@@ -480,7 +480,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 		{
 			name: "explicit strategy annotation on namespace",
 			fields: fields{
-				DefaultTimezone:          pkg.UTCTimezone,
+				DefaultTimezone:          k8tz.UTCTimezone,
 				ContainerName:            "k8tz",
 				BootstrapImage:           "test:0.0.0",
 				DefaultInjectionStrategy: inject.InitContainerInjectionStrategy,
@@ -505,7 +505,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// long warnings are expected here and better not be logged
-			warningLogger.SetOutput(io.Discard)
+			k8tz.WarningLogger.SetOutput(io.Discard)
 
 			h := &RequestsHandler{
 				DefaultTimezone:          tt.fields.DefaultTimezone,

@@ -54,6 +54,7 @@ spec:
           - "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           {{- if .Values.verbose }}
           - "--verbose"
+          - "--bootstrap-verbose"
           {{- end }}
           {{- if .Values.webhook.certManager.enabled }}
           - "--tls-crt"

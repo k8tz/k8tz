@@ -17,9 +17,9 @@ limitations under the License.
 package cmd
 
 import (
+	"github.com/k8tz/k8tz/pkg/admission"
 	"strings"
 
-	"github.com/k8tz/k8tz/pkg/admission"
 	"github.com/spf13/cobra"
 	cliflag "k8s.io/component-base/cli/flag"
 )
@@ -69,6 +69,7 @@ func init() {
 	webhookCmd.Flags().StringVarP(&webhook.Handler.DefaultTimezone, "timezone", "t", webhook.Handler.DefaultTimezone, "Default timezone if not specified explicitly")
 	webhookCmd.Flags().StringVar(&webhook.Handler.ContainerName, "container-name", webhook.Handler.ContainerName, "initContainer name")
 	webhookCmd.Flags().StringVar(&webhook.Handler.BootstrapImage, "bootstrap-image", webhook.Handler.BootstrapImage, "initContainer bootstrap image")
+	webhookCmd.Flags().BoolVar(&webhook.Handler.BootstrapVerbose, "bootstrap-verbose", webhook.Handler.BootstrapVerbose, "Print more verbose logs inside the bootstrap initContainer for debugging")
 	webhookCmd.Flags().StringVar(&webhook.Handler.HostPathPrefix, "hostPathPrefix", webhook.Handler.HostPathPrefix, "Location of zoneinfo on host machines")
 	webhookCmd.Flags().StringVar(&webhook.Handler.LocalTimePath, "localTimePath", webhook.Handler.LocalTimePath, "Mount path for TZif file on containers")
 	webhookCmd.Flags().StringVarP((*string)(&webhook.Handler.DefaultInjectionStrategy), "injection-strategy", "s", string(webhook.Handler.DefaultInjectionStrategy), "Default injection strategy if not specified explicitly (hostPath/initContainer)")

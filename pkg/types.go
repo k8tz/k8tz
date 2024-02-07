@@ -16,6 +16,12 @@ limitations under the License.
 
 package pkg
 
+import (
+	"io"
+	"log"
+	"os"
+)
+
 const (
 	// DefaultTimezone represents the default timezone for k8tz applications
 	DefaultTimezone = UTCTimezone
@@ -32,6 +38,11 @@ const (
 	// InjectAnnotation TODO
 	InjectAnnotation = "k8tz.io/inject"
 )
+
+var VerboseLogger = log.New(io.Discard, "VERBOSE: ", log.Ldate|log.Ltime|log.Lshortfile)
+var InfoLogger = log.New(os.Stdout, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
+var WarningLogger = log.New(os.Stderr, "WARNING: ", log.Ldate|log.Ltime|log.Lshortfile)
+var ErrorLogger = log.New(os.Stderr, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
 
 type Patches []Patch
 type Patch struct {
