@@ -1,3 +1,8 @@
+# 0.16.0
+
+- Update tzdata package to [2024a](https://github.com/k8tz/k8tz/pull/96)
+- Add verbose flag to bootstrap initContainer (https://github.com/k8tz/k8tz/pull/95)
+
 # 0.15.0
 
 - Update tzdata package to [2023d](https://github.com/k8tz/k8tz/pull/94)
