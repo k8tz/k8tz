@@ -1,6 +1,6 @@
 # 0.16.0
 
-- Update tzdata package to [2024a](https://github.com/k8tz/k8tz/pull/96)
+- Update tzdata package to [2024a](https://mm.icann.org/pipermail/tz-announce/2024-February/000081.html) (https://github.com/k8tz/k8tz/pull/96)
 - Add verbose flag to bootstrap initContainer (https://github.com/k8tz/k8tz/pull/95)
 
 # 0.15.0
