@@ -330,6 +330,7 @@ func (g *PatchGenerator) createInitContainerPatches(spec *corev1.PodSpec, pathpr
 						"ALL",
 					},
 				},
+				RunAsNonRoot: &True,
 			},
 			VolumeMounts: []corev1.VolumeMount{
 				{
