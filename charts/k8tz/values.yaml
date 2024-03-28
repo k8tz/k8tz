@@ -3,13 +3,14 @@
 kind: Deployment
 replicaCount: 1
 
-namespace: k8tz  # set to `null` to use helm built-in namespace
-createNamespace: true  # set to `false` to disable namespace creation by the helm chart
+namespace: k8tz # set to `null` to use helm built-in namespace
+createNamespace: true # set to `false` to disable namespace creation by the helm chart
+namespaceLabels: {}
 injectionStrategy: initContainer
 timezone: UTC
 injectedInitContainerName: k8tz
 injectAll: true
-cronJobTimeZone: false  # requires kubernetes >=1.24.0-beta.0 with 'CronJobTimeZone' feature gate enabled (alpha)
+cronJobTimeZone: false # requires kubernetes >=1.24.0-beta.0 with 'CronJobTimeZone' feature gate enabled (alpha)
 verbose: false
 
 # Labels to apply to all resources
@@ -66,7 +67,8 @@ service:
   type: ClusterIP
   port: 443
 
-resources: {}
+resources:
+  {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
