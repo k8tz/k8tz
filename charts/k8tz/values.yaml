@@ -11,6 +11,8 @@ injectedInitContainerName: k8tz
 injectAll: true
 cronJobTimeZone: false  # requires kubernetes >=1.24.0-beta.0 with 'CronJobTimeZone' feature gate enabled (alpha)
 verbose: false
+initContainerResources: {} # resources claimed for the bootstrap init container
+resources: {} # resources claimed for the k8tz controller
 
 # Labels to apply to all resources
 labels: {}

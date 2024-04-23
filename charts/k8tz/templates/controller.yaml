@@ -77,6 +77,10 @@ spec:
           - "--tls-cipher-suites"
           - "{{ .Values.webhook.tlsCipherSuites }}"
           {{- end }}
+          {{- if .Values.initContainerResources }}
+          - "--bootstrap-resources"
+          - {{ .Values.initContainerResources | toJson | quote }}
+          {{- end}}
           securityContext:
             {{- include "k8tz.securityContext" . | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"

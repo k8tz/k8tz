@@ -38,29 +38,31 @@ import (
 )
 
 type RequestsHandler struct {
-	DefaultTimezone          string
-	ContainerName            string
-	BootstrapImage           string
-	BootstrapVerbose         bool
-	DefaultInjectionStrategy inject.InjectionStrategy
-	InjectByDefault          bool
-	HostPathPrefix           string
-	LocalTimePath            string
-	CronJobTimeZone          bool
-	clientset                kubernetes.Interface
+	DefaultTimezone             string
+	ContainerName               string
+	BootstrapImage              string
+	BootstrapVerbose            bool
+	BootstrapContainerResources string
+	DefaultInjectionStrategy    inject.InjectionStrategy
+	InjectByDefault             bool
+	HostPathPrefix              string
+	LocalTimePath               string
+	CronJobTimeZone             bool
+	clientset                   kubernetes.Interface
 }
 
 func NewRequestsHandler() RequestsHandler {
 	return RequestsHandler{
-		DefaultTimezone:          k8tz.DefaultTimezone,
-		ContainerName:            inject.DefaultInitContainerName,
-		BootstrapImage:           version.Image(),
-		BootstrapVerbose:         false,
-		DefaultInjectionStrategy: inject.DefaultInjectionStrategy,
-		InjectByDefault:          true,
-		HostPathPrefix:           inject.DefaultHostPathPrefix,
-		LocalTimePath:            inject.DefaultLocalTimePath,
-		CronJobTimeZone:          false,
+		DefaultTimezone:             k8tz.DefaultTimezone,
+		ContainerName:               inject.DefaultInitContainerName,
+		BootstrapImage:              version.Image(),
+		BootstrapContainerResources: "",
+		BootstrapVerbose:            false,
+		DefaultInjectionStrategy:    inject.DefaultInjectionStrategy,
+		InjectByDefault:             true,
+		HostPathPrefix:              inject.DefaultHostPathPrefix,
+		LocalTimePath:               inject.DefaultLocalTimePath,
+		CronJobTimeZone:             false,
 	}
 }
 
@@ -234,12 +236,13 @@ func (h *RequestsHandler) lookupPod(namespace string, pod *corev1.Pod) (*inject.
 	}
 
 	return &inject.PatchGenerator{
-		Strategy:           strategy,
-		Timezone:           timezone,
-		InitContainerName:  h.ContainerName,
-		InitContainerImage: h.BootstrapImage,
-		HostPathPrefix:     h.HostPathPrefix,
-		LocalTimePath:      h.LocalTimePath,
+		Strategy:               strategy,
+		Timezone:               timezone,
+		InitContainerName:      h.ContainerName,
+		InitContainerImage:     h.BootstrapImage,
+		InitContainerResources: h.BootstrapContainerResources,
+		HostPathPrefix:         h.HostPathPrefix,
+		LocalTimePath:          h.LocalTimePath,
 	}, nil
 }
 
@@ -279,13 +282,14 @@ func (h *RequestsHandler) lookupCronJob(namespace string, cronJob *batchv1.CronJ
 	}
 
 	return &inject.PatchGenerator{
-		Strategy:           h.DefaultInjectionStrategy,
-		Timezone:           timezone,
-		InitContainerName:  h.ContainerName,
-		InitContainerImage: h.BootstrapImage,
-		HostPathPrefix:     h.HostPathPrefix,
-		LocalTimePath:      h.LocalTimePath,
-		CronJobTimeZone:    h.CronJobTimeZone,
+		Strategy:               h.DefaultInjectionStrategy,
+		Timezone:               timezone,
+		InitContainerName:      h.ContainerName,
+		InitContainerImage:     h.BootstrapImage,
+		InitContainerResources: h.BootstrapContainerResources,
+		HostPathPrefix:         h.HostPathPrefix,
+		LocalTimePath:          h.LocalTimePath,
+		CronJobTimeZone:        h.CronJobTimeZone,
 	}, nil
 }
 

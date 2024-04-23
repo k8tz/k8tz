@@ -546,7 +546,10 @@ func TestPatchGenerator_createInitContainerPatches(t *testing.T) {
 				LocalTimePath:        "/etc/localtime",
 			}
 
-			got := g.createInitContainerPatches(tt.args.spec, tt.args.pathprefix)
+			got, err := g.createInitContainerPatches(tt.args.spec, tt.args.pathprefix)
+			if err != nil {
+				t.Errorf("PatchGenerator.createInitContainerPatches(): %v", err)
+			}
 			if err := comparePatches(&got, tt.golden); err != nil {
 				t.Errorf("PatchGenerator.createInitContainerPatches(): %v", err)
 			}

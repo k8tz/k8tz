@@ -19,9 +19,10 @@ package certwatcher
 import (
 	"context"
 	"fmt"
+	"os"
+
 	k8tz "github.com/k8tz/k8tz/pkg"
 	"github.com/k8tz/k8tz/pkg/version"
-	"os"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/runtime"

@@ -17,6 +17,7 @@ limitations under the License.
 package inject
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -61,26 +62,28 @@ var (
 )
 
 type PatchGenerator struct {
-	Strategy             InjectionStrategy
-	Timezone             string
-	InitContainerImage   string
-	InitContainerName    string
-	InitContainerVerbose bool
-	HostPathPrefix       string
-	LocalTimePath        string
-	CronJobTimeZone      bool
+	Strategy               InjectionStrategy
+	Timezone               string
+	InitContainerImage     string
+	InitContainerName      string
+	InitContainerResources string
+	InitContainerVerbose   bool
+	HostPathPrefix         string
+	LocalTimePath          string
+	CronJobTimeZone        bool
 }
 
 func NewPatchGenerator() PatchGenerator {
 	return PatchGenerator{
-		Strategy:             DefaultInjectionStrategy,
-		Timezone:             k8tz.DefaultTimezone,
-		InitContainerImage:   version.Image(),
-		InitContainerName:    DefaultInitContainerName,
-		InitContainerVerbose: false,
-		HostPathPrefix:       DefaultHostPathPrefix,
-		LocalTimePath:        DefaultLocalTimePath,
-		CronJobTimeZone:      false,
+		Strategy:               DefaultInjectionStrategy,
+		Timezone:               k8tz.DefaultTimezone,
+		InitContainerImage:     version.Image(),
+		InitContainerName:      DefaultInitContainerName,
+		InitContainerResources: "",
+		InitContainerVerbose:   false,
+		HostPathPrefix:         DefaultHostPathPrefix,
+		LocalTimePath:          DefaultLocalTimePath,
+		CronJobTimeZone:        false,
 	}
 }
 
@@ -157,7 +160,11 @@ func (g *PatchGenerator) forPodSpec(spec *corev1.PodSpec, pathprefix string, pos
 	if g.Strategy == HostPathInjectionStrategy {
 		patches = append(patches, g.createHostPathPatches(spec, pathprefix)...)
 	} else if g.Strategy == InitContainerInjectionStrategy {
-		patches = append(patches, g.createInitContainerPatches(spec, pathprefix)...)
+		initPaches, err := g.createInitContainerPatches(spec, pathprefix)
+		if err != nil {
+			return nil, err
+		}
+		patches = append(patches, initPaches...)
 	} else {
 		return nil, fmt.Errorf("unknown injection strategy specified: %s", g.Strategy)
 	}
@@ -240,12 +247,12 @@ func (g *PatchGenerator) removeContainerVolumeMounts(volumeMounts []corev1.Volum
 	return patches
 }
 
-func (g *PatchGenerator) createInitContainerPatches(spec *corev1.PodSpec, pathprefix string) k8tz.Patches {
+func (g *PatchGenerator) createInitContainerPatches(spec *corev1.PodSpec, pathprefix string) (k8tz.Patches, error) {
 	var patches = k8tz.Patches{}
 
 	containers := len(spec.Containers)
 	if containers == 0 {
-		return patches
+		return patches, nil
 	}
 
 	if len(spec.Volumes) == 0 {
@@ -313,6 +320,10 @@ func (g *PatchGenerator) createInitContainerPatches(spec *corev1.PodSpec, pathpr
 		bootstrapArgs = append(bootstrapArgs, "--verbose")
 	}
 
+	resources, err := g.populateResourceRequirements()
+	if err != nil {
+		return nil, err
+	}
 	patches = append(patches, k8tz.Patch{
 		Op:   "add",
 		Path: fmt.Sprintf("%s/initContainers/-", pathprefix),
@@ -338,10 +349,11 @@ func (g *PatchGenerator) createInitContainerPatches(spec *corev1.PodSpec, pathpr
 					ReadOnly:  false,
 				},
 			},
+			Resources: *resources,
 		},
 	})
 
-	return patches
+	return patches, nil
 }
 
 func (g *PatchGenerator) createHostPathPatches(spec *corev1.PodSpec, pathprefix string) k8tz.Patches {
@@ -430,6 +442,21 @@ func (g *PatchGenerator) createPostInjectionAnnotations(meta *metav1.ObjectMeta,
 	})
 
 	return patches
+}
+
+func (g *PatchGenerator) populateResourceRequirements() (*corev1.ResourceRequirements, error) {
+	if len(g.InitContainerResources) > 0 {
+		resourceRequirement := corev1.ResourceRequirements{}
+		err := json.Unmarshal([]byte(g.InitContainerResources), &resourceRequirement)
+		if err != nil {
+			// if the json parsing fails, k8tz should not start
+			return nil, fmt.Errorf("fail to parse InitContainerResources Json, error=%w", err)
+		}
+
+		return &resourceRequirement, nil
+	}
+
+	return &corev1.ResourceRequirements{}, nil
 }
 
 // TODO: unit test
