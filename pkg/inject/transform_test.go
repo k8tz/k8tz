@@ -259,6 +259,56 @@ func TestTransformer_Transform(t *testing.T) {
 			golden:  "testdata/test-pod-volumeMounts-initContainer-result.yaml",
 			wantErr: false,
 		},
+		{
+			name: "patch pod with valid full compute resources for the initContainer",
+			fields: fields{
+				PatchGenerator: PatchGenerator{
+					Strategy:               InitContainerInjectionStrategy,
+					Timezone:               "America/Jamaica",
+					InitContainerName:      "k8tz",
+					InitContainerImage:     "quay.io/k8tz/k8tz:0.0.1-beta2",
+					InitContainerResources: "{\"limits\":{\"cpu\":\"100m\",\"memory\":\"128Mi\"},\"requests\":{\"cpu\":\"100m\",\"memory\":\"128Mi\"}}",
+					HostPathPrefix:         "/usr/share/zoneinfo",
+					LocalTimePath:          "/etc/localtime",
+				},
+				Inputs: []string{"testdata/simple-pod.yaml"},
+			},
+			golden:  "testdata/test-pod-initContainer-full-computeResources.yaml",
+			wantErr: false,
+		},
+		{
+			name: "patch pod with valid partial compute resources for the initContainer",
+			fields: fields{
+				PatchGenerator: PatchGenerator{
+					Strategy:               InitContainerInjectionStrategy,
+					Timezone:               "America/Jamaica",
+					InitContainerName:      "k8tz",
+					InitContainerImage:     "quay.io/k8tz/k8tz:0.0.1-beta2",
+					InitContainerResources: "{\"limits\":{\"memory\":\"128Mi\"},\"requests\":{\"cpu\":\"100m\",\"memory\":\"128Mi\"}}",
+					HostPathPrefix:         "/usr/share/zoneinfo",
+					LocalTimePath:          "/etc/localtime",
+				},
+				Inputs: []string{"testdata/simple-pod.yaml"},
+			},
+			golden:  "testdata/test-pod-initContainer-partial-computeResources.yaml",
+			wantErr: false,
+		},
+		{
+			name: "patch pod with bad compute resources for the initContainer",
+			fields: fields{
+				PatchGenerator: PatchGenerator{
+					Strategy:               InitContainerInjectionStrategy,
+					Timezone:               "America/Jamaica",
+					InitContainerName:      "k8tz",
+					InitContainerImage:     "quay.io/k8tz/k8tz:0.0.1-beta2",
+					InitContainerResources: "BAD_RESOURCES",
+					HostPathPrefix:         "/usr/share/zoneinfo",
+					LocalTimePath:          "/etc/localtime",
+				},
+				Inputs: []string{"testdata/simple-pod.yaml"},
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
