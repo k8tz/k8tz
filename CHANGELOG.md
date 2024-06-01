@@ -1,3 +1,7 @@
+# 0.16.1
+
+- Add possibility to set init container resources (https://github.com/k8tz/k8tz/pull/85)
+
 # 0.16.0
 
 - Update tzdata package to [2024a](https://mm.icann.org/pipermail/tz-announce/2024-February/000081.html) (https://github.com/k8tz/k8tz/pull/96)
