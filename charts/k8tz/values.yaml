@@ -80,7 +80,7 @@ resources: {}
   #   memory: 128Mi
 
 # resources claimed for the bootstrap init container
-initContainerResources: {} 
+initContainerResources: {}
   # limits:
   #   cpu: 100m
   #   memory: 128Mi
