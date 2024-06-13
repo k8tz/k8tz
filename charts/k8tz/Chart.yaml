@@ -1,8 +1,8 @@
 apiVersion: v2
 name: k8tz
 description: Kubernetes admission controller to inject timezones into Pods and CronJobs
-version: 0.16.1
-appVersion: "0.16.1"
+version: 0.16.2
+appVersion: "0.16.2"
 icon: https://github.com/k8tz/k8tz/raw/master/assets/k8tz-icon-transparent.png
 home: http://k8tz.io
 sources:
@@ -16,10 +16,10 @@ keywords:
   - tzdb
 annotations:
   artifacthub.io/changes: |
-    - kind: "added"
-      description: "Add possibility to set init container resources"
+    - kind: "fixed"
+      description: "Fix volumeMounts volume name not found error when using custom initContainer name"
   artifacthub.io/links: |
     - name: "source"
       url: "https://github.com/k8tz/k8tz"
-  artifacthub.io/containsSecurityUpdates: "true"
+  artifacthub.io/containsSecurityUpdates: "false"
   artifacthub.io/license: "Apache-2.0"
