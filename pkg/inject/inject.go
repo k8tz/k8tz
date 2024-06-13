@@ -267,7 +267,7 @@ func (g *PatchGenerator) createInitContainerPatches(spec *corev1.PodSpec, pathpr
 		Op:   "add",
 		Path: fmt.Sprintf("%s/volumes/-", pathprefix),
 		Value: corev1.Volume{
-			Name: g.InitContainerName,
+			Name: "k8tz",
 			VolumeSource: corev1.VolumeSource{
 				EmptyDir: &corev1.EmptyDirVolumeSource{},
 			},

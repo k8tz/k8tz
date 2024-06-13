@@ -8,7 +8,7 @@
     "op": "add",
     "path": "/spec/volumes/-",
     "value": {
-      "name": "k8tz-init",
+      "name": "k8tz",
       "emptyDir": {}
     }
   },
