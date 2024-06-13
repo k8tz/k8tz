@@ -1,3 +1,7 @@
+# 0.16.2
+
+- Fix volumeMounts volume name not found error when using custom initContainer name (https://github.com/k8tz/k8tz/pull/102)
+
 # 0.16.1
 
 - Add possibility to set init container resources (https://github.com/k8tz/k8tz/pull/85)
