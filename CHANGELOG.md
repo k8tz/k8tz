@@ -1,3 +1,7 @@
+# 0.17.0
+
+- Update tzdata package to [2024b](https://github.com/k8tz/k8tz/pull/107)
+
 # 0.16.2
 
 - Fix volumeMounts volume name not found error when using custom initContainer name (https://github.com/k8tz/k8tz/pull/102)
