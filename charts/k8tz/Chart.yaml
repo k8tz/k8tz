@@ -1,8 +1,8 @@
 apiVersion: v2
 name: k8tz
 description: Kubernetes admission controller to inject timezones into Pods and CronJobs
-version: 0.17.0
-appVersion: "0.17.0"
+version: 0.17.1
+appVersion: "0.17.1"
 icon: https://github.com/k8tz/k8tz/raw/master/assets/k8tz-icon-transparent.png
 home: http://k8tz.io
 sources:
@@ -16,13 +16,10 @@ keywords:
   - tzdb
 annotations:
   artifacthub.io/changes: |
-    - kind: "changed"
-      description: "Update tzdata package to 2024b"
-      links:
-        - name: "2024b Announcement"
-          url: "https://lists.iana.org/hyperkitty/list/tz-announce@iana.org/thread/IZ7AO6WRE3W3TWBL5IR6PMQUL433BQIE"
+    - kind: "fixed"
+      description: "don't render secret permissions when cert-manager is not used"
   artifacthub.io/links: |
     - name: "source"
       url: "https://github.com/k8tz/k8tz"
-  artifacthub.io/containsSecurityUpdates: "false"
+  artifacthub.io/containsSecurityUpdates: "true"
   artifacthub.io/license: "Apache-2.0"
