@@ -1,3 +1,7 @@
+# 0.17.1
+
+- Helm: don't render secret permissions when cert-manager is not used (https://github.com/k8tz/k8tz/pull/110)
+
 # 0.17.0
 
 - Update tzdata package to [2024b](https://github.com/k8tz/k8tz/pull/107)
