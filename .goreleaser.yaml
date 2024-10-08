@@ -1,3 +1,4 @@
+version: 2
 dist: build
 before:
   hooks:
@@ -49,7 +50,7 @@ archives:
 checksum:
   name_template: 'checksums.txt'
 snapshot:
-  name_template: "{{ incpatch .Version }}-snapshot"
+  version_template: "{{ incpatch .Version }}-snapshot"
 changelog:
   sort: asc
   filters:
