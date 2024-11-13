@@ -20,4 +20,8 @@ spec:
   issuerRef:
     {{- toYaml . | nindent 4 }}
   {{- end }}
+  {{- with .Values.webhook.certManager.privateKey }}
+  privateKey:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 {{- end }}

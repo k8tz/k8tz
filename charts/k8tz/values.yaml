@@ -29,6 +29,7 @@ webhook:
     issuerRef:
       name: selfsigned
       kind: ClusterIssuer
+    privateKey: ~
 
   crtPEM: |
 
