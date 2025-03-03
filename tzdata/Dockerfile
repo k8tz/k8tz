@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM alpine:3.13 AS src
+FROM alpine:3.21 AS src
 
-ARG tzdbversion=2024b
+ARG tzdbversion=2025a
 RUN \
     apk add build-base lzip && \
     wget -O tzdb.tar.lz https://data.iana.org/time-zones/releases/tzdb-$tzdbversion.tar.lz && \
@@ -26,3 +26,4 @@ RUN \
 
 FROM scratch
 COPY --from=src /tzdb/build/usr/share/zoneinfo /usr/share/zoneinfo
+
