@@ -1,3 +1,8 @@
+# 0.18.0
+
+- Update tzdata package to [2025b](https://github.com/k8tz/k8tz/pull/116)
+- Bump golang.org/x/net from 0.23.0 to 0.36.0 (https://github.com/k8tz/k8tz/pull/117)
+
 # 0.17.1
 
 - Helm: don't render secret permissions when cert-manager is not used (https://github.com/k8tz/k8tz/pull/110)
