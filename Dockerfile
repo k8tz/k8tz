@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ARG TZDATA_IMAGE=quay.io/k8tz/tzdata:2025a
+ARG TZDATA_IMAGE=quay.io/k8tz/tzdata:2025b
 FROM $TZDATA_IMAGE
 
 ARG BINARY_LOCATION=k8tz
