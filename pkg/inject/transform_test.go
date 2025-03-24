@@ -56,6 +56,19 @@ func TestTransformer_Transform(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "patch pod with imageVolume",
+			fields: fields{
+				PatchGenerator: PatchGenerator{
+					Strategy:           ImageVolumeInjectionStrategy,
+					Timezone:           "Asia/Jerusalem",
+					InitContainerImage: "k8tz:0.0.0",
+				},
+				Inputs: []string{"testdata/simple-pod.yaml"},
+			},
+			golden:  "testdata/test-pod-imageVolume-1.yaml",
+			wantErr: false,
+		},
+		{
 			name: "invalid yaml file should raise an error",
 			fields: fields{
 				PatchGenerator: PatchGenerator{
