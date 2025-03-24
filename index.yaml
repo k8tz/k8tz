@@ -3,6 +3,36 @@ entries:
   k8tz:
   - annotations:
       artifacthub.io/changes: |
+        - kind: "changed"
+          description: "update tzdata package to 2025b"
+      artifacthub.io/containsSecurityUpdates: "true"
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/links: |
+        - name: "source"
+          url: "https://github.com/k8tz/k8tz"
+    apiVersion: v2
+    appVersion: 0.18.0
+    created: "2025-03-24T20:19:24.939632078Z"
+    description: Kubernetes admission controller to inject timezones into Pods and
+      CronJobs
+    digest: ada078e7b73ded3b477a3be6d7b2264170e3dc777b665ced550bb525bb70d2c3
+    home: http://k8tz.io
+    icon: https://github.com/k8tz/k8tz/raw/master/assets/k8tz-icon-transparent.png
+    keywords:
+    - timezone
+    - timezones
+    - admission
+    - controller
+    - tzdata
+    - tzdb
+    name: k8tz
+    sources:
+    - https://github.com/k8tz/k8tz
+    urls:
+    - https://github.com/k8tz/k8tz/releases/download/helm-chart-v0.18.0-k8tz-v0.18.0/k8tz-0.18.0.tgz
+    version: 0.18.0
+  - annotations:
+      artifacthub.io/changes: |
         - kind: "fixed"
           description: "don't render secret permissions when cert-manager is not used"
       artifacthub.io/containsSecurityUpdates: "true"
@@ -658,4 +688,4 @@ entries:
     urls:
     - https://github.com/k8tz/k8tz/releases/download/helm-chart-v0.2.1-k8tz-v0.3.0/k8tz-0.2.1.tgz
     version: 0.2.1
-generated: "2024-10-08T16:21:37.368973375Z"
+generated: "2025-03-24T20:19:24.939891655Z"
