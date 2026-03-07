@@ -50,6 +50,7 @@ spec:
           - {{ .Values.injectionStrategy | quote }}
           - "--inject={{ .Values.injectAll }}"
           - "--container-name={{ .Values.injectedInitContainerName }}"
+          - "--container-imagepullpolicy={{ .Values.injectedInitContainerImagePullPolicy }}"
           - "--bootstrap-image"
           - "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           {{- if .Values.verbose }}

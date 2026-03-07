@@ -8,6 +8,7 @@ createNamespace: true  # set to `false` to disable namespace creation by the hel
 injectionStrategy: initContainer
 timezone: UTC
 injectedInitContainerName: k8tz
+injectedInitContainerImagePullPolicy: "Always"
 injectAll: true
 cronJobTimeZone: false  # requires kubernetes >=1.24.0-beta.0 with 'CronJobTimeZone' feature gate enabled (alpha)
 verbose: false

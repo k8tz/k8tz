@@ -44,6 +44,7 @@ items:
         - args:
           - bootstrap
           image: testimage:0.0.0
+          imagePullPolicy: Always
           name: k8tz
           resources: {}
           securityContext:
@@ -114,6 +115,7 @@ items:
         - args:
           - bootstrap
           image: testimage:0.0.0
+          imagePullPolicy: Always
           name: k8tz
           resources: {}
           securityContext:
@@ -184,6 +186,7 @@ items:
         - args:
           - bootstrap
           image: testimage:0.0.0
+          imagePullPolicy: Always
           name: k8tz
           resources: {}
           securityContext:

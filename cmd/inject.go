@@ -72,6 +72,7 @@ func init() {
 
 	injectCmd.Flags().StringVarP(&patchGenerator.Timezone, "timezone", "t", patchGenerator.Timezone, "Default timezone if not specified explicitly")
 	injectCmd.Flags().StringVar(&patchGenerator.InitContainerName, "name", patchGenerator.InitContainerName, "initContainer name")
+	injectCmd.Flags().StringVar(&patchGenerator.InitContainerImagePullPolicy, "imagePullPolicy", patchGenerator.InitContainerImagePullPolicy, "initContainer imagePullPolicy")
 	injectCmd.Flags().StringVarP(&patchGenerator.InitContainerImage, "image", "i", patchGenerator.InitContainerImage, "initContainer bootstrap image")
 	injectCmd.Flags().StringVar(&patchGenerator.InitContainerResources, "resources", patchGenerator.InitContainerResources, "initContainer compute resources in JSON format")
 	injectCmd.Flags().StringVarP((*string)(&patchGenerator.Strategy), "strategy", "s", string(patchGenerator.Strategy), "Default injection strategy if not specified explicitly (hostPath/initContainer)")

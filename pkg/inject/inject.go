@@ -29,6 +29,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/yaml"
+	"k8s.io/utils/strings/slices"
 )
 
 // InjectionStrategy is a method of timezone injection, since there is more
@@ -41,6 +42,9 @@ const (
 
 	// DefaultInitContainerName is the default name for initContainer of k8tz
 	DefaultInitContainerName string = "k8tz"
+	// DefaultInitContainerImagePullPolicy is the default ImagePullPolicy for
+	// initContainer of k8tz
+	DefaultInitContainerImagePullPolicy string = "Always"
 	// DefaultInjectionStrategy is the default injection strategy of k8tz
 	DefaultInjectionStrategy = InitContainerInjectionStrategy
 	// InitContainerInjectionStrategy is an injection strategy where we inject
@@ -57,33 +61,36 @@ const (
 var (
 	jsonPointerEscapeReplacer = strings.NewReplacer("~", "~0", "/", "~1")
 
-	True  = true
-	False = false
+	validImagePullPolicy = []string{"IfNotPresent", "Always", "Never"}
+	True                 = true
+	False                = false
 )
 
 type PatchGenerator struct {
-	Strategy               InjectionStrategy
-	Timezone               string
-	InitContainerImage     string
-	InitContainerName      string
-	InitContainerResources string
-	InitContainerVerbose   bool
-	HostPathPrefix         string
-	LocalTimePath          string
-	CronJobTimeZone        bool
+	Strategy                     InjectionStrategy
+	Timezone                     string
+	InitContainerImage           string
+	InitContainerName            string
+	InitContainerResources       string
+	InitContainerImagePullPolicy string
+	InitContainerVerbose         bool
+	HostPathPrefix               string
+	LocalTimePath                string
+	CronJobTimeZone              bool
 }
 
 func NewPatchGenerator() PatchGenerator {
 	return PatchGenerator{
-		Strategy:               DefaultInjectionStrategy,
-		Timezone:               k8tz.DefaultTimezone,
-		InitContainerImage:     version.Image(),
-		InitContainerName:      DefaultInitContainerName,
-		InitContainerResources: "",
-		InitContainerVerbose:   false,
-		HostPathPrefix:         DefaultHostPathPrefix,
-		LocalTimePath:          DefaultLocalTimePath,
-		CronJobTimeZone:        false,
+		Strategy:                     DefaultInjectionStrategy,
+		Timezone:                     k8tz.DefaultTimezone,
+		InitContainerImage:           version.Image(),
+		InitContainerName:            DefaultInitContainerName,
+		InitContainerResources:       "",
+		InitContainerImagePullPolicy: DefaultInitContainerImagePullPolicy,
+		InitContainerVerbose:         false,
+		HostPathPrefix:               DefaultHostPathPrefix,
+		LocalTimePath:                DefaultLocalTimePath,
+		CronJobTimeZone:              false,
 	}
 }
 
@@ -324,13 +331,20 @@ func (g *PatchGenerator) createInitContainerPatches(spec *corev1.PodSpec, pathpr
 	if err != nil {
 		return nil, err
 	}
+
+	imagePullPolicy, err := g.getImagePullPolicy()
+	if err != nil {
+		return nil, err
+	}
+
 	patches = append(patches, k8tz.Patch{
 		Op:   "add",
 		Path: fmt.Sprintf("%s/initContainers/-", pathprefix),
 		Value: corev1.Container{
-			Name:  g.InitContainerName,
-			Image: g.InitContainerImage,
-			Args:  bootstrapArgs,
+			Name:            g.InitContainerName,
+			Image:           g.InitContainerImage,
+			Args:            bootstrapArgs,
+			ImagePullPolicy: imagePullPolicy,
 			SecurityContext: &corev1.SecurityContext{
 				AllowPrivilegeEscalation: &False,
 				SeccompProfile: &corev1.SeccompProfile{
@@ -354,6 +368,17 @@ func (g *PatchGenerator) createInitContainerPatches(spec *corev1.PodSpec, pathpr
 	})
 
 	return patches, nil
+}
+
+func (g *PatchGenerator) getImagePullPolicy() (corev1.PullPolicy, error) {
+	if len(g.InitContainerImagePullPolicy) == 0 {
+		return corev1.PullPolicy(DefaultInitContainerImagePullPolicy), nil
+	}
+	if slices.Contains(validImagePullPolicy, g.InitContainerImagePullPolicy) {
+		return corev1.PullPolicy(g.InitContainerImagePullPolicy), nil
+	}
+
+	return corev1.PullPolicy(""), fmt.Errorf("failed to parse InitContainerImagePullPolicy \"%s\". Should be one of %s", g.InitContainerImagePullPolicy, validImagePullPolicy)
 }
 
 func (g *PatchGenerator) createHostPathPatches(spec *corev1.PodSpec, pathprefix string) k8tz.Patches {

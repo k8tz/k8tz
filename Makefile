@@ -17,7 +17,7 @@
 # Build Variables
 BINARY_NAME ?= k8tz
 OUT_DIR ?= build/
-VERSION ?= 0.18.0
+VERSION ?= 0.18.1
 VERSION_SUFFIX ?=
 TARGET=/usr/local/bin
 INSTALLCMD=install -v $(OUT_DIR)$(BINARY_NAME) $(TARGET)

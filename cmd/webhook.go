@@ -70,6 +70,7 @@ func init() {
 	webhookCmd.Flags().StringVarP(&webhook.Handler.DefaultTimezone, "timezone", "t", webhook.Handler.DefaultTimezone, "Default timezone if not specified explicitly")
 	webhookCmd.Flags().StringVar(&webhook.Handler.ContainerName, "container-name", webhook.Handler.ContainerName, "initContainer name")
 	webhookCmd.Flags().StringVar(&webhook.Handler.BootstrapImage, "bootstrap-image", webhook.Handler.BootstrapImage, "initContainer bootstrap image")
+	webhookCmd.Flags().StringVar(&webhook.Handler.BootstrapContainerImagePullPolicy, "container-imagepullpolicy", webhook.Handler.BootstrapContainerImagePullPolicy, "initContainer bootstrap imagePullPolicy")
 	webhookCmd.Flags().BoolVar(&webhook.Handler.BootstrapVerbose, "bootstrap-verbose", webhook.Handler.BootstrapVerbose, "Print more verbose logs inside the bootstrap initContainer for debugging")
 	webhookCmd.Flags().StringVar(&webhook.Handler.BootstrapContainerResources, "bootstrap-resources", webhook.Handler.BootstrapContainerResources, "initContainer compute resources in JSON format")
 	webhookCmd.Flags().StringVar(&webhook.Handler.HostPathPrefix, "hostPathPrefix", webhook.Handler.HostPathPrefix, "Location of zoneinfo on host machines")

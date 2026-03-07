@@ -81,6 +81,7 @@
           "mountPath": "/mnt/zoneinfo"
         }
       ],
+      "imagePullPolicy": "Always",
       "securityContext": {
         "capabilities": {
           "drop": [

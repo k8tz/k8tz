@@ -1,3 +1,6 @@
+# 0.18.1
+- Adds `injectedInitContainerImagePullPolicy` to helm chart and `container-imagepullpolicy` flag to set imagePullPolicy of the injected init container
+
 # 0.18.0
 
 - Update tzdata package to [2025b](https://github.com/k8tz/k8tz/pull/116)
