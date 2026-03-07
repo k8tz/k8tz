@@ -1,3 +1,8 @@
+# 0.19.0
+
+- Update tzdata package to [2026a](https://github.com/k8tz/k8tz/commit/bb9248cea9368ea23fa7e98eee167c1a2bce4c13)
+- ci: push Helm Chart to GHCR (https://github.com/k8tz/k8tz/pull/118)
+
 # 0.18.0
 
 - Update tzdata package to [2025b](https://github.com/k8tz/k8tz/pull/116)
