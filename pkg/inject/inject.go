@@ -52,6 +52,9 @@ const (
 	// TZif files exists on the node machines, and we can just mount them
 	// with hostPath volumes
 	HostPathInjectionStrategy InjectionStrategy = "hostPath"
+	// ImageVolumeInjectionStrategy will use image reference as volume
+	// and mount the files directly from the image
+	ImageVolumeInjectionStrategy InjectionStrategy = "imageVolume"
 )
 
 var (
@@ -165,6 +168,8 @@ func (g *PatchGenerator) forPodSpec(spec *corev1.PodSpec, pathprefix string, pos
 			return nil, err
 		}
 		patches = append(patches, initPaches...)
+	} else if g.Strategy == ImageVolumeInjectionStrategy {
+		patches = append(patches, g.createImageVolumePatches(spec, pathprefix)...)
 	} else {
 		return nil, fmt.Errorf("unknown injection strategy specified: %s", g.Strategy)
 	}
@@ -247,6 +252,73 @@ func (g *PatchGenerator) removeContainerVolumeMounts(volumeMounts []corev1.Volum
 	return patches
 }
 
+func (g *PatchGenerator) createImageVolumePatches(spec *corev1.PodSpec, pathprefix string) k8tz.Patches {
+	var patches = k8tz.Patches{}
+
+	containers := len(spec.Containers)
+	if containers == 0 {
+		return patches
+	}
+
+	if len(spec.Volumes) == 0 {
+		patches = append(patches, k8tz.Patch{
+			Op:    "add",
+			Path:  fmt.Sprintf("%s/volumes", pathprefix),
+			Value: []corev1.Volume{},
+		})
+	}
+
+	patches = append(patches, k8tz.Patch{
+		Op:   "add",
+		Path: fmt.Sprintf("%s/volumes/-", pathprefix),
+		Value: corev1.Volume{
+			Name: "k8tz",
+			VolumeSource: corev1.VolumeSource{
+				Image: &corev1.ImageVolumeSource{
+					Reference: g.InitContainerImage,
+				},
+			},
+		},
+	})
+
+	for containerId := 0; containerId < containers; containerId++ {
+		if len(spec.Containers[containerId].VolumeMounts) == 0 {
+			patches = append(patches, k8tz.Patch{
+				Op:    "add",
+				Path:  fmt.Sprintf("%s/containers/%d/volumeMounts", pathprefix, containerId),
+				Value: []corev1.VolumeMount{},
+			})
+		}
+
+		patches = append(patches, g.removeContainerVolumeMounts(spec.Containers[containerId].VolumeMounts, pathprefix, containerId)...)
+
+		// currently only directory subpath is supported,
+		// hopefully in future we can enable that:
+		// patches = append(patches, k8tz.Patch{
+		// 	Op:   "add",
+		// 	Path: fmt.Sprintf("%s/containers/%d/volumeMounts/-", pathprefix, containerId),
+		// 	Value: corev1.VolumeMount{
+		// 		Name:      "k8tz",
+		// 		ReadOnly:  true,
+		// 		MountPath: g.LocalTimePath,
+		// 		SubPath:   "usr/share/zoneinfo/" + g.Timezone,
+		// 	},
+		// })
+
+		patches = append(patches, k8tz.Patch{
+			Op:   "add",
+			Path: fmt.Sprintf("%s/containers/%d/volumeMounts/-", pathprefix, containerId),
+			Value: corev1.VolumeMount{
+				Name:      "k8tz",
+				ReadOnly:  true,
+				MountPath: "/usr/share/zoneinfo",
+				SubPath:   "usr/share/zoneinfo/",
+			},
+		})
+	}
+
+	return patches
+}
 func (g *PatchGenerator) createInitContainerPatches(spec *corev1.PodSpec, pathprefix string) (k8tz.Patches, error) {
 	var patches = k8tz.Patches{}
 

@@ -130,17 +130,21 @@ If those files (which are located under `/usr/share/zoneinfo`) exist in every no
 
 ### Using bootstrap **initContainer**
 
-Another solution, which is generally safer, is to inject `initContainer` (bootstrap image) to the pod and supply the required `TZif` file using a shared `emptyDir` volume. This is the default method of k8tz.
+Another way, is to inject `initContainer` (bootstrap image) to the pod and supply the required `TZif` file using a shared `emptyDir` volume. This is the default method of k8tz.
+
+### Using **imageVolume**
+
+On Kubernetes 1.33 and later, k8tz can mount /usr/share/zoneinfo directly from the k8tz image by using the imageVolume strategy. Unlike the initContainer strategy, this approach does not require a shared emptyDir volume. This is the recommended strategy when your cluster version supports it.
 
 ## Annotations
 
 The behaviour of the controller can be changed using annotations on both `Pod` and/or `Namespace` objects. If the same annotation specified in both, the `Pod`'s annotation value will take place.
 
-| Annotation         | Description                                                            | Default         |
-|--------------------|------------------------------------------------------------------------|-----------------|
-| `k8tz.io/inject`   | Decide whether k8tz should inject timezone or not                      | `true`          |
-| `k8tz.io/timezone` | Decide what timezone should be used, e.g: `Africa/Addis_Ababa`         | `UTC`           |
-| `k8tz.io/strategy` | Decide what injection strategy to use, i.e: `hostPath`/`initContainer` | `initContainer` |
+| Annotation         | Description                                                                          | Default         |
+|--------------------|--------------------------------------------------------------------------------------|-----------------|
+| `k8tz.io/inject`   | Decide whether k8tz should inject timezone or not                                    | `true`          |
+| `k8tz.io/timezone` | Decide what timezone should be used, e.g: `Africa/Addis_Ababa`                       | `UTC`           |
+| `k8tz.io/strategy` | Decide what injection strategy to use, i.e: `hostPath`/`initContainer`/`imageVolume` | `initContainer` |
 
 ## Roadmap
 
