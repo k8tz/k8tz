@@ -134,7 +134,7 @@ Another way, is to inject `initContainer` (bootstrap image) to the pod and suppl
 
 ### Using **imageVolume**
 
-On Kubernetes 1.33 and later, k8tz can mount /usr/share/zoneinfo directly from the k8tz image by using the imageVolume strategy. Unlike the initContainer strategy, this approach does not require a shared emptyDir volume. This is the recommended strategy when your cluster version supports it.
+On Kubernetes 1.33 and later, k8tz can use the `imageVolume` strategy to mount `/usr/share/zoneinfo` directly from the k8tz image, without requiring the shared `emptyDir` volume used by the `initContainer` strategy. However, `initContainer` remains the recommended strategy for now, because `imageVolume` currently does not support mounting `/etc/localtime` from the image.
 
 ## Annotations
 
