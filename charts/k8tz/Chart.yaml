@@ -23,4 +23,3 @@ annotations:
       url: "https://github.com/k8tz/k8tz"
   artifacthub.io/containsSecurityUpdates: "true"
   artifacthub.io/license: "Apache-2.0"
-
