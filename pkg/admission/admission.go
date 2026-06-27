@@ -48,6 +48,7 @@ type RequestsHandler struct {
 	HostPathPrefix              string
 	LocalTimePath               string
 	CronJobTimeZone             bool
+	PodOwnerLookup              bool
 	clientset                   kubernetes.Interface
 }
 
@@ -63,6 +64,7 @@ func NewRequestsHandler() RequestsHandler {
 		HostPathPrefix:              inject.DefaultHostPathPrefix,
 		LocalTimePath:               inject.DefaultLocalTimePath,
 		CronJobTimeZone:             false,
+		PodOwnerLookup:              false,
 	}
 }
 
@@ -202,14 +204,11 @@ func (h *RequestsHandler) lookupPod(namespace string, pod *corev1.Pod) (*inject.
 		return nil, nil
 	}
 
-	if val, ok := pod.Annotations[k8tz.InjectAnnotation]; ok {
+	annotationSources := h.lookupPodAnnotationSources(namespace, pod, namespaceObj, h.PodOwnerLookup)
+
+	if val, source, ok := lookupAnnotation(annotationSources, k8tz.InjectAnnotation); ok {
 		if val == "false" {
-			k8tz.InfoLogger.Printf("skipping pod (%s) because annotation on pod is explicitly false for injection", formatObjectDetails(pod.ObjectMeta))
-			return nil, nil
-		}
-	} else if val, ok := namespaceObj.Annotations[k8tz.InjectAnnotation]; ok {
-		if val == "false" {
-			k8tz.InfoLogger.Printf("skipping pod (%s) because annotation on namespace is explicitly false for injection", formatObjectDetails(pod.ObjectMeta))
+			k8tz.InfoLogger.Printf("skipping pod (%s) because annotation on %s is explicitly false for injection", formatObjectDetails(pod.ObjectMeta), source)
 			return nil, nil
 		}
 	} else if !h.InjectByDefault {
@@ -218,21 +217,15 @@ func (h *RequestsHandler) lookupPod(namespace string, pod *corev1.Pod) (*inject.
 	}
 
 	timezone := h.DefaultTimezone
-	if val, ok := pod.Annotations[k8tz.TimezoneAnnotation]; ok {
+	if val, source, ok := lookupAnnotation(annotationSources, k8tz.TimezoneAnnotation); ok {
 		timezone = val
-		k8tz.InfoLogger.Printf("explicit timezone requested on pod's (%s) annotation: %s", formatObjectDetails(pod.ObjectMeta), val)
-	} else if val, ok := namespaceObj.Annotations[k8tz.TimezoneAnnotation]; ok {
-		timezone = val
-		k8tz.InfoLogger.Printf("explicit timezone requested on namespace (%s) annotation: %s", formatObjectDetails(pod.ObjectMeta), val)
+		k8tz.InfoLogger.Printf("explicit timezone requested on %s annotation for pod (%s): %s", source, formatObjectDetails(pod.ObjectMeta), val)
 	}
 
 	strategy := h.DefaultInjectionStrategy
-	if v, e := pod.Annotations[k8tz.InjectionStrategyAnnotation]; e {
+	if v, source, e := lookupAnnotation(annotationSources, k8tz.InjectionStrategyAnnotation); e {
 		strategy = inject.InjectionStrategy(v)
-		k8tz.InfoLogger.Printf("explicit injection strategy requested on pod's (%s) annotation: %s", formatObjectDetails(pod.ObjectMeta), v)
-	} else if v, e := namespaceObj.Annotations[k8tz.InjectionStrategyAnnotation]; e {
-		strategy = inject.InjectionStrategy(v)
-		k8tz.InfoLogger.Printf("explicit injection strategy requested on namespace (%s) annotation: %s", formatObjectDetails(pod.ObjectMeta), v)
+		k8tz.InfoLogger.Printf("explicit injection strategy requested on %s annotation for pod (%s): %s", source, formatObjectDetails(pod.ObjectMeta), v)
 	}
 
 	return &inject.PatchGenerator{

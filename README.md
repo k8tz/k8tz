@@ -138,7 +138,7 @@ On Kubernetes 1.33 and later, k8tz can mount /usr/share/zoneinfo directly from t
 
 ## Annotations
 
-The behaviour of the controller can be changed using annotations on both `Pod` and/or `Namespace` objects. If the same annotation specified in both, the `Pod`'s annotation value will take place.
+The behaviour of the controller can be changed using annotations on `Pod` and/or `Namespace` objects. k8tz resolves every annotation key independently, so the closest object to the `Pod` that defines a specific annotation wins for that annotation.
 
 | Annotation         | Description                                                                          | Default         |
 |--------------------|--------------------------------------------------------------------------------------|-----------------|
@@ -146,11 +146,21 @@ The behaviour of the controller can be changed using annotations on both `Pod` a
 | `k8tz.io/timezone` | Decide what timezone should be used, e.g: `Africa/Addis_Ababa`                       | `UTC`           |
 | `k8tz.io/strategy` | Decide what injection strategy to use, i.e: `hostPath`/`initContainer`/`imageVolume` | `initContainer` |
 
+By default, pod admission annotation inheritance order is:
+
+`Pod` -> `Namespace` -> webhook defaults
+
+Beta pod owner lookup can be enabled with the webhook `--podOwnerLookup` flag or Helm `podOwnerLookup=true` value. When enabled, annotation inheritance order is:
+
+`Pod` -> controller owners -> `Namespace` -> webhook defaults
+
+Supported controller owner chains are `ReplicaSet` -> `Deployment`, `Job` -> `CronJob`, and direct `StatefulSet` or `DaemonSet` ownership.
+
 ## Roadmap
 
 - [X] Support `StatefulSet` injection
 - [X] Support `CronJob` injection
-- [ ] Better way to lookup pod owner annotations
+- [X] Better way to lookup pod owner annotations
 - [X] Test and document installation on OpenShift
 - [X] Implement `make install` for easier installation from source
 - [X] Add VERBOSE flag to helm

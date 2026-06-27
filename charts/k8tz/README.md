@@ -51,6 +51,20 @@ k8tz ignores pods in the namespace where it is installed. Therefore it is recomm
 
 If you want to use the helm built-in namespace (`helm --namespace`), you can completely cancel the above behavior by setting the `namespace` value to null (`helm install k8tz k8tz/k8tz --namespace=foo --set namespace=null`).
 
+## Annotations
+
+The admission controller can be configured with annotations on `Pod` and/or `Namespace` objects. k8tz resolves `k8tz.io/inject`, `k8tz.io/timezone`, and `k8tz.io/strategy` independently, so the closest object to the `Pod` that defines a specific annotation wins for that annotation.
+
+By default, pod admission annotation inheritance order is:
+
+`Pod` -> `Namespace` -> chart values
+
+Beta pod owner lookup can be enabled with `podOwnerLookup=true`. When enabled, annotation inheritance order is:
+
+`Pod` -> controller owners -> `Namespace` -> chart values
+
+Supported controller owner chains are `ReplicaSet` -> `Deployment`, `Job` -> `CronJob`, and direct `StatefulSet` or `DaemonSet` ownership.
+
 ## Values
 
 | Parameter                          | Description                                                                                                                                                                   | Default           |
@@ -64,6 +78,7 @@ If you want to use the helm built-in namespace (`helm --namespace`), you can com
 | injectionStrategy                  | The default injection strategy to use                                                                                                                                         | initContainer     |
 | injectAll                          | If true, timezone will be injected to the pod even when there is no annotation with explicit injection request. When false, the `k8tz.io/inject: true` annotation is required | true              |
 | cronJobTimeZone                    | Enable injection of `timeZone` field to `CronJob`s[^1]                                                                                                                        | false             |
+| podOwnerLookup                     | Enable beta pod annotation inheritance from supported controller owners                                                                                                        | false             |
 | verbose                            | Enable more detailed logs from admission controller and initContainers for debug purposes                                                                                     | false             |
 | labels                             | Labels to apply to all resources                                                                                                                                              | {}                |
 | image.repository                   | The image repository for the admission controller and bootstrap image                                                                                                         | quay.io/k8tz/k8tz |

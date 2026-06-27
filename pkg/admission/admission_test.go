@@ -27,10 +27,15 @@ import (
 
 	k8tz "github.com/k8tz/k8tz/pkg"
 	"github.com/k8tz/k8tz/pkg/inject"
+	appsv1 "k8s.io/api/apps/v1"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes/fake"
+	ktesting "k8s.io/client-go/testing"
 )
 
 var updateGoldens = false
@@ -594,4 +599,429 @@ func readGolden(file string) (*string, bool, error) {
 	} else {
 		return nil, false, err
 	}
+}
+
+func TestRequestsHandler_lookupPodParentAnnotations(t *testing.T) {
+	tests := []struct {
+		name            string
+		pod             *corev1.Pod
+		objects         []runtime.Object
+		reactor         func(*fake.Clientset)
+		injectByDefault *bool
+		wantNil         bool
+		wantTimezone    string
+		wantStrategy    inject.InjectionStrategy
+	}{
+		{
+			name: "pod annotation wins over all parents",
+			pod: testPod(map[string]string{
+				k8tz.TimezoneAnnotation:          "Europe/Pod",
+				k8tz.InjectionStrategyAnnotation: string(inject.HostPathInjectionStrategy),
+			}, testOwnerReference("apps/v1", "ReplicaSet", "rs")),
+			objects: []runtime.Object{
+				testNamespace(map[string]string{
+					k8tz.TimezoneAnnotation:          "Europe/Namespace",
+					k8tz.InjectionStrategyAnnotation: string(inject.InitContainerInjectionStrategy),
+				}),
+				testReplicaSet("rs", map[string]string{
+					k8tz.TimezoneAnnotation:          "Europe/ReplicaSet",
+					k8tz.InjectionStrategyAnnotation: string(inject.InitContainerInjectionStrategy),
+				}, testOwnerReference("apps/v1", "Deployment", "deploy")),
+				testDeployment("deploy", map[string]string{
+					k8tz.TimezoneAnnotation: "Europe/Deployment",
+				}),
+			},
+			wantTimezone: "Europe/Pod",
+			wantStrategy: inject.HostPathInjectionStrategy,
+		},
+		{
+			name: "replicaset annotation wins over deployment and namespace",
+			pod:  testPod(nil, testOwnerReference("apps/v1", "ReplicaSet", "rs")),
+			objects: []runtime.Object{
+				testNamespace(map[string]string{
+					k8tz.TimezoneAnnotation:          "Europe/Namespace",
+					k8tz.InjectionStrategyAnnotation: string(inject.InitContainerInjectionStrategy),
+				}),
+				testReplicaSet("rs", map[string]string{
+					k8tz.TimezoneAnnotation:          "Europe/ReplicaSet",
+					k8tz.InjectionStrategyAnnotation: string(inject.HostPathInjectionStrategy),
+				}, testOwnerReference("apps/v1", "Deployment", "deploy")),
+				testDeployment("deploy", map[string]string{
+					k8tz.TimezoneAnnotation:          "Europe/Deployment",
+					k8tz.InjectionStrategyAnnotation: string(inject.InitContainerInjectionStrategy),
+				}),
+			},
+			wantTimezone: "Europe/ReplicaSet",
+			wantStrategy: inject.HostPathInjectionStrategy,
+		},
+		{
+			name: "deployment annotation is used when replicaset lacks the key",
+			pod:  testPod(nil, testOwnerReference("apps/v1", "ReplicaSet", "rs")),
+			objects: []runtime.Object{
+				testNamespace(map[string]string{
+					k8tz.TimezoneAnnotation: "Europe/Namespace",
+				}),
+				testReplicaSet("rs", nil, testOwnerReference("apps/v1", "Deployment", "deploy")),
+				testDeployment("deploy", map[string]string{
+					k8tz.TimezoneAnnotation: "Europe/Deployment",
+				}),
+			},
+			wantTimezone: "Europe/Deployment",
+			wantStrategy: inject.InitContainerInjectionStrategy,
+		},
+		{
+			name: "job and cronjob annotations are inherited",
+			pod:  testPod(nil, testOwnerReference("batch/v1", "Job", "job")),
+			objects: []runtime.Object{
+				testNamespace(map[string]string{
+					k8tz.TimezoneAnnotation: "Europe/Namespace",
+				}),
+				testJob("job", map[string]string{
+					k8tz.InjectionStrategyAnnotation: string(inject.HostPathInjectionStrategy),
+				}, testOwnerReference("batch/v1", "CronJob", "cron")),
+				testCronJob("cron", map[string]string{
+					k8tz.TimezoneAnnotation: "Pacific/Honolulu",
+				}),
+			},
+			wantTimezone: "Pacific/Honolulu",
+			wantStrategy: inject.HostPathInjectionStrategy,
+		},
+		{
+			name: "statefulset annotation is inherited",
+			pod:  testPod(nil, testOwnerReference("apps/v1", "StatefulSet", "sts")),
+			objects: []runtime.Object{
+				testNamespace(map[string]string{
+					k8tz.TimezoneAnnotation: "Europe/Namespace",
+				}),
+				testStatefulSet("sts", map[string]string{
+					k8tz.TimezoneAnnotation: "Asia/Tokyo",
+				}),
+			},
+			wantTimezone: "Asia/Tokyo",
+			wantStrategy: inject.InitContainerInjectionStrategy,
+		},
+		{
+			name: "daemonset annotation is inherited",
+			pod:  testPod(nil, testOwnerReference("apps/v1", "DaemonSet", "ds")),
+			objects: []runtime.Object{
+				testNamespace(map[string]string{
+					k8tz.TimezoneAnnotation: "Europe/Namespace",
+				}),
+				testDaemonSet("ds", map[string]string{
+					k8tz.InjectionStrategyAnnotation: string(inject.HostPathInjectionStrategy),
+				}),
+			},
+			wantTimezone: "Europe/Namespace",
+			wantStrategy: inject.HostPathInjectionStrategy,
+		},
+		{
+			name: "annotation keys merge independently by closest source",
+			pod:  testPod(nil, testOwnerReference("apps/v1", "ReplicaSet", "rs")),
+			objects: []runtime.Object{
+				testNamespace(map[string]string{
+					k8tz.TimezoneAnnotation: "Asia/Jerusalem",
+				}),
+				testReplicaSet("rs", map[string]string{
+					k8tz.InjectAnnotation: "true",
+				}, testOwnerReference("apps/v1", "Deployment", "deploy")),
+				testDeployment("deploy", map[string]string{
+					k8tz.InjectionStrategyAnnotation: string(inject.HostPathInjectionStrategy),
+				}),
+			},
+			wantTimezone: "Asia/Jerusalem",
+			wantStrategy: inject.HostPathInjectionStrategy,
+		},
+		{
+			name: "parent inject false skips injection",
+			pod:  testPod(nil, testOwnerReference("apps/v1", "ReplicaSet", "rs")),
+			objects: []runtime.Object{
+				testNamespace(map[string]string{
+					k8tz.InjectAnnotation: "true",
+				}),
+				testReplicaSet("rs", map[string]string{
+					k8tz.InjectAnnotation: "false",
+				}),
+			},
+			wantNil: true,
+		},
+		{
+			name: "parent inject true enables injection when default is disabled",
+			pod:  testPod(nil, testOwnerReference("apps/v1", "ReplicaSet", "rs")),
+			objects: []runtime.Object{
+				testNamespace(nil),
+				testReplicaSet("rs", map[string]string{
+					k8tz.InjectAnnotation: "true",
+				}),
+			},
+			injectByDefault: testBool(false),
+			wantTimezone:    k8tz.UTCTimezone,
+			wantStrategy:    inject.InitContainerInjectionStrategy,
+		},
+		{
+			name: "missing owner lookup falls back to namespace",
+			pod:  testPod(nil, testOwnerReference("apps/v1", "ReplicaSet", "missing-rs")),
+			objects: []runtime.Object{
+				testNamespace(map[string]string{
+					k8tz.TimezoneAnnotation: "Asia/Jerusalem",
+				}),
+			},
+			wantTimezone: "Asia/Jerusalem",
+			wantStrategy: inject.InitContainerInjectionStrategy,
+		},
+		{
+			name: "forbidden owner lookup falls back to namespace",
+			pod:  testPod(nil, testOwnerReference("apps/v1", "ReplicaSet", "rs")),
+			objects: []runtime.Object{
+				testNamespace(map[string]string{
+					k8tz.TimezoneAnnotation: "Asia/Jerusalem",
+				}),
+			},
+			reactor: func(clientset *fake.Clientset) {
+				clientset.PrependReactor("get", "replicasets", func(action ktesting.Action) (bool, runtime.Object, error) {
+					return true, nil, apierrors.NewForbidden(schema.GroupResource{Group: "apps", Resource: "replicasets"}, "rs", fmt.Errorf("denied"))
+				})
+			},
+			wantTimezone: "Asia/Jerusalem",
+			wantStrategy: inject.InitContainerInjectionStrategy,
+		},
+		{
+			name: "unsupported custom owner falls back to namespace",
+			pod:  testPod(nil, testOwnerReference("example.com/v1", "Widget", "widget")),
+			objects: []runtime.Object{
+				testNamespace(map[string]string{
+					k8tz.TimezoneAnnotation: "Asia/Jerusalem",
+				}),
+			},
+			wantTimezone: "Asia/Jerusalem",
+			wantStrategy: inject.InitContainerInjectionStrategy,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			k8tz.WarningLogger.SetOutput(io.Discard)
+
+			clientset := fake.NewSimpleClientset(tt.objects...)
+			if tt.reactor != nil {
+				tt.reactor(clientset)
+			}
+
+			injectByDefault := true
+			if tt.injectByDefault != nil {
+				injectByDefault = *tt.injectByDefault
+			}
+
+			h := &RequestsHandler{
+				DefaultTimezone:          k8tz.UTCTimezone,
+				ContainerName:            "k8tz",
+				BootstrapImage:           "test:0.0.0",
+				DefaultInjectionStrategy: inject.InitContainerInjectionStrategy,
+				InjectByDefault:          injectByDefault,
+				HostPathPrefix:           "/usr/share/zoneinfo",
+				LocalTimePath:            "/etc/localtime",
+				PodOwnerLookup:           true,
+				clientset:                clientset,
+			}
+
+			got, err := h.lookupPod("default", tt.pod)
+			if err != nil {
+				t.Fatalf("lookupPod() error = %v", err)
+			}
+
+			if tt.wantNil {
+				if got != nil {
+					t.Fatalf("lookupPod() = %+v, want nil", got)
+				}
+				return
+			}
+
+			if got == nil {
+				t.Fatal("lookupPod() = nil, want generator")
+			}
+			if got.Timezone != tt.wantTimezone {
+				t.Errorf("lookupPod().Timezone = %s, want %s", got.Timezone, tt.wantTimezone)
+			}
+			if got.Strategy != tt.wantStrategy {
+				t.Errorf("lookupPod().Strategy = %s, want %s", got.Strategy, tt.wantStrategy)
+			}
+		})
+	}
+}
+
+func TestRequestsHandler_lookupPodParentAnnotationsDisabled(t *testing.T) {
+	tests := []struct {
+		name         string
+		pod          *corev1.Pod
+		objects      []runtime.Object
+		wantTimezone string
+		wantStrategy inject.InjectionStrategy
+	}{
+		{
+			name: "owner annotations are ignored",
+			pod:  testPod(nil, testOwnerReference("apps/v1", "ReplicaSet", "rs")),
+			objects: []runtime.Object{
+				testNamespace(map[string]string{
+					k8tz.TimezoneAnnotation:          "Asia/Jerusalem",
+					k8tz.InjectionStrategyAnnotation: string(inject.HostPathInjectionStrategy),
+				}),
+				testReplicaSet("rs", map[string]string{
+					k8tz.TimezoneAnnotation:          "Europe/ReplicaSet",
+					k8tz.InjectionStrategyAnnotation: string(inject.InitContainerInjectionStrategy),
+				}),
+			},
+			wantTimezone: "Asia/Jerusalem",
+			wantStrategy: inject.HostPathInjectionStrategy,
+		},
+		{
+			name: "pod annotations still beat namespace annotations",
+			pod: testPod(map[string]string{
+				k8tz.TimezoneAnnotation:          "Europe/Pod",
+				k8tz.InjectionStrategyAnnotation: string(inject.HostPathInjectionStrategy),
+			}, testOwnerReference("apps/v1", "ReplicaSet", "rs")),
+			objects: []runtime.Object{
+				testNamespace(map[string]string{
+					k8tz.TimezoneAnnotation:          "Asia/Jerusalem",
+					k8tz.InjectionStrategyAnnotation: string(inject.InitContainerInjectionStrategy),
+				}),
+				testReplicaSet("rs", map[string]string{
+					k8tz.TimezoneAnnotation: "Europe/ReplicaSet",
+				}),
+			},
+			wantTimezone: "Europe/Pod",
+			wantStrategy: inject.HostPathInjectionStrategy,
+		},
+		{
+			name: "namespace annotations are used without pod annotations",
+			pod:  testPod(nil, testOwnerReference("apps/v1", "ReplicaSet", "rs")),
+			objects: []runtime.Object{
+				testNamespace(map[string]string{
+					k8tz.TimezoneAnnotation: "Asia/Jerusalem",
+				}),
+				testReplicaSet("rs", map[string]string{
+					k8tz.TimezoneAnnotation: "Europe/ReplicaSet",
+				}),
+			},
+			wantTimezone: "Asia/Jerusalem",
+			wantStrategy: inject.InitContainerInjectionStrategy,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			k8tz.WarningLogger.SetOutput(io.Discard)
+
+			ownerLookupCalled := false
+			clientset := fake.NewSimpleClientset(tt.objects...)
+			clientset.PrependReactor("get", "replicasets", func(action ktesting.Action) (bool, runtime.Object, error) {
+				ownerLookupCalled = true
+				return true, nil, fmt.Errorf("owner lookup should not be called when pod owner lookup is disabled")
+			})
+
+			h := &RequestsHandler{
+				DefaultTimezone:          k8tz.UTCTimezone,
+				ContainerName:            "k8tz",
+				BootstrapImage:           "test:0.0.0",
+				DefaultInjectionStrategy: inject.InitContainerInjectionStrategy,
+				InjectByDefault:          true,
+				HostPathPrefix:           "/usr/share/zoneinfo",
+				LocalTimePath:            "/etc/localtime",
+				clientset:                clientset,
+			}
+
+			got, err := h.lookupPod("default", tt.pod)
+			if err != nil {
+				t.Fatalf("lookupPod() error = %v", err)
+			}
+			if ownerLookupCalled {
+				t.Fatal("owner lookup was called when pod owner lookup is disabled")
+			}
+			if got == nil {
+				t.Fatal("lookupPod() = nil, want generator")
+			}
+			if got.Timezone != tt.wantTimezone {
+				t.Errorf("lookupPod().Timezone = %s, want %s", got.Timezone, tt.wantTimezone)
+			}
+			if got.Strategy != tt.wantStrategy {
+				t.Errorf("lookupPod().Strategy = %s, want %s", got.Strategy, tt.wantStrategy)
+			}
+		})
+	}
+}
+
+func testNamespace(annotations map[string]string) *corev1.Namespace {
+	return &corev1.Namespace{
+		ObjectMeta: v1.ObjectMeta{
+			Name:        "default",
+			Annotations: annotations,
+		},
+	}
+}
+
+func testPod(annotations map[string]string, ownerReferences ...v1.OwnerReference) *corev1.Pod {
+	return &corev1.Pod{
+		ObjectMeta: v1.ObjectMeta{
+			Name:            "pod",
+			Namespace:       "default",
+			Annotations:     annotations,
+			OwnerReferences: ownerReferences,
+		},
+	}
+}
+
+func testReplicaSet(name string, annotations map[string]string, ownerReferences ...v1.OwnerReference) *appsv1.ReplicaSet {
+	return &appsv1.ReplicaSet{
+		ObjectMeta: testObjectMeta(name, annotations, ownerReferences...),
+	}
+}
+
+func testDeployment(name string, annotations map[string]string, ownerReferences ...v1.OwnerReference) *appsv1.Deployment {
+	return &appsv1.Deployment{
+		ObjectMeta: testObjectMeta(name, annotations, ownerReferences...),
+	}
+}
+
+func testStatefulSet(name string, annotations map[string]string, ownerReferences ...v1.OwnerReference) *appsv1.StatefulSet {
+	return &appsv1.StatefulSet{
+		ObjectMeta: testObjectMeta(name, annotations, ownerReferences...),
+	}
+}
+
+func testDaemonSet(name string, annotations map[string]string, ownerReferences ...v1.OwnerReference) *appsv1.DaemonSet {
+	return &appsv1.DaemonSet{
+		ObjectMeta: testObjectMeta(name, annotations, ownerReferences...),
+	}
+}
+
+func testJob(name string, annotations map[string]string, ownerReferences ...v1.OwnerReference) *batchv1.Job {
+	return &batchv1.Job{
+		ObjectMeta: testObjectMeta(name, annotations, ownerReferences...),
+	}
+}
+
+func testCronJob(name string, annotations map[string]string, ownerReferences ...v1.OwnerReference) *batchv1.CronJob {
+	return &batchv1.CronJob{
+		ObjectMeta: testObjectMeta(name, annotations, ownerReferences...),
+	}
+}
+
+func testObjectMeta(name string, annotations map[string]string, ownerReferences ...v1.OwnerReference) v1.ObjectMeta {
+	return v1.ObjectMeta{
+		Name:            name,
+		Namespace:       "default",
+		Annotations:     annotations,
+		OwnerReferences: ownerReferences,
+	}
+}
+
+func testOwnerReference(apiVersion, kind, name string) v1.OwnerReference {
+	return v1.OwnerReference{
+		APIVersion: apiVersion,
+		Kind:       kind,
+		Name:       name,
+		Controller: &inject.True,
+	}
+}
+
+func testBool(v bool) *bool {
+	return &v
 }
