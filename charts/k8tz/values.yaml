@@ -10,6 +10,7 @@ timezone: UTC
 injectedInitContainerName: k8tz
 injectAll: true
 cronJobTimeZone: false  # requires kubernetes >=1.24.0-beta.0 with 'CronJobTimeZone' feature gate enabled (alpha)
+podOwnerLookup: false  # beta: inherit pod annotations from supported controller owners
 verbose: false
 
 # Labels to apply to all resources

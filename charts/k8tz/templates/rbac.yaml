@@ -8,6 +8,14 @@ rules:
   - apiGroups: [""]
     resources: ["namespaces"]
     verbs: ["get"]
+  {{- if .Values.podOwnerLookup }}
+  - apiGroups: ["apps"]
+    resources: ["replicasets", "deployments", "statefulsets", "daemonsets"]
+    verbs: ["get"]
+  - apiGroups: ["batch"]
+    resources: ["jobs", "cronjobs"]
+    verbs: ["get"]
+  {{- end }}
   {{- if .Values.webhook.certManager.enabled }}
   - apiGroups: [""]
     resources: ["secrets"]
