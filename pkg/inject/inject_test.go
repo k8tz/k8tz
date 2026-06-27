@@ -677,7 +677,7 @@ func TestPatchGenerator_createPostInjectionAnnotations(t *testing.T) {
 	}
 }
 
-func comparePatches(got *k8tz.Patches, goldenFile string) error {
+func comparePatches(got *k8tz.Patches, goldenFile string) (err error) {
 	hyp, err := json.MarshalIndent(got, "", "  ")
 	if err != nil {
 		return fmt.Errorf("failed to convert reference to json, reference: %v, err: %v", got, err)
@@ -694,7 +694,11 @@ func comparePatches(got *k8tz.Patches, goldenFile string) error {
 			return fmt.Errorf("failed to create golden file: %s, error: %v", goldenFile, err)
 		}
 
-		defer f.Close()
+		defer func() {
+			if closeErr := f.Close(); err == nil && closeErr != nil {
+				err = fmt.Errorf("failed to close golden file: %s, error: %v", goldenFile, closeErr)
+			}
+		}()
 
 		_, err = f.Write(hyp)
 		if err != nil {

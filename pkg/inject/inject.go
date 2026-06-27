@@ -160,17 +160,18 @@ func (g *PatchGenerator) handleList(list *corev1.List, pathprefix string) (patch
 }
 
 func (g *PatchGenerator) forPodSpec(spec *corev1.PodSpec, pathprefix string, postInjectionAnnotations map[string]*metav1.ObjectMeta) (patches k8tz.Patches, err error) {
-	if g.Strategy == HostPathInjectionStrategy {
+	switch g.Strategy {
+	case HostPathInjectionStrategy:
 		patches = append(patches, g.createHostPathPatches(spec, pathprefix)...)
-	} else if g.Strategy == InitContainerInjectionStrategy {
+	case InitContainerInjectionStrategy:
 		initPaches, err := g.createInitContainerPatches(spec, pathprefix)
 		if err != nil {
 			return nil, err
 		}
 		patches = append(patches, initPaches...)
-	} else if g.Strategy == ImageVolumeInjectionStrategy {
+	case ImageVolumeInjectionStrategy:
 		patches = append(patches, g.createImageVolumePatches(spec, pathprefix)...)
-	} else {
+	default:
 		return nil, fmt.Errorf("unknown injection strategy specified: %s", g.Strategy)
 	}
 
@@ -235,13 +236,14 @@ func (g *PatchGenerator) createEnvironmentVariablePatches(spec *corev1.PodSpec, 
 func (g *PatchGenerator) removeContainerVolumeMounts(volumeMounts []corev1.VolumeMount, pathprefix string, containerId int) k8tz.Patches {
 	patches := k8tz.Patches{}
 	for index := len(volumeMounts) - 1; index >= 0; index-- {
-		if volumeMounts[index].MountPath == g.LocalTimePath {
+		switch volumeMounts[index].MountPath {
+		case g.LocalTimePath:
 			patches = append(patches, k8tz.Patch{
 				Op:    "remove",
 				Path:  fmt.Sprintf("%s/containers/%d/volumeMounts/%d", pathprefix, containerId, index),
 				Value: "",
 			})
-		} else if volumeMounts[index].MountPath == g.HostPathPrefix {
+		case g.HostPathPrefix:
 			patches = append(patches, k8tz.Patch{
 				Op:    "remove",
 				Path:  fmt.Sprintf("%s/containers/%d/volumeMounts/%d", pathprefix, containerId, index),

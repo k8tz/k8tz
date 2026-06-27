@@ -485,7 +485,7 @@ func TestArgumentsToInputs(t *testing.T) {
 	}
 }
 
-func compareGolden(hyp string, goldenFile string) error {
+func compareGolden(hyp string, goldenFile string) (err error) {
 	golden, exists, err := readGolden(goldenFile)
 	if err != nil {
 		return fmt.Errorf("golden file: %s, exists: %t, err: %v", goldenFile, exists, err)
@@ -497,7 +497,11 @@ func compareGolden(hyp string, goldenFile string) error {
 			return fmt.Errorf("failed to create golden file: %s, error: %v", goldenFile, err)
 		}
 
-		defer f.Close()
+		defer func() {
+			if closeErr := f.Close(); err == nil && closeErr != nil {
+				err = fmt.Errorf("failed to close golden file: %s, error: %v", goldenFile, closeErr)
+			}
+		}()
 
 		_, err = f.WriteString(hyp)
 		if err != nil {

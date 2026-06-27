@@ -60,21 +60,29 @@ func copyDirectory(src, dst string, overwrite bool) error {
 	return nil
 }
 
-func copyFile(src, dst string) error {
+func copyFile(src, dst string) (err error) {
 	k8tz.VerboseLogger.Printf("Copying '%s' to '%s'\n", src, dst)
 	out, err := os.Create(dst)
 	if err != nil {
 		return err
 	}
 
-	defer out.Close()
+	defer func() {
+		if closeErr := out.Close(); err == nil && closeErr != nil {
+			err = closeErr
+		}
+	}()
 
 	in, err := os.Open(src)
 	if err != nil {
 		return err
 	}
 
-	defer in.Close()
+	defer func() {
+		if closeErr := in.Close(); err == nil && closeErr != nil {
+			err = closeErr
+		}
+	}()
 
 	_, err = io.Copy(out, in)
 	if err != nil {
