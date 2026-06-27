@@ -156,9 +156,10 @@ func (h *RequestsHandler) handleAdmissionReview(review *admission.AdmissionRevie
 	if review.Request.Operation == admission.Create {
 		var patches k8tz.Patches
 		var err error
-		if review.Request.Resource == podResource {
+		switch review.Request.Resource {
+		case podResource:
 			patches, err = h.handlePodAdmissionRequest(review.Request)
-		} else if review.Request.Resource == cronJobResource {
+		case cronJobResource:
 			patches, err = h.handleCronJobAdmissionRequest(review.Request)
 		}
 

@@ -155,10 +155,16 @@ func overwriteFile(filepath string, filecontent []byte) {
 		k8tz.ErrorLogger.Panicf("error creating file: %s, error=%v", filepath, err)
 	}
 
-	defer fileCrt.Close()
 	_, err = fileCrt.Write(filecontent)
 	if err != nil {
+		if closeErr := fileCrt.Close(); closeErr != nil {
+			k8tz.ErrorLogger.Printf("error closing file after write failure: %s, error=%v", filepath, closeErr)
+		}
 		k8tz.ErrorLogger.Panicf("error writing file: %s, error=%v", filepath, err)
+	}
+
+	if err := fileCrt.Close(); err != nil {
+		k8tz.ErrorLogger.Panicf("error closing file: %s, error=%v", filepath, err)
 	}
 }
 

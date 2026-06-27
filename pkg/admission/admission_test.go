@@ -556,7 +556,7 @@ func TestAdmissionRequestsHandler_handleFunc(t *testing.T) {
 	}
 }
 
-func compareReviews(got *bytes.Buffer, goldenFile string) error {
+func compareReviews(got *bytes.Buffer, goldenFile string) (err error) {
 	golden, exists, err := readGolden(goldenFile)
 	if err != nil {
 		return fmt.Errorf("golden file: %s, exists: %t, err: %v", goldenFile, exists, err)
@@ -568,7 +568,11 @@ func compareReviews(got *bytes.Buffer, goldenFile string) error {
 			return fmt.Errorf("failed to create golden file: %s, error: %v", goldenFile, err)
 		}
 
-		defer f.Close()
+		defer func() {
+			if closeErr := f.Close(); err == nil && closeErr != nil {
+				err = fmt.Errorf("failed to close golden file: %s, error: %v", goldenFile, closeErr)
+			}
+		}()
 
 		_, err = f.Write(got.Bytes())
 		if err != nil {
