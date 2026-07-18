@@ -40,10 +40,45 @@ jobs:
 
       - if: ${{ steps.cr.outputs.changed_charts }}
         name: Push Charts to GHCR
+        env:
+          OCI_CHART_REPOSITORY: ghcr.io/${{ github.repository }}/charts
         run: |
-          for pkg in .cr-release-packages/*; do
-            if [ -z "${pkg:-}" ]; then
-              break
+          set -euo pipefail
+
+          : "${OCI_CHART_REPOSITORY:?OCI_CHART_REPOSITORY is required}"
+
+          chart_package_dir="${CHART_PACKAGE_DIR:-.cr-release-packages}"
+
+          if [[ ! -d "${chart_package_dir}" ]]; then
+            echo "No chart package directory found at ${chart_package_dir}"
+            exit 0
+          fi
+
+          shopt -s nullglob
+          packages=("${chart_package_dir}"/*.tgz)
+
+          if (( ${#packages[@]} == 0 )); then
+            echo "No chart packages found in ${chart_package_dir}"
+            exit 0
+          fi
+
+          for pkg in "${packages[@]}"; do
+            chart_metadata="$(helm show chart "${pkg}")"
+            chart_name="$(printf '%s\n' "${chart_metadata}" | awk -F ': *' '$1 == "name" { print $2; exit }')"
+            chart_version="$(printf '%s\n' "${chart_metadata}" | awk -F ': *' '$1 == "version" { print $2; exit }')"
+
+            if [[ -z "${chart_name}" || -z "${chart_version}" ]]; then
+              echo "Could not read chart name and version from ${pkg}" >&2
+              exit 1
             fi
-            helm push "${pkg}" oci://ghcr.io/${{ github.repository }}/charts
+
+            chart_ref="oci://${OCI_CHART_REPOSITORY}/${chart_name}"
+
+            if helm show chart "${chart_ref}" --version "${chart_version}" >/dev/null 2>&1; then
+              echo "Chart ${chart_name}:${chart_version} already exists; skipping"
+              continue
+            fi
+
+            echo "Pushing ${chart_name}:${chart_version} to oci://${OCI_CHART_REPOSITORY}"
+            helm push "${pkg}" "oci://${OCI_CHART_REPOSITORY}"
           done
