@@ -1,3 +1,9 @@
+# 0.20.0
+
+- Update tzdata package to [2026c](https://github.com/k8tz/k8tz/commit/6344b03e2ec3dbf9d14e64663863bd52e8f52c9a)
+- Add support for imageVolume injection strategy (https://github.com/k8tz/k8tz/pull/123)
+- Add pod ownership annotations lookup (https://github.com/k8tz/k8tz/pull/124)
+
 # 0.19.0
 
 - Update tzdata package to [2026a](https://github.com/k8tz/k8tz/commit/bb9248cea9368ea23fa7e98eee167c1a2bce4c13)
