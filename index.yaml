@@ -4,6 +4,40 @@ entries:
   - annotations:
       artifacthub.io/changes: |
         - kind: "changed"
+          description: "update tzdata package to 2026c"
+        - kind: "added"
+          description: "add support for imageVolume injection strategy"
+        - kind: "added"
+          description: "add pod ownership annotations lookup"
+      artifacthub.io/containsSecurityUpdates: "true"
+      artifacthub.io/license: Apache-2.0
+      artifacthub.io/links: |
+        - name: "source"
+          url: "https://github.com/k8tz/k8tz"
+    apiVersion: v2
+    appVersion: 0.20.0
+    created: "2026-07-18T11:19:05.579401346Z"
+    description: Kubernetes admission controller to inject timezones into Pods and
+      CronJobs
+    digest: 5768d585163f15427e3a4586b2ebfa04307f7f110a03a7dce051c5d180fadaa8
+    home: http://k8tz.io
+    icon: https://github.com/k8tz/k8tz/raw/master/assets/k8tz-icon-transparent.png
+    keywords:
+    - timezone
+    - timezones
+    - admission
+    - controller
+    - tzdata
+    - tzdb
+    name: k8tz
+    sources:
+    - https://github.com/k8tz/k8tz
+    urls:
+    - https://github.com/k8tz/k8tz/releases/download/helm-chart-v0.20.0-k8tz-v0.20.0/k8tz-0.20.0.tgz
+    version: 0.20.0
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: "changed"
           description: "update tzdata package to 2026a"
       artifacthub.io/containsSecurityUpdates: "true"
       artifacthub.io/license: Apache-2.0
@@ -718,4 +752,4 @@ entries:
     urls:
     - https://github.com/k8tz/k8tz/releases/download/helm-chart-v0.2.1-k8tz-v0.3.0/k8tz-0.2.1.tgz
     version: 0.2.1
-generated: "2026-03-07T16:40:30.058638096Z"
+generated: "2026-07-18T11:19:05.579962686Z"
