@@ -1,6 +1,10 @@
+# 0.22.0
+
+- Update tzdata package to [2026f](https://github.com/k8tz/k8tz/commit/f23b6ab9a2fefe19a9942aceda45f5f6ec35b6e5)
+
 # 0.21.0
 
-- - Update tzdata package to [2026e](https://github.com/k8tz/k8tz/commit/b4fdd49db355f01da8f88430221cd61b731f70b5)
+- Update tzdata package to [2026e](https://github.com/k8tz/k8tz/commit/b4fdd49db355f01da8f88430221cd61b731f70b5)
 
 # 0.20.0
 
