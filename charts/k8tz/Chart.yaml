@@ -1,8 +1,8 @@
 apiVersion: v2
 name: k8tz
 description: Kubernetes admission controller to inject timezones into Pods and CronJobs
-version: 0.21.0
-appVersion: "0.21.0"
+version: 0.22.0
+appVersion: "0.22.0"
 icon: https://github.com/k8tz/k8tz/raw/master/assets/k8tz-icon-transparent.png
 home: http://k8tz.io
 sources:
@@ -17,9 +17,9 @@ keywords:
 annotations:
   artifacthub.io/changes: |
     - kind: "changed"
-      description: "update tzdata package to 2026e"
+      description: "update tzdata package to 2026f"
   artifacthub.io/links: |
     - name: "source"
       url: "https://github.com/k8tz/k8tz"
-  artifacthub.io/containsSecurityUpdates: "true"
+  artifacthub.io/containsSecurityUpdates: "false"
   artifacthub.io/license: "Apache-2.0"
