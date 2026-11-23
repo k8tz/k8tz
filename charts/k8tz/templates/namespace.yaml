@@ -6,4 +6,7 @@ metadata:
   labels:
     k8tz.io/controller-namespace: "true"
     {{- include "k8tz.labels" . | nindent 4 }}
+    {{- with .Values.namespaceLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 {{- end }}
