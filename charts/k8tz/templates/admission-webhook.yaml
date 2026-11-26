@@ -8,7 +8,6 @@ data:
 kind: Secret
 metadata:
   namespace: {{ include "k8tz.namespace" . }}
-  creationTimestamp: null
   name: {{ include "k8tz.fullname" . }}-tls
   labels:
     {{- include "k8tz.labels" . | nindent 4 }}
